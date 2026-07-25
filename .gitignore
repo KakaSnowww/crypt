@@ -1,0 +1,27 @@
+# Dependências e builds
+node_modules/
+dist/
+coverage/
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs e arquivos temporários
+*.log
+*.local
+.cache/
+.tmp/
+
+# Editores e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Tauri e Android, utilizados em fases posteriores
+src-tauri/target/
+android/.gradle/
+android/local.properties
+android/app/build/

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Símbolo do Crypt</title>
+  <defs>
+    <linearGradient id="surface" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#0b1020"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="14" y1="14" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a78bfa"/>
+      <stop offset="0.52" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#surface)"/>
+  <path
+    d="M45 20.5A18 18 0 1 0 45 43.5"
+    fill="none"
+    stroke="url(#signal)"
+    stroke-linecap="round"
+    stroke-width="7"
+  />
+  <path
+    d="M45 20.5 36.5 28M45 43.5 36.5 36"
+    fill="none"
+    stroke="url(#signal)"
+    stroke-linecap="round"
+    stroke-width="4"
+  />
+  <circle cx="46" cy="20" r="4" fill="#c4b5fd"/>
+  <circle cx="46" cy="44" r="4" fill="#60a5fa"/>
+</svg>
