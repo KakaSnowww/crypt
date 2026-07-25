@@ -63,7 +63,7 @@ export function AuthLayout() {
 
         <p className="relative flex items-center gap-2 text-xs text-crypt-subtle">
           <CheckCircle2 aria-hidden="true" size={15} />
-          Fase 2 — experiência visual e navegação
+          Fase 3 — autenticação segura com Supabase
         </p>
       </section>
 

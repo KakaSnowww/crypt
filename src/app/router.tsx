@@ -1,11 +1,21 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
-import { AppShell } from '../components/layout/AppShell';
 import { AuthLayout } from '../components/layout/AuthLayout';
-import { AppHomeRoute } from '../routes/AppHomeRoute';
-import { DesignSystemRoute } from '../routes/DesignSystemRoute';
-import { LoginRoute } from '../routes/LoginRoute';
-import { NotFoundRoute } from '../routes/NotFoundRoute';
 import { RouteErrorFallback } from '../routes/RouteErrorFallback';
+import { ProtectedRoute } from '../features/auth/ProtectedRoute';
+import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute';
+import {
+  AccountSecurityRoute,
+  AppHomeRoute,
+  AppShell,
+  AuthCallbackRoute,
+  DesignSystemRoute,
+  ForgotPasswordRoute,
+  LazyRoute,
+  LoginRoute,
+  NotFoundRoute,
+  RegisterRoute,
+  ResetPasswordRoute,
+} from './lazyRoutes';
 
 export const appRoutes: RouteObject[] = [
   {
@@ -18,28 +28,96 @@ export const appRoutes: RouteObject[] = [
     children: [
       {
         path: '/login',
-        element: <LoginRoute />,
+        element: (
+          <PublicOnlyRoute>
+            <LazyRoute>
+              <LoginRoute />
+            </LazyRoute>
+          </PublicOnlyRoute>
+        ),
+      },
+      {
+        path: '/cadastro',
+        element: (
+          <PublicOnlyRoute>
+            <LazyRoute>
+              <RegisterRoute />
+            </LazyRoute>
+          </PublicOnlyRoute>
+        ),
+      },
+      {
+        path: '/recuperar-senha',
+        element: (
+          <PublicOnlyRoute>
+            <LazyRoute>
+              <ForgotPasswordRoute />
+            </LazyRoute>
+          </PublicOnlyRoute>
+        ),
+      },
+      {
+        path: '/redefinir-senha',
+        element: (
+          <LazyRoute>
+            <ResetPasswordRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: '/auth/callback',
+        element: (
+          <LazyRoute>
+            <AuthCallbackRoute />
+          </LazyRoute>
+        ),
       },
     ],
   },
   {
     path: '/app',
-    element: <AppShell />,
+    element: (
+      <ProtectedRoute>
+        <LazyRoute>
+          <AppShell />
+        </LazyRoute>
+      </ProtectedRoute>
+    ),
     errorElement: <RouteErrorFallback />,
     children: [
       {
         index: true,
-        element: <AppHomeRoute />,
+        element: (
+          <LazyRoute>
+            <AppHomeRoute />
+          </LazyRoute>
+        ),
       },
       {
         path: 'componentes',
-        element: <DesignSystemRoute />,
+        element: (
+          <LazyRoute>
+            <DesignSystemRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'conta',
+        element: (
+          <LazyRoute>
+            <AccountSecurityRoute />
+          </LazyRoute>
+        ),
       },
     ],
   },
   {
     path: '*',
-    element: <NotFoundRoute />,
+    element: (
+      <LazyRoute>
+        <NotFoundRoute />
+      </LazyRoute>
+    ),
   },
 ];
 

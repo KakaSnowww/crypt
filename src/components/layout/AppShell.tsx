@@ -4,16 +4,19 @@ import {
   Compass,
   Hash,
   Home,
+  LogOut,
   Menu,
   MessageCircle,
   Palette,
   Plus,
   Search,
   Settings,
-  Sparkles,
+  UserRound,
   Users,
 } from 'lucide-react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useToast } from '../common/ToastContext';
+import { useAuth } from '../../features/auth/useAuth';
 import { classNames } from '../../lib/classNames';
 import { IconButton } from '../common/IconButton';
 
@@ -45,6 +48,32 @@ const channelLinks = [
 ] as const;
 
 export function AppShell() {
+  const navigate = useNavigate();
+  const { addToast } = useToast();
+  const { signOut, user } = useAuth();
+  const displayName =
+    typeof user?.user_metadata.display_name === 'string'
+      ? user.user_metadata.display_name
+      : 'Pessoa do Crypt';
+  const handle =
+    typeof user?.user_metadata.handle === 'string' ? `@${user.user_metadata.handle}` : user?.email;
+  const initials = displayName
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toLocaleUpperCase('pt-BR');
+
+  async function handleSignOut() {
+    await signOut();
+    addToast({
+      message: 'Sua sessão foi encerrada somente neste dispositivo.',
+      title: 'Você saiu do Crypt',
+      tone: 'info',
+    });
+    void navigate('/login', { replace: true });
+  }
+
   return (
     <div className="min-h-dvh bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17rem_minmax(0,1fr)] 2xl:grid-cols-[4.5rem_17rem_minmax(0,1fr)_15rem]">
       <aside
@@ -86,7 +115,13 @@ export function AppShell() {
           </button>
         </div>
         <div className="mt-auto">
-          <IconButton icon={<Settings aria-hidden="true" size={18} />} label="Configurações" />
+          <NavLink
+            aria-label="Configurações da conta"
+            className="grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+            to="/app/conta"
+          >
+            <Settings aria-hidden="true" size={18} />
+          </NavLink>
         </div>
       </aside>
 
@@ -152,18 +187,27 @@ export function AppShell() {
 
         <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-xs font-bold text-white">
-            KS
+            {initials}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">Kaio Snow</p>
-            <p className="truncate text-xs text-emerald-300">Base conectada</p>
+            <p className="truncate text-sm font-semibold text-white">{displayName}</p>
+            <p className="truncate text-xs text-emerald-300">{handle}</p>
           </div>
-          <IconButton
-            className="ml-auto"
-            icon={<Settings aria-hidden="true" size={16} />}
-            label="Configurações do perfil"
-            size="sm"
-          />
+          <div className="ml-auto flex">
+            <NavLink
+              aria-label="Configurações da conta"
+              className="grid size-8 place-items-center rounded-lg text-crypt-muted hover:bg-white/[0.07] hover:text-white"
+              to="/app/conta"
+            >
+              <Settings aria-hidden="true" size={16} />
+            </NavLink>
+            <IconButton
+              icon={<LogOut aria-hidden="true" size={16} />}
+              label="Sair neste dispositivo"
+              onClick={() => void handleSignOut()}
+              size="sm"
+            />
+          </div>
         </div>
       </aside>
 
@@ -237,10 +281,10 @@ export function AppShell() {
                 isActive ? 'text-violet-200' : 'text-crypt-subtle',
               )
             }
-            to="/app/componentes"
+            to="/app/conta"
           >
-            <Sparkles aria-hidden="true" size={19} />
-            Sistema
+            <UserRound aria-hidden="true" size={19} />
+            Conta
           </NavLink>
         </nav>
       </section>

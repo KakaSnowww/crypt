@@ -1,77 +1,94 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { KeyRound, Mail } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { useToast } from '../components/common/ToastContext';
+import { toAuthActionError } from '../features/auth/auth.errors';
+import { loginSchema, type LoginValues } from '../features/auth/auth.schemas';
+import { getSafeNextPath, loginWithPassword } from '../features/auth/auth.service';
+import { AuthConfigurationNotice } from '../features/auth/components/AuthConfigurationNotice';
+import { AuthFormError } from '../features/auth/components/AuthFormError';
+import { AuthPageHeader } from '../features/auth/components/AuthPageHeader';
 
 export function LoginRoute() {
-  const { addToast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = getSafeNextPath(searchParams.get('next'));
+  const form = useForm<LoginValues>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    resolver: zodResolver(loginSchema),
+  });
+  const loginMutation = useMutation({
+    mutationFn: loginWithPassword,
+    onSuccess: () => void navigate(nextPath, { replace: true }),
+  });
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    addToast({
-      message: 'A autenticação real será conectada ao Supabase na Fase 3.',
-      title: 'Tela pronta para integração',
-      tone: 'info',
-    });
-  }
+  const handleSubmit = form.handleSubmit(async (values) => {
+    await loginMutation.mutateAsync(values).catch(() => undefined);
+  });
 
   return (
     <section aria-labelledby="login-title">
-      <p className="eyebrow">Acesse sua conta</p>
-      <h1 className="mt-3 text-3xl font-bold tracking-tight text-white" id="login-title">
-        Que bom ter você de volta
-      </h1>
-      <p className="mt-3 text-sm leading-6 text-crypt-muted">
-        Entre para continuar suas conversas e encontrar sua comunidade.
-      </p>
+      <AuthPageHeader
+        description="Entre para continuar suas conversas e encontrar sua comunidade."
+        eyebrow="Acesse sua conta"
+        id="login-title"
+        title="Que bom ter você de volta"
+      />
+      <AuthConfigurationNotice />
 
-      <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
+      <form className="mt-8 grid gap-5" noValidate onSubmit={(event) => void handleSubmit(event)}>
         <Input
           autoComplete="email"
+          errorText={form.formState.errors.email?.message}
           label="E-mail"
           leadingIcon={<Mail aria-hidden="true" size={17} />}
           placeholder="voce@exemplo.com"
           required
           type="email"
+          {...form.register('email')}
         />
         <Input
           autoComplete="current-password"
+          errorText={form.formState.errors.password?.message}
           label="Senha"
           leadingIcon={<KeyRound aria-hidden="true" size={17} />}
           placeholder="Digite sua senha"
           required
           type="password"
+          {...form.register('password')}
         />
 
-        <div className="flex items-center justify-between gap-4">
-          <label className="flex items-center gap-2 text-xs text-crypt-muted">
-            <input
-              className="size-4 rounded border-white/20 bg-crypt-elevated accent-violet-500"
-              type="checkbox"
-            />
-            Manter conectado
-          </label>
-          <button
+        <div className="flex justify-end">
+          <Link
             className="rounded-lg text-xs font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
-            type="button"
+            to="/recuperar-senha"
           >
             Esqueci minha senha
-          </button>
+          </Link>
         </div>
 
-        <Button className="mt-1 w-full" size="lg" type="submit">
+        <AuthFormError
+          message={loginMutation.error ? toAuthActionError(loginMutation.error).message : undefined}
+        />
+
+        <Button className="mt-1 w-full" loading={loginMutation.isPending} size="lg" type="submit">
           Entrar no Crypt
         </Button>
       </form>
 
       <p className="mt-7 text-center text-xs text-crypt-subtle">
-        Esta é uma prévia estrutural.{' '}
+        Ainda não tem uma conta?{' '}
         <Link
           className="font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
-          to="/app"
+          to="/cadastro"
         >
-          Voltar ao aplicativo
+          Criar conta
         </Link>
       </p>
     </section>

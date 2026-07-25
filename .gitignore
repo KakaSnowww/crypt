@@ -13,6 +13,8 @@ coverage/
 *.local
 .cache/
 .tmp/
+supabase/.branches/
+supabase/.temp/
 
 # Editores e sistema operacional
 .vscode/
