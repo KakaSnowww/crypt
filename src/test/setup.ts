@@ -42,3 +42,8 @@ if (!HTMLElement.prototype.scrollIntoView) {
     value: () => undefined,
   });
 }
+
+Object.defineProperty(window, 'scrollTo', {
+  configurable: true,
+  value: () => undefined,
+});

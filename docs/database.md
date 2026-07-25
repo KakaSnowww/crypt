@@ -1,80 +1,106 @@
-# Banco de dados — Fase 3
+# Banco de dados — Fases 3 e 4
 
-## Migration
+## Migrations
 
-Arquivo:
+| Ordem | Arquivo                                        | Responsabilidade             |
+| ----- | ---------------------------------------------- | ---------------------------- |
+| 1     | `20260725143000_phase3_auth_profiles.sql`      | Auth, perfil mínimo e `@`    |
+| 2     | `20260725200000_phase4_profile_onboarding.sql` | Perfil, interesses e Storage |
 
-`supabase/migrations/20260725143000_phase3_auth_profiles.sql`
+As migrations são aplicadas somente pela CLI:
 
-A migration deve ser aplicada pela CLI com `npm run supabase:db:push`. Alterações manuais no Table
-Editor não são necessárias.
+```powershell
+npm run supabase:db:push
+```
 
-## Tabela `public.profiles`
+## `public.profiles`
 
-| Coluna         | Tipo          | Regra                                                          |
-| -------------- | ------------- | -------------------------------------------------------------- |
-| `id`           | `uuid`        | Mesmo ID de `auth.users`; chave primária e exclusão em cascata |
-| `display_name` | `text`        | 2–48 caracteres, espaços e acentos permitidos                  |
-| `handle`       | `text`        | 3–24 caracteres, minúsculo e único                             |
-| `avatar_url`   | `text`        | Reservado para a Fase 4                                        |
-| `bio`          | `text`        | Reservado para a Fase 4                                        |
-| `created_at`   | `timestamptz` | Criado automaticamente                                         |
-| `updated_at`   | `timestamptz` | Atualizado por gatilho                                         |
+| Coluna                           | Regra                                             |
+| -------------------------------- | ------------------------------------------------- |
+| `id`                             | UUID de `auth.users`, chave primária, cascata     |
+| `display_name`                   | 2–48 caracteres; repetição permitida              |
+| `handle`                         | minúsculo, único e pesquisável                    |
+| `avatar_path`                    | somente a pasta UUID do próprio perfil            |
+| `bio`                            | opcional, até 280 caracteres                      |
+| `favorite_spotify_url`           | somente `https://open.spotify.com/track/{id}`     |
+| `favorite_spotify_title`         | identificação segura da faixa, até 200 caracteres |
+| `favorite_spotify_thumbnail_url` | opcional, somente `https://i.scdn.co/image/...`   |
+| `created_at` / `updated_at`      | datas UTC controladas pelo banco                  |
 
-E-mail e senha não pertencem a essa tabela. Esses dados permanecem no schema protegido
-`auth`, gerenciado pelo Supabase.
+E-mail, senha e tokens permanecem exclusivamente nos schemas protegidos do Supabase.
 
-## Identificador `@`
+## `public.profile_settings`
 
-O valor é armazenado sem `@` e sempre em minúsculas. A função `normalize_handle` garante que
-`@KaioSnow`, `@kaiosnow` e `@KAIOSNOW` representem o mesmo identificador.
+Uma linha 1:1 é criada automaticamente para cada perfil. Ela armazena:
 
-As constraints do banco rejeitam:
+- etapa e conclusão do onboarding;
+- exibição dos interesses no perfil;
+- uso separado em sugestões;
+- opção prioritária para ocultar tudo;
+- pedidos de amizade;
+- mensagens privadas;
+- status online;
+- amigos e servidores em comum.
 
-- menos de 3 ou mais de 24 caracteres;
-- caracteres diferentes de `a-z`, `0-9` e `_`;
-- letras maiúsculas no valor armazenado;
-- nomes reservados;
-- duplicações.
+Interesses e sugestões começam desativados. Somente o dono lê ou atualiza a própria linha. Decisões
+sociais futuras deverão usar funções específicas, sem expor o progresso interno do onboarding.
 
-O RPC `is_handle_available` fornece uma verificação amigável antes do cadastro. A restrição `unique`
-continua sendo a proteção definitiva contra duas tentativas simultâneas.
+## Catálogo de interesses
 
-## Criação automática
+`interest_categories` contém cinco categorias controladas e `interests` contém 63 itens seedados
+pela migration. Clientes autenticados podem ler, mas não criar, editar ou excluir itens do catálogo.
 
-O gatilho `on_auth_user_created` roda após a criação em `auth.users`. A função:
+`profile_interests` usa chave composta `(profile_id, interest_id)`. A leitura permite:
 
-1. lê apenas `display_name` e `handle` dos metadados;
-2. normaliza e valida os valores novamente;
-3. cria `public.profiles`;
-4. cancela o cadastro se os dados forem inválidos ou duplicados.
+1. o dono sempre ver a própria seleção;
+2. outra pessoa ver somente quando `show_interests_on_profile = true`;
+3. `hide_all_interests = true` ocultar a seleção independentemente das outras opções.
 
-A função é `security definer` e possui `search_path` vazio para impedir desvio de objetos.
+Não existe permissão direta de insert, update ou delete para o cliente.
 
-## Matriz de autorização
+`can_view_profile_interests(profile_id)` consulta as preferências como função protegida e devolve
+somente a decisão booleana. Assim, outra conta não precisa ler `profile_settings` para a RLS
+funcionar.
 
-| Ação em `profiles` | Anônimo | Autenticado          | Dono            | Servidor protegido  |
-| ------------------ | ------- | -------------------- | --------------- | ------------------- |
-| Ler                | Não     | Sim, campos públicos | Sim             | Sim                 |
-| Inserir            | Não     | Não                  | Não diretamente | Gatilho de cadastro |
-| Atualizar          | Não     | Não em terceiros     | Sim             | Sim                 |
-| Excluir            | Não     | Não                  | Não diretamente | Edge Function       |
+## Funções SQL
 
-A leitura usa uma política ampla apenas para o papel `authenticated`, pois a tabela contém
-exclusivamente o diretório público do usuário. Nenhum e-mail, senha, token ou preferência privada
-fica nessa tabela.
+### `set_profile_interests(category_slug, selected_interest_ids)`
 
-## Testes RLS
+Substitui atomicamente a seleção de uma categoria. A função:
 
-`supabase/tests/database/profiles_rls.test.sql` verifica:
+- usa exclusivamente `auth.uid()`;
+- valida a categoria;
+- confirma que todos os IDs pertencem à categoria;
+- remove a seleção anterior;
+- insere IDs distintos;
+- nunca aceita um `profile_id` enviado pelo cliente.
 
-- criação automática dos perfis;
-- nomes de exibição repetidos;
-- normalização sem diferença entre maiúsculas e minúsculas;
-- bloqueio de nomes reservados;
-- atualização do próprio perfil;
-- bloqueio da alteração de terceiros;
-- ausência de exclusão direta pelo cliente.
+### `replace_my_interests(selected_interest_ids)`
+
+Substitui atomicamente toda a seleção da pessoa autenticada e recusa IDs inexistentes.
+
+As duas funções são `security definer`, usam `search_path` vazio e só podem ser executadas pelo papel
+`authenticated`.
+
+## Storage
+
+O bucket público `profile-media` guarda somente imagens de apresentação:
+
+- limite por arquivo: 2 MB;
+- MIME permitido: JPEG, PNG e WebP;
+- pasta obrigatória: `{auth.uid()}/...`;
+- extensão permitida: `jpg`, `jpeg`, `png` ou `webp`;
+- insert, update, listagem e delete limitados à própria pasta.
+
+O arquivo é público para permitir avatar em perfis visíveis. A associação no banco também exige que
+o primeiro segmento de `avatar_path` seja igual ao UUID do perfil, impedindo apontar para o avatar
+de outra conta.
+
+## Testes
+
+- `profiles_rls.test.sql`: criação, identificador e proteção da Fase 3.
+- `profile_onboarding_rls.test.sql`: catálogo, defaults privados, RPCs, visibilidade, constraints,
+  progresso e privilégios da Fase 4.
 
 Execute com Docker Desktop aberto:
 

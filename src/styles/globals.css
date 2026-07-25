@@ -105,6 +105,10 @@ a {
   animation: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.onboarding-card {
+  animation: onboarding-step-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @keyframes overlay-in {
   from {
     opacity: 0;
@@ -135,6 +139,13 @@ a {
   from {
     opacity: 0;
     transform: translateY(-0.75rem) scale(0.98);
+  }
+}
+
+@keyframes onboarding-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem) scale(0.995);
   }
 }
 

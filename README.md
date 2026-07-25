@@ -4,36 +4,37 @@ Plataforma social de comunidades, conversas, amizades e descoberta de pessoas po
 Crypt possui identidade visual própria em roxo e azul e está sendo construído em fases para web,
 Windows e Android.
 
-## Estado atual — Fase 3
+## Estado atual — Fase 4
 
-Esta fase conecta a base visual ao Supabase e entrega:
+Além da autenticação real entregue na Fase 3, esta fase adiciona:
 
-- cadastro com nome de exibição, e-mail, identificador `@` e senha;
-- identificador normalizado, único e protegido contra nomes reservados;
-- login e logout no dispositivo atual;
-- confirmação de e-mail;
-- recuperação e redefinição de senha;
-- sessão persistente com renovação automática;
-- callback de autenticação usando PKCE;
-- rotas privadas com redirecionamento seguro;
-- área de segurança para alteração de senha;
-- exclusão protegida da conta por Edge Function;
-- tabela `profiles` criada automaticamente após o cadastro;
-- migration SQL versionada;
-- Row Level Security e privilégios mínimos;
-- testes unitários, de rotas e um conjunto pgTAP para RLS.
+- onboarding privado com nove etapas e progresso persistente;
+- nome de exibição e biografia editáveis;
+- avatar JPG, PNG ou WebP de até 2 MB;
+- Storage com pasta individual e políticas RLS;
+- cinco categorias e 63 interesses opcionais;
+- chips animados, navegação voltar e opção de pular categorias;
+- autodescrições de personalidade sem diagnóstico;
+- preferências independentes para perfil, sugestões, amizade, mensagens e presença;
+- interesses ocultos por padrão;
+- música favorita por link normalizado de faixa do Spotify;
+- player oficial incorporado diretamente pelo ID validado da faixa;
+- perfil responsivo sem exposição do e-mail;
+- edição posterior de tudo que foi escolhido no onboarding;
+- migrations, testes unitários e testes pgTAP de RLS.
 
 ## Tecnologias
 
 - React 19 e TypeScript
 - Vite e Tailwind CSS
 - React Router
-- Supabase Auth, PostgreSQL, RLS e Edge Functions
+- Supabase Auth, PostgreSQL, Storage, RLS e Edge Functions
 - TanStack Query
 - React Hook Form e Zod
 - Radix UI Dialog
 - Lucide React
-- Vitest e Testing Library
+- Spotify Embed oficial
+- Vitest, Testing Library e pgTAP
 - Supabase CLI
 - ESLint e Prettier
 
@@ -45,7 +46,7 @@ Esta fase conecta a base visual ao Supabase e entrega:
 - conta gratuita no Supabase
 - Docker Desktop somente para executar o Supabase e os testes SQL localmente
 
-O projeto hospedado pode ser configurado e receber migrations sem iniciar o ambiente Docker local.
+O projeto hospedado pode receber migrations sem iniciar o ambiente Docker local.
 
 ## Instalação
 
@@ -54,33 +55,16 @@ cd C:\Users\Snow\Documents\Crypt
 npm ci
 ```
 
-## Configuração do Supabase
+## Variáveis de ambiente
 
-### 1. Criar o projeto
-
-Crie um projeto gratuito em `https://database.new`. Guarde a senha do banco em um gerenciador de
-senhas.
-
-### 2. Configurar URLs de autenticação
-
-No painel do Supabase, em **Authentication → URL Configuration**, configure:
-
-- Site URL: `http://127.0.0.1:5173`
-- Redirect URL: `http://127.0.0.1:5173/auth/callback`
-- Redirect URL adicional: `http://localhost:5173/auth/callback`
-
-Quando o Crypt for publicado, a URL HTTPS de produção também deverá ser adicionada.
-
-### 3. Criar o arquivo local de ambiente
-
-No botão **Connect** do projeto, copie a Project URL e a Publishable key. Depois:
+Copie o exemplo somente na primeira configuração:
 
 ```powershell
 Copy-Item .env.example .env.local
 code .env.local
 ```
 
-Preencha:
+Preencha com os dados públicos exibidos pelo botão **Connect** do projeto Supabase:
 
 ```dotenv
 VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
@@ -88,28 +72,29 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_SUA_CHAVE
 VITE_LIVEKIT_URL=
 ```
 
-A Publishable key pode aparecer no navegador porque a autorização real está na RLS. Nunca coloque
-uma Secret key ou `service_role` nesse arquivo.
+Nunca coloque Secret key, `service_role`, senha do banco ou credenciais do LiveKit nesse arquivo.
 
-### 4. Vincular a CLI e aplicar a migration
+## Aplicar as migrations
 
-Encontre o Project Ref em **Project Settings → General**:
+O projeto já deve estar vinculado ao Supabase:
 
 ```powershell
-npx supabase login
 npx supabase link --project-ref SEU_PROJECT_REF
+npx supabase migration list
 npm run supabase:db:push
 ```
 
-### 5. Publicar a exclusão segura de conta
+A migration da Fase 4 cria catálogo, configurações, seleções e o bucket `profile-media`
+automaticamente. Não é necessário criar tabelas ou políticas manualmente no painel.
+
+## Edge Function da conta
+
+A função de exclusão agora também limpa as mídias do perfil e deve ser publicada novamente:
 
 ```powershell
 npx supabase secrets set "ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173"
 npm run supabase:functions:deploy
 ```
-
-A função recebe as chaves administrativas automaticamente no ambiente protegido do Supabase. Elas
-não são copiadas para o frontend.
 
 ## Executar
 
@@ -124,9 +109,15 @@ Rotas principais:
 - `/recuperar-senha`
 - `/redefinir-senha`
 - `/auth/callback`
+- `/onboarding`
 - `/app`
+- `/app/perfil`
+- `/app/perfil/editar`
 - `/app/conta`
 - `/app/componentes`
+
+Uma conta existente sem onboarding concluído será redirecionada para `/onboarding`. O progresso é
+salvo no Supabase e continua após fechar o navegador.
 
 ## Validação
 
@@ -136,7 +127,7 @@ npm run validate
 
 Esse comando executa TypeScript, ESLint, testes, Prettier e build.
 
-Com Docker Desktop aberto, também é possível validar a migration e a RLS localmente:
+Com Docker Desktop aberto:
 
 ```powershell
 npm run supabase:start
@@ -150,56 +141,59 @@ npm run supabase:stop
 src/
 ├── app/
 ├── components/
+│   ├── common/
+│   └── layout/
 ├── features/
-│   └── auth/
+│   ├── auth/
+│   ├── onboarding/
+│   └── profile/
 │       ├── components/
-│       ├── AuthProvider.tsx
-│       ├── ProtectedRoute.tsx
-│       ├── auth.errors.ts
-│       ├── auth.schemas.ts
-│       └── auth.service.ts
+│       ├── profile.errors.ts
+│       ├── profile.queries.ts
+│       ├── profile.schemas.ts
+│       ├── profile.service.ts
+│       └── profile.types.ts
 ├── lib/
-│   ├── config/
-│   └── supabase/
 ├── routes/
 └── types/
 supabase/
 ├── functions/
-│   └── delete-account/
 ├── migrations/
-└── tests/
-    └── database/
+└── tests/database/
 ```
 
-## Segurança
+## Segurança e privacidade
 
-- senhas existem somente no Supabase Auth;
-- e-mail não é salvo em `public.profiles`;
-- a chave administrativa nunca entra no bundle;
-- dados do formulário são validados no frontend e no banco;
-- a tabela pública possui RLS forçada;
-- cadastro de perfil acontece por gatilho `security definer` com `search_path` vazio;
-- URLs externas não podem ser usadas como redirecionamento após o login;
-- erros internos do provedor não são exibidos diretamente;
-- a exclusão exige sessão válida, senha atual e confirmação explícita.
+- e-mail e senha nunca aparecem no perfil;
+- interesses começam ocultos e seu uso em sugestões exige escolha separada;
+- RLS controla leitura das seleções de interesses;
+- funções SQL substituem seleções atomicamente e recusam IDs manipulados;
+- avatar fica na pasta UUID da própria conta;
+- tipo e tamanho do avatar são validados no cliente, bucket e políticas;
+- o banco impede associar ao perfil o arquivo de outra conta;
+- somente links HTTPS de faixas em `open.spotify.com` são aceitos;
+- a capa aceita somente o domínio oficial `i.scdn.co`;
+- o Spotify Embed é incorporado sem baixar ou hospedar áudio;
+- segredos administrativos continuam fora do bundle.
 
-Consulte [docs/security.md](docs/security.md) e [docs/database.md](docs/database.md).
+Consulte [docs/security.md](docs/security.md), [docs/database.md](docs/database.md) e
+[docs/profile-onboarding.md](docs/profile-onboarding.md).
 
 ### Nota da auditoria
 
-O `npm audit` sinaliza `GHSA-qwww-vcr4-c8h2` no React Router. O aviso afeta somente APIs instáveis
-de RSC, que não são usadas neste aplicativo SPA. Ainda não existe uma correção compatível publicada
-no npm. Não execute `npm audit fix --force`.
+O `npm audit` sinaliza `GHSA-qwww-vcr4-c8h2` no React Router. O aviso afeta APIs instáveis de RSC,
+que não são usadas neste aplicativo SPA. Não execute `npm audit fix --force`.
 
 ## Limitações atuais
 
-- o usuário ainda precisa configurar seu próprio projeto Supabase;
-- entrega de e-mails usa inicialmente o serviço padrão do Supabase, adequado apenas para testes;
-- avatar, bio, interesses e edição completa do perfil pertencem à Fase 4;
+- o envio padrão de e-mails do Supabase é apropriado apenas para testes;
+- o perfil aberto nesta fase é o da própria conta;
+- busca de pessoas, amizades, bloqueios e perfis de terceiros pertencem à Fase 5;
+- presença online real será conectada em uma fase posterior;
 - mensagens e comunidades continuam simuladas;
 - publicação web, Windows e Android será feita em fases posteriores.
 
 ## Próxima fase
 
-A Fase 4 implementará perfil, avatar, bio, onboarding de interesses, privacidade e música favorita.
-Ela só deve começar depois dos testes reais desta fase com duas contas.
+A Fase 5 implementará busca por `@`, pedidos, amigos, bloqueios e sugestões transparentes por
+interesses. Ela só começa após os testes reais da Fase 4 com duas contas.

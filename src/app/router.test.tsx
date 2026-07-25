@@ -21,6 +21,14 @@ describe('rotas do Crypt', () => {
     expect(router.state.location.search).toContain('next=%2Fapp');
   });
 
+  it('protege o onboarding quando não existe sessão', async () => {
+    const { router } = renderRoute('/onboarding');
+
+    await screen.findByRole('heading', { level: 1, name: 'Que bom ter você de volta' });
+    expect(router.state.location.pathname).toBe('/login');
+    expect(router.state.location.search).toContain('next=%2Fonboarding');
+  });
+
   it('valida o formulário de acesso antes de chamar o Supabase', async () => {
     const user = userEvent.setup();
     renderRoute('/login');

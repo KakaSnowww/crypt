@@ -1,6 +1,5 @@
 import {
   Bell,
-  BookOpen,
   Compass,
   Hash,
   Home,
@@ -11,13 +10,17 @@ import {
   Plus,
   Search,
   Settings,
+  Sparkles,
   UserRound,
   Users,
 } from 'lucide-react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../common/ToastContext';
 import { useAuth } from '../../features/auth/useAuth';
+import { ProfileAvatar } from '../../features/profile/components/ProfileAvatar';
+import { useCurrentProfile } from '../../features/profile/profile.queries';
 import { classNames } from '../../lib/classNames';
+import { isSupabaseConfigured } from '../../lib/supabase/client';
 import { IconButton } from '../common/IconButton';
 
 const spaces = [
@@ -45,24 +48,56 @@ const channelLinks = [
     label: 'Base visual',
     to: '/app/componentes',
   },
+  {
+    end: false,
+    icon: UserRound,
+    label: 'Meu perfil',
+    to: '/app/perfil',
+  },
 ] as const;
 
 export function AppShell() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToast } = useToast();
   const { signOut, user } = useAuth();
+  const profileQuery = useCurrentProfile(
+    user?.id ?? null,
+    isSupabaseConfigured() && import.meta.env.MODE !== 'test',
+  );
   const displayName =
-    typeof user?.user_metadata.display_name === 'string'
+    profileQuery.data?.display_name ??
+    (typeof user?.user_metadata.display_name === 'string'
       ? user.user_metadata.display_name
-      : 'Pessoa do Crypt';
+      : 'Pessoa do Crypt');
   const handle =
-    typeof user?.user_metadata.handle === 'string' ? `@${user.user_metadata.handle}` : user?.email;
-  const initials = displayName
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toLocaleUpperCase('pt-BR');
+    profileQuery.data?.handle ??
+    (typeof user?.user_metadata.handle === 'string' ? user.user_metadata.handle : undefined);
+  const identityLabel = handle ? `@${handle}` : user?.email;
+  const pageHeader = location.pathname.startsWith('/app/perfil/editar')
+    ? {
+        description: 'Avatar, interesses, privacidade e música',
+        icon: Settings,
+        title: 'Editar perfil',
+      }
+    : location.pathname.startsWith('/app/perfil')
+      ? {
+          description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+          icon: UserRound,
+          title: 'Meu perfil',
+        }
+      : location.pathname.startsWith('/app/conta')
+        ? {
+            description: 'Sessão, senha e exclusão da conta',
+            icon: Settings,
+            title: 'Conta e segurança',
+          }
+        : {
+            description: 'Ideias, novidades e conversas da comunidade',
+            icon: Hash,
+            title: 'Conversa Geral',
+          };
+  const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
     await signOut();
@@ -116,9 +151,9 @@ export function AppShell() {
         </div>
         <div className="mt-auto">
           <NavLink
-            aria-label="Configurações da conta"
+            aria-label="Editar perfil"
             className="grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-            to="/app/conta"
+            to="/app/perfil/editar"
           >
             <Settings aria-hidden="true" size={18} />
           </NavLink>
@@ -168,36 +203,38 @@ export function AppShell() {
             Descoberta
           </p>
           <div className="mt-2 grid gap-1">
-            <button
+            <NavLink
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              type="button"
+              to="/app/perfil/editar"
             >
               <Compass aria-hidden="true" size={17} />
-              Pessoas
-            </button>
-            <button
+              Explorar meu perfil
+            </NavLink>
+            <NavLink
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              type="button"
+              to="/app/perfil/editar"
             >
-              <BookOpen aria-hidden="true" size={17} />
+              <Sparkles aria-hidden="true" size={17} />
               Interesses
-            </button>
+            </NavLink>
           </div>
         </nav>
 
         <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-xs font-bold text-white">
-            {initials}
-          </span>
+          <ProfileAvatar
+            avatarPath={profileQuery.data?.avatar_path ?? null}
+            displayName={displayName}
+            size="sm"
+          />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">{displayName}</p>
-            <p className="truncate text-xs text-emerald-300">{handle}</p>
+            <p className="truncate text-xs text-emerald-300">{identityLabel}</p>
           </div>
           <div className="ml-auto flex">
             <NavLink
-              aria-label="Configurações da conta"
+              aria-label="Editar perfil"
               className="grid size-8 place-items-center rounded-lg text-crypt-muted hover:bg-white/[0.07] hover:text-white"
-              to="/app/conta"
+              to="/app/perfil/editar"
             >
               <Settings aria-hidden="true" size={16} />
             </NavLink>
@@ -217,12 +254,12 @@ export function AppShell() {
             <IconButton icon={<Menu aria-hidden="true" size={20} />} label="Abrir espaços" />
           </div>
           <span className="grid size-9 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
-            <Hash aria-hidden="true" size={18} />
+            <HeaderIcon aria-hidden="true" size={18} />
           </span>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-white">Conversa Geral</h2>
+            <h2 className="truncate text-sm font-semibold text-white">{pageHeader.title}</h2>
             <p className="hidden truncate text-xs text-crypt-subtle sm:block">
-              Ideias, novidades e conversas da comunidade
+              {pageHeader.description}
             </p>
           </div>
           <div className="ml-auto flex items-center gap-1">
@@ -281,10 +318,10 @@ export function AppShell() {
                 isActive ? 'text-violet-200' : 'text-crypt-subtle',
               )
             }
-            to="/app/conta"
+            to="/app/perfil"
           >
             <UserRound aria-hidden="true" size={19} />
-            Conta
+            Perfil
           </NavLink>
         </nav>
       </section>

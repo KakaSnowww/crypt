@@ -126,6 +126,35 @@ Deno.serve(async (request) => {
       persistSession: false,
     },
   });
+
+  const { data: profileMedia, error: listMediaError } = await adminClient.storage
+    .from('profile-media')
+    .list(user.id, {
+      limit: 1000,
+      sortBy: {
+        column: 'name',
+        order: 'asc',
+      },
+    });
+
+  if (listMediaError) {
+    console.error('delete-account: profile media listing failed');
+    return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+  }
+
+  const mediaPaths = profileMedia.map((object) => `${user.id}/${object.name}`);
+
+  if (mediaPaths.length > 0) {
+    const { error: removeMediaError } = await adminClient.storage
+      .from('profile-media')
+      .remove(mediaPaths);
+
+    if (removeMediaError) {
+      console.error('delete-account: profile media removal failed');
+      return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+    }
+  }
+
   const { error: deletionError } = await adminClient.auth.admin.deleteUser(user.id, false);
 
   if (deletionError) {

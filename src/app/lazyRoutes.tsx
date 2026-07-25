@@ -36,9 +36,24 @@ export const LoginRoute = lazy(async () => {
   return { default: route.LoginRoute };
 });
 
+export const OnboardingRoute = lazy(async () => {
+  const route = await import('../routes/OnboardingRoute');
+  return { default: route.OnboardingRoute };
+});
+
 export const NotFoundRoute = lazy(async () => {
   const route = await import('../routes/NotFoundRoute');
   return { default: route.NotFoundRoute };
+});
+
+export const ProfileRoute = lazy(async () => {
+  const route = await import('../routes/ProfileRoute');
+  return { default: route.ProfileRoute };
+});
+
+export const ProfileSettingsRoute = lazy(async () => {
+  const route = await import('../routes/ProfileSettingsRoute');
+  return { default: route.ProfileSettingsRoute };
 });
 
 export const RegisterRoute = lazy(async () => {

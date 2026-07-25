@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { RouteErrorFallback } from '../routes/RouteErrorFallback';
+import { OnboardingGate } from '../features/onboarding/OnboardingGate';
 import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute';
 import {
@@ -13,6 +14,9 @@ import {
   LazyRoute,
   LoginRoute,
   NotFoundRoute,
+  OnboardingRoute,
+  ProfileRoute,
+  ProfileSettingsRoute,
   RegisterRoute,
   ResetPasswordRoute,
 } from './lazyRoutes';
@@ -75,12 +79,25 @@ export const appRoutes: RouteObject[] = [
     ],
   },
   {
-    path: '/app',
+    path: '/onboarding',
     element: (
       <ProtectedRoute>
         <LazyRoute>
-          <AppShell />
+          <OnboardingRoute />
         </LazyRoute>
+      </ProtectedRoute>
+    ),
+    errorElement: <RouteErrorFallback />,
+  },
+  {
+    path: '/app',
+    element: (
+      <ProtectedRoute>
+        <OnboardingGate>
+          <LazyRoute>
+            <AppShell />
+          </LazyRoute>
+        </OnboardingGate>
       </ProtectedRoute>
     ),
     errorElement: <RouteErrorFallback />,
@@ -98,6 +115,22 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <DesignSystemRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'perfil',
+        element: (
+          <LazyRoute>
+            <ProfileRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'perfil/editar',
+        element: (
+          <LazyRoute>
+            <ProfileSettingsRoute />
           </LazyRoute>
         ),
       },

@@ -1,73 +1,91 @@
-# Segurança — Fase 3
+# Segurança — Fases 3 e 4
 
 ## Fronteiras de confiança
 
-O navegador não é considerado confiável. Ele recebe apenas a Project URL e a Publishable key. Toda
-autorização de dados acontece no PostgreSQL por privilégios e Row Level Security.
+O navegador recebe somente Project URL e Publishable key. Ele não é considerado confiável. Banco,
+Storage, funções SQL e Edge Functions validam novamente identidade, propriedade e formato.
 
-A Secret key ou chave legada `service_role` existe somente no ambiente da Edge Function. Ela ignora
-RLS e, por isso, nunca pode aparecer em `.env.local`, no Git ou no bundle do Vite.
+Secret key, `service_role`, senha do banco e credenciais futuras do LiveKit nunca entram em
+`.env.local`, Git ou bundle do Vite.
 
-## Autenticação
+## Autenticação e rotas
 
-- Supabase Auth armazena e protege as senhas.
-- O cliente usa PKCE para callbacks de e-mail.
-- A sessão é persistida no navegador e renovada automaticamente.
-- A saída remove somente a sessão do dispositivo atual.
-- Rotas privadas exigem uma sessão autenticada.
-- Destinos pós-login são limitados a `/app` e seus caminhos internos.
-- Sessões ausentes ou expiradas voltam ao login.
+- senhas existem somente no Supabase Auth;
+- callbacks usam PKCE;
+- sessão é renovada e persistida;
+- rotas privadas exigem usuário autenticado;
+- contas sem onboarding concluído são encaminhadas para `/onboarding`;
+- progresso concluído é lido do banco, não de uma flag local;
+- sessão ausente ou expirada volta ao login.
 
-## Validação
+## Perfil público
 
-React Hook Form e Zod fornecem feedback imediato, mas não são a barreira final. Nome e identificador
-também possuem constraints e validações na migration.
+`profiles` contém somente dados destinados ao perfil. Não há coluna de e-mail, senha ou token.
 
-React escapa textos renderizados. Mensagens internas do Supabase são convertidas em mensagens
-seguras e previsíveis antes de aparecerem para o usuário.
+Constraints limitam:
 
-## Row Level Security
+- nome e biografia;
+- caminho do avatar à pasta do próprio UUID;
+- Spotify a uma faixa HTTPS no domínio exato;
+- consistência entre URL, título e capa.
 
-RLS está habilitada e forçada em `profiles`.
+React renderiza textos como conteúdo, sem interpretar HTML recebido do usuário.
 
-- anônimos não leem perfis;
-- autenticados leem somente a tabela de campos públicos;
-- cada pessoa altera apenas sua própria linha;
-- ninguém exclui uma linha diretamente pelo cliente;
-- criação acontece exclusivamente pelo gatilho associado a `auth.users`.
+## Interesses e privacidade
+
+Interesses são opcionais e começam ocultos. A pessoa escolhe separadamente:
+
+- mostrar no perfil;
+- usar em sugestões;
+- ocultar tudo;
+- permitir amizade, mensagens e presença;
+- mostrar amigos ou servidores em comum.
+
+RLS impede outro usuário de ler seleções ocultas. O aplicativo nunca usa a opção de mostrar no perfil
+como autorização para sugestões: são preferências independentes.
+
+Os RPCs recebem somente IDs do catálogo e derivam o dono de `auth.uid()`. Isso impede escolher outro
+`profile_id` pela API.
+
+## Avatar e Storage
+
+O cliente verifica tipo e 2 MB antes do envio para feedback rápido. A proteção real continua no
+bucket e nas políticas de `storage.objects`.
+
+Cada caminho começa pelo UUID da sessão. Uma conta não pode inserir, atualizar ou excluir objetos na
+pasta de outra. A constraint de `profiles.avatar_path` fornece uma segunda barreira contra associação
+indevida.
+
+Quando um avatar é substituído, o perfil aponta primeiro para o novo arquivo e o anterior é removido
+depois. Se a atualização do banco falhar, o upload novo é limpo.
+
+## Spotify
+
+O Crypt aceita somente uma URL de faixa em `open.spotify.com`, remove parâmetros de compartilhamento
+e reduz o link ao ID validado da faixa. O iframe é construído diretamente a partir desse ID e usa o
+player oficial. O Crypt não baixa, copia, transforma nem hospeda áudio.
 
 ## Exclusão de conta
 
-A exclusão utiliza `supabase/functions/delete-account`:
+`delete-account` continua validando origem, Publishable key, JWT, senha atual no frontend e a palavra
+`EXCLUIR`. A chave administrativa existe somente na Edge Function.
 
-1. o frontend pede a senha atual novamente;
-2. o usuário precisa digitar `EXCLUIR`;
-3. a função limita origens com `ALLOWED_ORIGINS`;
-4. confere a Publishable key recebida;
-5. valida o token do usuário com o Supabase Auth;
-6. usa a chave administrativa apenas no servidor;
-7. exclui exatamente o usuário do token;
-8. a chave estrangeira remove o perfil relacionado.
-
-A função é publicada com `--no-verify-jwt` porque as chaves públicas atuais não são verificadas pelo
-modo legado do gateway. Isso não torna a função pública: a própria implementação valida a API key e
-o JWT antes de qualquer operação administrativa.
-
-## E-mails
-
-O envio padrão do Supabase é apropriado apenas para desenvolvimento e possui limites baixos. Antes
-de disponibilizar o Crypt publicamente, será necessário configurar SMTP próprio, templates e o
-domínio HTTPS oficial.
+Antes de excluir `auth.users`, a função lista e remove os arquivos da pasta UUID no bucket
+`profile-media`. Depois, as relações `on delete cascade` removem perfil, configurações e seleções.
+Se a limpeza de mídia falhar, a exclusão é interrompida para não deixar arquivos órfãos.
 
 ## Checklist
 
-- [ ] `.env.local` está ignorado pelo Git.
-- [ ] Nenhuma Secret key aparece no frontend.
-- [ ] Redirect URLs correspondem exatamente às URLs utilizadas.
-- [ ] Confirmação de e-mail está habilitada no projeto hospedado.
-- [ ] Migration foi aplicada pela CLI.
-- [ ] `ALLOWED_ORIGINS` foi configurado.
-- [ ] Edge Function foi publicada.
-- [ ] Testes com dois usuários confirmaram o identificador único.
-- [ ] Usuário sem sessão não abre `/app`.
-- [ ] Exclusão remove o usuário e seu perfil.
+- [ ] `.env.local` está ignorado.
+- [ ] Migrations local e remota possuem as mesmas versões.
+- [ ] Interesses novos começam ocultos.
+- [ ] Segunda conta não lê interesses privados.
+- [ ] Segunda conta lê somente após autorização.
+- [ ] Usuário não altera preferências de outra conta.
+- [ ] Avatar acima de 2 MB ou com MIME inválido é recusado.
+- [ ] Perfil não aceita caminho de avatar de outra conta.
+- [ ] Links que não sejam faixas oficiais do Spotify são recusados.
+- [ ] Nenhum HTML externo é injetado.
+- [ ] E-mail não aparece em perfil ou catálogo.
+- [ ] Exclusão da conta remove as mídias do perfil.
+- [ ] Testes pgTAP passam com dois usuários.
