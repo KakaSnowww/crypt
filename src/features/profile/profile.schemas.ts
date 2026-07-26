@@ -22,6 +22,7 @@ export const profileDetailsSchema = z.object({
 export const privacySchema = z.object({
   allow_direct_messages: z.boolean(),
   allow_friend_requests: z.boolean(),
+  discoverable_by_search: z.boolean(),
   hide_all_interests: z.boolean(),
   show_interests_on_profile: z.boolean(),
   show_mutual_friends: z.boolean(),

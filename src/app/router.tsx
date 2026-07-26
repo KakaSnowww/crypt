@@ -9,6 +9,7 @@ import {
   AppHomeRoute,
   AppShell,
   AuthCallbackRoute,
+  ConnectionsRoute,
   DesignSystemRoute,
   ForgotPasswordRoute,
   LazyRoute,
@@ -17,6 +18,7 @@ import {
   OnboardingRoute,
   ProfileRoute,
   ProfileSettingsRoute,
+  PublicProfileRoute,
   RegisterRoute,
   ResetPasswordRoute,
 } from './lazyRoutes';
@@ -119,6 +121,14 @@ export const appRoutes: RouteObject[] = [
         ),
       },
       {
+        path: 'conexoes',
+        element: (
+          <LazyRoute>
+            <ConnectionsRoute />
+          </LazyRoute>
+        ),
+      },
+      {
         path: 'perfil',
         element: (
           <LazyRoute>
@@ -131,6 +141,14 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ProfileSettingsRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'pessoas/:handle',
+        element: (
+          <LazyRoute>
+            <PublicProfileRoute />
           </LazyRoute>
         ),
       },

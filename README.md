@@ -4,24 +4,29 @@ Plataforma social de comunidades, conversas, amizades e descoberta de pessoas po
 Crypt possui identidade visual própria em roxo e azul e está sendo construído em fases para web,
 Windows e Android.
 
-## Estado atual — Fase 4
+## Estado atual — Fase 5
 
-Além da autenticação real entregue na Fase 3, esta fase adiciona:
+Além do perfil e onboarding entregues na Fase 4, esta fase adiciona:
 
-- onboarding privado com nove etapas e progresso persistente;
-- nome de exibição e biografia editáveis;
-- avatar JPG, PNG ou WebP de até 2 MB;
-- Storage com pasta individual e políticas RLS;
-- cinco categorias e 63 interesses opcionais;
-- chips animados, navegação voltar e opção de pular categorias;
-- autodescrições de personalidade sem diagnóstico;
-- preferências independentes para perfil, sugestões, amizade, mensagens e presença;
-- interesses ocultos por padrão;
-- música favorita por link normalizado de faixa do Spotify;
-- player oficial incorporado diretamente pelo ID validado da faixa;
-- perfil responsivo sem exposição do e-mail;
-- edição posterior de tudo que foi escolhido no onboarding;
-- migrations, testes unitários e testes pgTAP de RLS.
+- busca exata ou parcial pelo `@`, limitada a 20 resultados;
+- perfis públicos sem e-mail ou configurações internas;
+- pedidos recebidos e enviados;
+- aceitar, recusar e cancelar pedidos;
+- amizade armazenada uma única vez em par canônico;
+- lista de amigos online e offline;
+- presença leve com expiração automática;
+- remover amizade, bloquear e desbloquear;
+- bloqueio válido nos dois sentidos para novas interações;
+- aba **Descobrir** com sugestões por interesses e amigos em comum;
+- pontuação transparente calculada somente no banco, sem IA;
+- explicações objetivas dos interesses compartilhados;
+- ignorar por 30 dias ou não sugerir novamente;
+- notificações de pedido novo e pedido aceito;
+- denúncia privada com motivo controlado e proteção contra repetição;
+- atualização por Realtime sem depender de F5;
+- preferências separadas para aparecer na busca e aceitar pedidos;
+- RLS e RPCs protegidas para todas as ações sociais;
+- 56 testes pgTAP da Fase 5 e testes de interface.
 
 ## Tecnologias
 
@@ -84,8 +89,8 @@ npx supabase migration list
 npm run supabase:db:push
 ```
 
-A migration da Fase 4 cria catálogo, configurações, seleções e o bucket `profile-media`
-automaticamente. Não é necessário criar tabelas ou políticas manualmente no painel.
+A migration da Fase 5 cria amizades, pedidos, bloqueios, sugestões, notificações, presença e todas
+as funções protegidas automaticamente. Não crie tabelas ou políticas manualmente no painel.
 
 ## Edge Function da conta
 
@@ -111,6 +116,8 @@ Rotas principais:
 - `/auth/callback`
 - `/onboarding`
 - `/app`
+- `/app/conexoes`
+- `/app/pessoas/@identificador`
 - `/app/perfil`
 - `/app/perfil/editar`
 - `/app/conta`
@@ -145,6 +152,7 @@ src/
 │   └── layout/
 ├── features/
 │   ├── auth/
+│   ├── connections/
 │   ├── onboarding/
 │   └── profile/
 │       ├── components/
@@ -172,12 +180,16 @@ supabase/
 - tipo e tamanho do avatar são validados no cliente, bucket e políticas;
 - o banco impede associar ao perfil o arquivo de outra conta;
 - somente links HTTPS de faixas em `open.spotify.com` são aceitos;
-- a capa aceita somente o domínio oficial `i.scdn.co`;
 - o Spotify Embed é incorporado sem baixar ou hospedar áudio;
 - segredos administrativos continuam fora do bundle.
+- pedidos, amizades e bloqueios só podem ser alterados pelas funções protegidas;
+- uma terceira conta não lê pedidos, amizades, bloqueios ou notificações alheias;
+- score de sugestão nunca é enviado pelo cliente;
+- pessoas bloqueadas são removidas de pedidos, amizades, busca e sugestões;
+- a barreira `can_start_direct_message` já impede futuras DMs entre bloqueados.
 
 Consulte [docs/security.md](docs/security.md), [docs/database.md](docs/database.md) e
-[docs/profile-onboarding.md](docs/profile-onboarding.md).
+[docs/profile-onboarding.md](docs/profile-onboarding.md) e [docs/connections.md](docs/connections.md).
 
 ### Nota da auditoria
 
@@ -187,13 +199,13 @@ que não são usadas neste aplicativo SPA. Não execute `npm audit fix --force`.
 ## Limitações atuais
 
 - o envio padrão de e-mails do Supabase é apropriado apenas para testes;
-- o perfil aberto nesta fase é o da própria conta;
-- busca de pessoas, amizades, bloqueios e perfis de terceiros pertencem à Fase 5;
-- presença online real será conectada em uma fase posterior;
+- presença depende de a aplicação permanecer aberta e expira após dois minutos sem atividade;
+- servidores em comum entrarão na pontuação quando as comunidades existirem;
+- a análise administrativa das denúncias será conectada na fase própria;
 - mensagens e comunidades continuam simuladas;
 - publicação web, Windows e Android será feita em fases posteriores.
 
 ## Próxima fase
 
-A Fase 5 implementará busca por `@`, pedidos, amigos, bloqueios e sugestões transparentes por
-interesses. Ela só começa após os testes reais da Fase 4 com duas contas.
+A Fase 6 implementará servidores, convites, entrada, saída, membros, propriedade, transferência e
+exclusão. Ela só começa depois dos testes reais da Fase 5 com duas contas.

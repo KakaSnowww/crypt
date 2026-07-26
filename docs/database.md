@@ -1,11 +1,12 @@
-# Banco de dados — Fases 3 e 4
+# Banco de dados — Fases 3 a 5
 
 ## Migrations
 
-| Ordem | Arquivo                                        | Responsabilidade             |
-| ----- | ---------------------------------------------- | ---------------------------- |
-| 1     | `20260725143000_phase3_auth_profiles.sql`      | Auth, perfil mínimo e `@`    |
-| 2     | `20260725200000_phase4_profile_onboarding.sql` | Perfil, interesses e Storage |
+| Ordem | Arquivo                                        | Responsabilidade                          |
+| ----- | ---------------------------------------------- | ----------------------------------------- |
+| 1     | `20260725143000_phase3_auth_profiles.sql`      | Auth, perfil mínimo e `@`                 |
+| 2     | `20260725200000_phase4_profile_onboarding.sql` | Perfil, interesses e Storage              |
+| 3     | `20260725223000_phase5_connections.sql`        | Amizades, sugestões, bloqueios e presença |
 
 As migrations são aplicadas somente pela CLI:
 
@@ -29,6 +30,9 @@ npm run supabase:db:push
 
 E-mail, senha e tokens permanecem exclusivamente nos schemas protegidos do Supabase.
 
+Na Fase 5, a leitura direta de `profiles` foi limitada à própria linha. Busca e perfis públicos usam
+funções específicas para aplicar descoberta, bloqueio e limites antes de retornar dados.
+
 ## `public.profile_settings`
 
 Uma linha 1:1 é criada automaticamente para cada perfil. Ela armazena:
@@ -41,6 +45,7 @@ Uma linha 1:1 é criada automaticamente para cada perfil. Ela armazena:
 - mensagens privadas;
 - status online;
 - amigos e servidores em comum.
+- consentimento separado para aparecer na busca pelo `@`.
 
 Interesses e sugestões começam desativados. Somente o dono lê ou atualiza a própria linha. Decisões
 sociais futuras deverão usar funções específicas, sem expor o progresso interno do onboarding.
@@ -82,6 +87,44 @@ Substitui atomicamente toda a seleção da pessoa autenticada e recusa IDs inexi
 As duas funções são `security definer`, usam `search_path` vazio e só podem ser executadas pelo papel
 `authenticated`.
 
+## Conexões
+
+### `friend_requests`
+
+Mantém somente pedidos pendentes. Um índice único usa o menor e o maior UUID para impedir pedidos
+duplicados mesmo quando as direções são invertidas.
+
+### `friendships`
+
+Cada amizade ocupa uma única linha `(user_low_id, user_high_id)`. A constraint exige a ordem
+canônica dos UUIDs e evita armazenar a mesma amizade duas vezes.
+
+### `user_blocks`
+
+O bloqueio é unidirecional, mas todas as ações consultam os dois sentidos. Bloquear remove
+atomicamente pedidos pendentes e uma amizade existente.
+
+### Sugestões, notificações e presença
+
+- `dismissed_friend_suggestions`: oculta por 30 dias ou permanentemente;
+- `connection_notifications`: pedido novo e pedido aceito, legíveis somente pelo destinatário;
+- `user_reports`: denúncia privada, com motivo controlado e limite de repetição em 24 horas;
+- `user_presence`: status e último sinal, visíveis somente para amigos quando autorizado.
+
+As funções `send_friend_request`, `respond_friend_request`, `cancel_friend_request`,
+`remove_friend`, `block_profile`, `unblock_profile` e `dismiss_friend_suggestion` derivam o autor de
+`auth.uid()`. As tabelas não concedem `insert`, `update` ou `delete` direto ao cliente.
+
+`get_friend_suggestions` calcula no banco:
+
+- Música e Jogos: 4 pontos por interesse;
+- Filmes/séries e Hobbies: 3 pontos;
+- autodescrições: 1 ponto;
+- amigo em comum: 5 pontos.
+
+O cliente nunca envia score. Perfis já conectados, pendentes, bloqueados, não encontráveis,
+desativados ou descartados são removidos antes do resultado.
+
 ## Storage
 
 O bucket público `profile-media` guarda somente imagens de apresentação:
@@ -101,6 +144,8 @@ de outra conta.
 - `profiles_rls.test.sql`: criação, identificador e proteção da Fase 3.
 - `profile_onboarding_rls.test.sql`: catálogo, defaults privados, RPCs, visibilidade, constraints,
   progresso e privilégios da Fase 4.
+- `connections_rls.test.sql`: pedidos, amizade canônica, bloqueios, sugestões, notificações,
+  presença, busca, privacidade e acessos de terceiros da Fase 5.
 
 Execute com Docker Desktop aberto:
 

@@ -43,6 +43,7 @@ vi.mock('../features/profile/profile.queries', () => ({
       allow_direct_messages: true,
       allow_friend_requests: true,
       created_at: '2026-07-25T12:00:00.000Z',
+      discoverable_by_search: true,
       hide_all_interests: false,
       onboarding_completed_at: null,
       onboarding_step: 0,

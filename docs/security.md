@@ -1,4 +1,4 @@
-# Segurança — Fases 3 e 4
+# Segurança — Fases 3 a 5
 
 ## Fronteiras de confiança
 
@@ -47,6 +47,54 @@ como autorização para sugestões: são preferências independentes.
 Os RPCs recebem somente IDs do catálogo e derivam o dono de `auth.uid()`. Isso impede escolher outro
 `profile_id` pela API.
 
+## Amizades, busca e bloqueios
+
+O navegador não recebe permissão de escrita nas tabelas sociais. Todas as ações passam por funções
+`security definer` com `search_path` vazio, validação de `auth.uid()` e locks transacionais por par
+de usuários.
+
+O banco impede:
+
+- pedido para si mesmo;
+- pedido repetido ou invertido;
+- pedido entre amigos;
+- pedido quando qualquer lado bloqueou o outro;
+- pedido para quem desativou essa opção;
+- aceite por quem não recebeu o pedido;
+- amizade criada diretamente pelo cliente;
+- leitura de pedidos ou amizades por uma terceira conta.
+
+Busca e sugestões filtram os bloqueios nos dois sentidos. O autor do bloqueio consegue listar e
+remover os próprios bloqueios; a pessoa bloqueada não consegue consultar quem a bloqueou.
+
+A policy antiga que permitia enumerar `profiles` diretamente foi substituída por leitura somente do
+próprio perfil. Busca e perfis de terceiros passam por RPCs filtradas, impedindo contornar
+`discoverable_by_search` com uma consulta direta à tabela.
+
+## Sugestões transparentes
+
+A pontuação é calculada integralmente em SQL usando interesses e amigos em comum. O cliente informa
+somente o limite, que o banco reduz para o intervalo seguro. Nenhum score, rótulo psicológico ou
+afirmação de compatibilidade é aceito do navegador.
+
+O consentimento para usar interesses em sugestões é independente da exibição pública. Ignorar uma
+sugestão a oculta por 30 dias; “não sugerir novamente” não possui expiração.
+
+Denúncias aceitam somente motivos controlados e até 500 caracteres opcionais. Um lock transacional
+e a janela de 24 horas impedem repetição imediata. Somente o autor lê a própria denúncia; a pessoa
+denunciada não recebe acesso ao registro.
+
+## Notificações, presença e futuras DMs
+
+Notificações são criadas dentro da mesma função que cria ou aceita o pedido e só o destinatário pode
+ler. O Realtime respeita essa RLS.
+
+Presença fica visível somente para o próprio usuário ou para amigos quando `show_online_status`
+estiver ativo. O status online expira na consulta após dois minutos sem heartbeat.
+
+`can_start_direct_message` já centraliza bloqueios e `allow_direct_messages`. A futura fase de DMs
+deverá chamar essa função no banco antes de criar qualquer conversa.
+
 ## Avatar e Storage
 
 O cliente verifica tipo e 2 MB antes do envio para feedback rápido. A proteção real continua no
@@ -88,4 +136,12 @@ Se a limpeza de mídia falhar, a exclusão é interrompida para não deixar arqu
 - [ ] Nenhum HTML externo é injetado.
 - [ ] E-mail não aparece em perfil ou catálogo.
 - [ ] Exclusão da conta remove as mídias do perfil.
-- [ ] Testes pgTAP passam com dois usuários.
+- [ ] Pedido para si mesmo ou duplicado é recusado.
+- [ ] Terceira conta não lê pedidos ou amizades.
+- [ ] Terceira conta não enumera a tabela de perfis.
+- [ ] Bloqueado some da busca e das sugestões.
+- [ ] Bloqueado não envia pedido nem inicia futura DM.
+- [ ] Sugestão explica somente fatos em comum.
+- [ ] Denúncia não fica visível para a pessoa denunciada.
+- [ ] Notificações aparecem sem F5 e somente para o destinatário.
+- [ ] Testes pgTAP passam com três usuários.

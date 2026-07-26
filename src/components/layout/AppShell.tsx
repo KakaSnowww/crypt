@@ -17,6 +17,11 @@ import {
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../common/ToastContext';
 import { useAuth } from '../../features/auth/useAuth';
+import { useConnectionNotifications } from '../../features/connections/connections.queries';
+import {
+  useConnectionsRealtime,
+  usePresenceHeartbeat,
+} from '../../features/connections/useConnectionsRealtime';
 import { ProfileAvatar } from '../../features/profile/components/ProfileAvatar';
 import { useCurrentProfile } from '../../features/profile/profile.queries';
 import { classNames } from '../../lib/classNames';
@@ -50,6 +55,12 @@ const channelLinks = [
   },
   {
     end: false,
+    icon: Users,
+    label: 'Conexões',
+    to: '/app/conexoes',
+  },
+  {
+    end: false,
     icon: UserRound,
     label: 'Meu perfil',
     to: '/app/perfil',
@@ -65,6 +76,12 @@ export function AppShell() {
     user?.id ?? null,
     isSupabaseConfigured() && import.meta.env.MODE !== 'test',
   );
+  const connectionsEnabled = isSupabaseConfigured() && import.meta.env.MODE !== 'test';
+  const notificationsQuery = useConnectionNotifications(connectionsEnabled);
+  useConnectionsRealtime(user?.id ?? null);
+  usePresenceHeartbeat(user?.id ?? null);
+  const unreadNotifications =
+    notificationsQuery.data?.filter((notification) => !notification.read_at).length ?? 0;
   const displayName =
     profileQuery.data?.display_name ??
     (typeof user?.user_metadata.display_name === 'string'
@@ -74,29 +91,41 @@ export function AppShell() {
     profileQuery.data?.handle ??
     (typeof user?.user_metadata.handle === 'string' ? user.user_metadata.handle : undefined);
   const identityLabel = handle ? `@${handle}` : user?.email;
-  const pageHeader = location.pathname.startsWith('/app/perfil/editar')
+  const pageHeader = location.pathname.startsWith('/app/conexoes')
     ? {
-        description: 'Avatar, interesses, privacidade e música',
-        icon: Settings,
-        title: 'Editar perfil',
+        description: 'Amigos, pedidos e pessoas para conhecer',
+        icon: Users,
+        title: 'Conexões',
       }
-    : location.pathname.startsWith('/app/perfil')
+    : location.pathname.startsWith('/app/pessoas/')
       ? {
-          description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+          description: 'Perfil público e informações compartilhadas',
           icon: UserRound,
-          title: 'Meu perfil',
+          title: 'Perfil',
         }
-      : location.pathname.startsWith('/app/conta')
+      : location.pathname.startsWith('/app/perfil/editar')
         ? {
-            description: 'Sessão, senha e exclusão da conta',
+            description: 'Avatar, interesses, privacidade e música',
             icon: Settings,
-            title: 'Conta e segurança',
+            title: 'Editar perfil',
           }
-        : {
-            description: 'Ideias, novidades e conversas da comunidade',
-            icon: Hash,
-            title: 'Conversa Geral',
-          };
+        : location.pathname.startsWith('/app/perfil')
+          ? {
+              description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+              icon: UserRound,
+              title: 'Meu perfil',
+            }
+          : location.pathname.startsWith('/app/conta')
+            ? {
+                description: 'Sessão, senha e exclusão da conta',
+                icon: Settings,
+                title: 'Conta e segurança',
+              }
+            : {
+                description: 'Ideias, novidades e conversas da comunidade',
+                icon: Hash,
+                title: 'Conversa Geral',
+              };
   const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
@@ -205,10 +234,10 @@ export function AppShell() {
           <div className="mt-2 grid gap-1">
             <NavLink
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              to="/app/perfil/editar"
+              to="/app/conexoes?aba=discover"
             >
               <Compass aria-hidden="true" size={17} />
-              Explorar meu perfil
+              Descobrir pessoas
             </NavLink>
             <NavLink
               className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
@@ -267,7 +296,20 @@ export function AppShell() {
               icon={<Search aria-hidden="true" size={18} />}
               label="Pesquisar neste canal"
             />
-            <IconButton icon={<Bell aria-hidden="true" size={18} />} label="Notificações" />
+            <NavLink
+              aria-label={
+                unreadNotifications
+                  ? `Notificações: ${unreadNotifications} não lidas`
+                  : 'Notificações'
+              }
+              className="relative grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+              to="/app/conexoes?aba=notifications"
+            >
+              <Bell aria-hidden="true" size={18} />
+              {unreadNotifications ? (
+                <span className="absolute right-1.5 top-1.5 size-2.5 rounded-full border-2 border-crypt-background bg-violet-400" />
+              ) : null}
+            </NavLink>
             <IconButton
               className="hidden sm:inline-flex"
               icon={<Users aria-hidden="true" size={18} />}
@@ -304,13 +346,18 @@ export function AppShell() {
             <MessageCircle aria-hidden="true" size={19} />
             Mensagens
           </button>
-          <button
-            className="grid min-h-12 place-items-center gap-0.5 rounded-xl text-[0.65rem] font-medium text-crypt-subtle"
-            type="button"
+          <NavLink
+            className={({ isActive }) =>
+              classNames(
+                'grid min-h-12 place-items-center gap-0.5 rounded-xl text-[0.65rem] font-medium',
+                isActive ? 'text-violet-200' : 'text-crypt-subtle',
+              )
+            }
+            to="/app/conexoes"
           >
             <Users aria-hidden="true" size={19} />
             Amigos
-          </button>
+          </NavLink>
           <NavLink
             className={({ isActive }) =>
               classNames(

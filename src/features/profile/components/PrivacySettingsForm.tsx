@@ -39,7 +39,12 @@ const toggleFields: Array<{
     label: 'Ocultar todos os interesses',
   },
   {
-    description: 'Controlará quem poderá enviar convites quando as amizades forem implementadas.',
+    description: 'Permite que outras pessoas encontrem seu @ na busca limitada do Crypt.',
+    field: 'discoverable_by_search',
+    label: 'Aparecer na busca por @',
+  },
+  {
+    description: 'Permite que outras pessoas enviem novos pedidos para você.',
     field: 'allow_friend_requests',
     label: 'Permitir pedidos de amizade',
   },
@@ -77,6 +82,7 @@ export function PrivacySettingsForm({
     defaultValues: {
       allow_direct_messages: settings.allow_direct_messages,
       allow_friend_requests: settings.allow_friend_requests,
+      discoverable_by_search: settings.discoverable_by_search,
       hide_all_interests: settings.hide_all_interests,
       show_interests_on_profile: settings.show_interests_on_profile,
       show_mutual_friends: settings.show_mutual_friends,

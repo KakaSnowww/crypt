@@ -26,6 +26,11 @@ export const DesignSystemRoute = lazy(async () => {
   return { default: route.DesignSystemRoute };
 });
 
+export const ConnectionsRoute = lazy(async () => {
+  const route = await import('../routes/ConnectionsRoute');
+  return { default: route.ConnectionsRoute };
+});
+
 export const ForgotPasswordRoute = lazy(async () => {
   const route = await import('../routes/ForgotPasswordRoute');
   return { default: route.ForgotPasswordRoute };
@@ -54,6 +59,11 @@ export const ProfileRoute = lazy(async () => {
 export const ProfileSettingsRoute = lazy(async () => {
   const route = await import('../routes/ProfileSettingsRoute');
   return { default: route.ProfileSettingsRoute };
+});
+
+export const PublicProfileRoute = lazy(async () => {
+  const route = await import('../routes/PublicProfileRoute');
+  return { default: route.PublicProfileRoute };
 });
 
 export const RegisterRoute = lazy(async () => {
