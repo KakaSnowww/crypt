@@ -17,8 +17,8 @@ Inclui:
 - transferência e exclusão;
 - RLS e RPCs protegidas.
 
-Categorias, novos canais, cargos personalizados e permissões pertencem à Fase 7. Mensagens reais
-pertencem à Fase 8.
+Categorias, novos canais, cargos personalizados, permissões e mensagens reais estão documentados em
+[`channels-messages.md`](channels-messages.md).
 
 ## Fluxo de criação
 

@@ -1,4 +1,4 @@
-# Segurança — Fases 3 a 6
+# Segurança — Fases 3 a 8
 
 ## Fronteiras de confiança
 
@@ -139,6 +139,30 @@ consulta somente UUID e proprietário com privilégios controlados, sem depender
 `servers`. A função de configuração repete a validação do caminho antes de associá-lo à linha do
 servidor.
 
+## Canais, cargos e mensagens
+
+O nome visível nunca autoriza acesso. Servidores, categorias, canais, cargos, mensagens e anexos
+usam UUID. Uma URL direta chama `can_view_channel` no banco e não contorna a interface.
+
+O cargo `@everyone` é obrigatório e não pode ser excluído ou renomeado. Gerentes de cargo operam
+somente abaixo da própria posição e não concedem permissões que não possuem ao criar, mover ou
+editar um cargo. O proprietário pode receber cargos visuais, mas continua com controle máximo
+independentemente deles. Exceções por categoria e canal também respeitam a hierarquia.
+
+O papel `authenticated` recebe somente leitura RLS das tabelas de mensagem. Envio, edição, exclusão,
+reação, fixação e leitura passam por RPCs `security definer` com `search_path` vazio.
+
+Conteúdo é renderizado como texto React, nunca como HTML. A exclusão apaga conteúdo e anexos, mas
+conserva a linha lógica para não quebrar respostas. O histórico usa paginação por cursor.
+
+O bucket de anexos é privado. A policy valida servidor, canal, autor, UUID, extensão e permissão
+efetiva. O download usa uma URL assinada curta. Excluir mensagem, servidor ou conta também remove os
+objetos correspondentes.
+
+Realtime não substitui autorização: eventos Postgres continuam sob RLS e cada leitura passa pelas
+funções protegidas. O Broadcast de digitação transmite somente UUID e nome de exibição, nunca o
+conteúdo digitado.
+
 ## Spotify
 
 O Crypt aceita somente uma URL de faixa em `open.spotify.com`, remove parâmetros de compartilhamento
@@ -150,10 +174,10 @@ player oficial. O Crypt não baixa, copia, transforma nem hospeda áudio.
 `delete-account` continua validando origem, Publishable key, JWT, senha atual no frontend e a palavra
 `EXCLUIR`. A chave administrativa existe somente na Edge Function.
 
-Antes de excluir `auth.users`, a função lista e remove os arquivos da pasta UUID no bucket
-`profile-media` e as mídias de todos os servidores que ainda pertencem à conta. Depois, as relações
-`on delete cascade` removem perfil, configurações, seleções, associações e servidores pertencentes à
-conta. Se a limpeza de mídia falhar, a exclusão é interrompida para não deixar arquivos órfãos.
+Antes de excluir `auth.users`, a função remove os arquivos de `profile-media`, anexos enviados pela
+conta, anexos dos servidores pertencentes a ela e suas mídias. Depois, as relações
+`on delete cascade` removem perfil, configurações, seleções, associações e servidores. Se a limpeza
+falhar, a exclusão é interrompida.
 
 ## Checklist
 
@@ -184,4 +208,14 @@ conta. Se a limpeza de mídia falhar, a exclusão é interrompida para não deix
 - [ ] Transferência aceita somente outro membro.
 - [ ] Exclusão exige o nome atual do servidor.
 - [ ] Conta não envia mídia para a pasta de servidor alheio.
+- [ ] Cargo gerenciador não altera nem atribui cargo igual ou superior ao próprio.
+- [ ] Canal negado não aparece e não abre por URL direta.
+- [ ] Canal somente leitura recusa envio no banco.
+- [ ] Pessoa de fora não lista canal, histórico, reação ou anexo.
+- [ ] Mensagem acima de 2.000 caracteres e quarto anexo são recusados.
+- [ ] Resposta não referencia mensagem de outro canal.
+- [ ] Modo lento é aplicado no banco.
+- [ ] Anexo usa bucket privado e URL assinada.
+- [ ] Exclusão de mensagem, servidor e conta limpa anexos privados.
+- [ ] Não lidas e menções são calculadas somente em canais visíveis.
 - [ ] Testes pgTAP passam com três usuários.

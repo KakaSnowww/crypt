@@ -127,6 +127,30 @@ Deno.serve(async (request) => {
     },
   });
 
+  const { data: authoredAttachments, error: authoredAttachmentsError } = await adminClient
+    .from('message_attachments')
+    .select('storage_path')
+    .eq('uploader_id', user.id)
+    .limit(3000);
+
+  if (authoredAttachmentsError) {
+    console.error('delete-account: message attachment listing failed');
+    return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+  }
+
+  const authoredAttachmentPaths = authoredAttachments.map((attachment) => attachment.storage_path);
+
+  if (authoredAttachmentPaths.length > 0) {
+    const { error: removeAttachmentsError } = await adminClient.storage
+      .from('message-attachments')
+      .remove(authoredAttachmentPaths);
+
+    if (removeAttachmentsError) {
+      console.error('delete-account: message attachment removal failed');
+      return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+    }
+  }
+
   const { data: ownedServers, error: ownedServersError } = await adminClient
     .from('servers')
     .select('id')
@@ -136,6 +160,36 @@ Deno.serve(async (request) => {
   if (ownedServersError) {
     console.error('delete-account: owned servers listing failed');
     return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+  }
+
+  const ownedServerIds = ownedServers.map((server) => server.id);
+
+  if (ownedServerIds.length > 0) {
+    const { data: ownedServerMessages, error: ownedServerMessagesError } = await adminClient
+      .from('channel_messages')
+      .select('message_attachments(storage_path)')
+      .in('server_id', ownedServerIds)
+      .limit(3000);
+
+    if (ownedServerMessagesError) {
+      console.error('delete-account: owned server attachment listing failed');
+      return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+    }
+
+    const ownedServerAttachmentPaths = ownedServerMessages.flatMap((message) =>
+      message.message_attachments.map((attachment) => attachment.storage_path),
+    );
+
+    if (ownedServerAttachmentPaths.length > 0) {
+      const { error: removeOwnedServerAttachmentsError } = await adminClient.storage
+        .from('message-attachments')
+        .remove([...new Set(ownedServerAttachmentPaths)]);
+
+      if (removeOwnedServerAttachmentsError) {
+        console.error('delete-account: owned server attachment removal failed');
+        return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+      }
+    }
   }
 
   for (const server of ownedServers) {

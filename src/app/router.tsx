@@ -9,6 +9,7 @@ import {
   AppHomeRoute,
   AppShell,
   AuthCallbackRoute,
+  ChannelRoute,
   ConnectionsRoute,
   DesignSystemRoute,
   ForgotPasswordRoute,
@@ -22,6 +23,7 @@ import {
   RegisterRoute,
   ResetPasswordRoute,
   ServerInviteRoute,
+  ServerManageRoute,
   ServerRoute,
   ServersRoute,
   ServerSettingsRoute,
@@ -161,6 +163,22 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ServerSettingsRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores/:serverId/gerenciar',
+        element: (
+          <LazyRoute>
+            <ServerManageRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores/:serverId/canais/:channelId',
+        element: (
+          <LazyRoute>
+            <ChannelRoute />
           </LazyRoute>
         ),
       },

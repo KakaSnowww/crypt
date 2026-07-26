@@ -6,6 +6,7 @@ import {
   Link2,
   LogOut,
   MessageCircle,
+  LayoutList,
   Settings,
   ShieldCheck,
   UserPlus,
@@ -28,6 +29,7 @@ import {
 } from '../features/servers/servers.queries';
 import { getServerMediaUrl } from '../features/servers/servers.service';
 import { useServerActions } from '../features/servers/useServerActions';
+import { useServerChannels } from '../features/workspace/workspace.queries';
 
 const expirationOptions = [
   { label: '1 hora', value: '1' },
@@ -53,12 +55,18 @@ export function ServerRoute() {
   const membersQuery = useServerMembers(serverId);
   const invitesQuery = useServerInvites(serverId);
   const actions = useServerActions();
+  const channelsQuery = useServerChannels(serverId);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [expiration, setExpiration] = useState('168');
   const [maxUses, setMaxUses] = useState('unlimited');
   const [createdCode, setCreatedCode] = useState<string>();
 
-  if (overviewQuery.isPending || membersQuery.isPending || invitesQuery.isPending) {
+  if (
+    overviewQuery.isPending ||
+    membersQuery.isPending ||
+    invitesQuery.isPending ||
+    channelsQuery.isPending
+  ) {
     return (
       <div aria-label="Carregando servidor" className="grid min-h-72 place-items-center">
         <Spinner />
@@ -87,6 +95,9 @@ export function ServerRoute() {
   const bannerUrl = getServerMediaUrl(overview.banner_path);
   const members = membersQuery.data ?? [];
   const invites = invitesQuery.data ?? [];
+  const channels = channelsQuery.data ?? [];
+  const firstChannel =
+    channels.find((channel) => channel.channel_id === overview.default_channel_id) ?? channels[0];
 
   async function copyInvite(code: string) {
     const url = `${window.location.origin}/app/convite/${code}`;
@@ -164,13 +175,22 @@ export function ServerRoute() {
             </div>
             <div className="flex flex-wrap gap-2 pb-1">
               {overview.is_owner ? (
-                <Button
-                  leadingIcon={<Settings aria-hidden="true" size={16} />}
-                  onClick={() => void navigate(`/app/servidores/${serverId}/configuracoes`)}
-                  variant="secondary"
-                >
-                  Configurações
-                </Button>
+                <>
+                  <Button
+                    leadingIcon={<LayoutList aria-hidden="true" size={16} />}
+                    onClick={() => void navigate(`/app/servidores/${serverId}/gerenciar`)}
+                    variant="secondary"
+                  >
+                    Organizar
+                  </Button>
+                  <Button
+                    leadingIcon={<Settings aria-hidden="true" size={16} />}
+                    onClick={() => void navigate(`/app/servidores/${serverId}/configuracoes`)}
+                    variant="secondary"
+                  >
+                    Configurações
+                  </Button>
+                </>
               ) : (
                 <Button
                   leadingIcon={<LogOut aria-hidden="true" size={16} />}
@@ -209,21 +229,32 @@ export function ServerRoute() {
               </span>
               <div>
                 <h2 className="font-semibold text-white" id="channel-title">
-                  {overview.default_channel_name ?? 'Conversa Geral'}
+                  {firstChannel?.channel_name ?? overview.default_channel_name ?? 'Conversa Geral'}
                 </h2>
                 <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-                  Canal inicial com UUID permanente, pronto para as mensagens da Fase 8.
+                  {firstChannel?.topic ?? 'Abra o canal e comece a conversa em tempo real.'}
                 </p>
               </div>
             </div>
             <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-white/[0.025] p-7 text-center">
               <MessageCircle className="mx-auto text-crypt-subtle" size={25} />
               <p className="mt-3 text-sm font-semibold text-white">
-                A estrutura do canal está pronta
+                {channels.length}{' '}
+                {channels.length === 1 ? 'canal disponível' : 'canais disponíveis'}
               </p>
               <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-                Categorias e novos canais entram na Fase 7; mensagens reais entram na Fase 8.
+                Histórico paginado, respostas, reações, anexos e mensagens em tempo real.
               </p>
+              {firstChannel ? (
+                <Button
+                  className="mt-4"
+                  onClick={() =>
+                    void navigate(`/app/servidores/${serverId}/canais/${firstChannel.channel_id}`)
+                  }
+                >
+                  Abrir {firstChannel.channel_name}
+                </Button>
+              ) : null}
             </div>
           </section>
 

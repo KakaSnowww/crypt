@@ -203,6 +203,26 @@ export async function deleteServer(
 ) {
   const client = getSupabaseClient();
   const existingPaths = mediaPaths.filter((path): path is string => Boolean(path));
+  const { data: attachmentPaths, error: attachmentPathsError } = await client.rpc(
+    'get_server_message_attachment_paths',
+    {
+      target_server_id: serverId,
+    },
+  );
+
+  if (attachmentPathsError) {
+    throw toServerActionError(attachmentPathsError);
+  }
+
+  if (attachmentPaths.length > 0) {
+    const { error: attachmentRemovalError } = await client.storage
+      .from('message-attachments')
+      .remove(attachmentPaths);
+
+    if (attachmentRemovalError) {
+      throw toServerActionError(attachmentRemovalError);
+    }
+  }
 
   if (existingPaths.length > 0) {
     const { error: removeError } = await client.storage

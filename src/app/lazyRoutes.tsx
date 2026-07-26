@@ -31,6 +31,11 @@ export const ConnectionsRoute = lazy(async () => {
   return { default: route.ConnectionsRoute };
 });
 
+export const ChannelRoute = lazy(async () => {
+  const route = await import('../routes/ChannelRoute');
+  return { default: route.ChannelRoute };
+});
+
 export const ForgotPasswordRoute = lazy(async () => {
   const route = await import('../routes/ForgotPasswordRoute');
   return { default: route.ForgotPasswordRoute };
@@ -94,6 +99,11 @@ export const ServersRoute = lazy(async () => {
 export const ServerSettingsRoute = lazy(async () => {
   const route = await import('../routes/ServerSettingsRoute');
   return { default: route.ServerSettingsRoute };
+});
+
+export const ServerManageRoute = lazy(async () => {
+  const route = await import('../routes/ServerManageRoute');
+  return { default: route.ServerManageRoute };
 });
 
 export function LazyRoute({ children }: { children: ReactNode }) {

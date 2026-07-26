@@ -46,11 +46,57 @@ export type Database = {
         };
         Returns: string;
       };
+      create_server_category: {
+        Args: { category_name: string; target_server_id: string };
+        Returns: string;
+      };
+      create_server_channel: {
+        Args: {
+          channel_icon?: null | string;
+          channel_is_read_only?: boolean;
+          channel_name: string;
+          channel_slowmode_seconds?: number;
+          channel_topic?: null | string;
+          target_category_id?: null | string;
+          target_server_id: string;
+        };
+        Returns: string;
+      };
+      create_server_role: {
+        Args: {
+          role_color: string;
+          role_display_separately?: boolean;
+          role_name: string;
+          role_permissions: number;
+          target_server_id: string;
+        };
+        Returns: string;
+      };
+      delete_channel_message: {
+        Args: { target_message_id: string };
+        Returns: string[];
+      };
       delete_server: {
         Args: {
           confirmation_name: string;
           target_server_id: string;
         };
+        Returns: undefined;
+      };
+      delete_server_category: {
+        Args: { target_category_id: string };
+        Returns: undefined;
+      };
+      delete_server_channel: {
+        Args: { target_channel_id: string };
+        Returns: undefined;
+      };
+      delete_server_permission_override: {
+        Args: { target_override_id: string };
+        Returns: undefined;
+      };
+      delete_server_role: {
+        Args: { target_role_id: string };
         Returns: undefined;
       };
       dismiss_friend_suggestion: {
@@ -73,6 +119,38 @@ export type Database = {
       get_connection_status: {
         Args: { target_profile_id: string };
         Returns: string;
+      };
+      get_channel_messages: {
+        Args: {
+          before_created_at?: null | string;
+          before_message_id?: null | string;
+          result_limit?: number;
+          target_channel_id: string;
+        };
+        Returns: Array<{
+          attachment_summary: Json;
+          author_avatar_path: null | string;
+          author_display_name: string;
+          author_handle: string;
+          author_id: null | string;
+          can_delete: boolean;
+          can_edit: boolean;
+          can_pin: boolean;
+          channel_id: string;
+          content: null | string;
+          created_at: string;
+          deleted_at: null | string;
+          edited_at: null | string;
+          mentioned_channel_ids: string[];
+          mentioned_profile_ids: string[];
+          message_id: string;
+          pinned_at: null | string;
+          reaction_summary: Json;
+          reply_author_display_name: null | string;
+          reply_content: null | string;
+          reply_to_id: null | string;
+          server_id: string;
+        }>;
       };
       get_friend_requests: {
         Args: { request_direction: string };
@@ -196,6 +274,43 @@ export type Database = {
           uses_count: number;
         }>;
       };
+      get_my_server_permissions: {
+        Args: { target_server_id: string };
+        Returns: number;
+      };
+      get_server_categories: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          category_id: string;
+          category_name: string;
+          category_position: number;
+          created_at: string;
+        }>;
+      };
+      get_server_channels: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          category_id: null | string;
+          channel_icon: null | string;
+          channel_id: string;
+          channel_name: string;
+          channel_position: number;
+          created_at: string;
+          effective_permissions: number;
+          is_read_only: boolean;
+          normalized_name: string;
+          slowmode_seconds: number;
+          topic: null | string;
+        }>;
+      };
+      get_server_member_roles: {
+        Args: { target_server_id: string };
+        Returns: Array<{ profile_id: string; role_ids: string[] }>;
+      };
+      get_server_message_attachment_paths: {
+        Args: { target_server_id: string };
+        Returns: string[];
+      };
       get_server_members: {
         Args: { target_server_id: string };
         Returns: Array<{
@@ -229,6 +344,40 @@ export type Database = {
           updated_at: string;
         }>;
       };
+      get_server_permission_overrides: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          allow_permissions: number;
+          category_id: null | string;
+          channel_id: null | string;
+          deny_permissions: number;
+          override_id: string;
+          profile_id: null | string;
+          role_id: null | string;
+        }>;
+      };
+      get_server_roles: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          color: string;
+          display_separately: boolean;
+          is_default: boolean;
+          is_system: boolean;
+          member_count: number;
+          permissions: number;
+          role_id: string;
+          role_name: string;
+          role_position: number;
+        }>;
+      };
+      get_server_unread_counts: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          channel_id: string;
+          mention_count: number;
+          unread_count: number;
+        }>;
+      };
       has_block_between: {
         Args: { target_profile_id: string };
         Returns: boolean;
@@ -255,6 +404,25 @@ export type Database = {
       };
       mark_connection_notifications_read: {
         Args: NoArgs;
+        Returns: undefined;
+      };
+      mark_channel_read: {
+        Args: {
+          target_channel_id: string;
+          target_message_id?: null | string;
+        };
+        Returns: undefined;
+      };
+      move_server_category: {
+        Args: { direction: number; target_category_id: string };
+        Returns: undefined;
+      };
+      move_server_channel: {
+        Args: { direction: number; target_channel_id: string };
+        Returns: undefined;
+      };
+      move_server_role: {
+        Args: { direction: number; target_role_id: string };
         Returns: undefined;
       };
       normalize_server_name: {
@@ -308,6 +476,36 @@ export type Database = {
         Args: { target_profile_id: string };
         Returns: string;
       };
+      send_channel_message: {
+        Args: {
+          attachment_items?: Json;
+          mentioned_channel_ids?: string[];
+          mentioned_profile_ids?: string[];
+          message_content: string;
+          target_channel_id: string;
+          target_reply_id?: null | string;
+        };
+        Returns: string;
+      };
+      set_server_member_roles: {
+        Args: {
+          target_profile_id: string;
+          target_role_ids: string[];
+          target_server_id: string;
+        };
+        Returns: undefined;
+      };
+      set_server_permission_override: {
+        Args: {
+          allowed_permissions: number;
+          denied_permissions: number;
+          target_id: string;
+          target_kind: string;
+          target_role_id: string;
+          target_server_id: string;
+        };
+        Returns: string;
+      };
       set_my_presence: {
         Args: { next_status: string };
         Returns: undefined;
@@ -326,6 +524,14 @@ export type Database = {
         };
         Returns: undefined;
       };
+      toggle_message_reaction: {
+        Args: { reaction_emoji: string; target_message_id: string };
+        Returns: boolean;
+      };
+      toggle_pin_channel_message: {
+        Args: { target_message_id: string };
+        Returns: boolean;
+      };
       unblock_profile: {
         Args: { target_profile_id: string };
         Returns: undefined;
@@ -338,6 +544,36 @@ export type Database = {
           server_name: string;
           target_server_id: string;
         };
+        Returns: undefined;
+      };
+      update_server_category: {
+        Args: { category_name: string; target_category_id: string };
+        Returns: undefined;
+      };
+      update_server_channel: {
+        Args: {
+          channel_icon?: null | string;
+          channel_is_read_only?: boolean;
+          channel_name: string;
+          channel_slowmode_seconds?: number;
+          channel_topic?: null | string;
+          target_category_id: null | string;
+          target_channel_id: string;
+        };
+        Returns: undefined;
+      };
+      update_server_role: {
+        Args: {
+          role_color: string;
+          role_display_separately?: boolean;
+          role_name: string;
+          role_permissions: number;
+          target_role_id: string;
+        };
+        Returns: undefined;
+      };
+      edit_channel_message: {
+        Args: { new_content: string; target_message_id: string };
         Returns: undefined;
       };
     };

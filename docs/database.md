@@ -1,14 +1,17 @@
-# Banco de dados — Fases 3 a 6
+# Banco de dados — Fases 3 a 8
 
 ## Migrations
 
-| Ordem | Arquivo                                          | Responsabilidade                            |
-| ----- | ------------------------------------------------ | ------------------------------------------- |
-| 1     | `20260725143000_phase3_auth_profiles.sql`        | Auth, perfil mínimo e `@`                   |
-| 2     | `20260725200000_phase4_profile_onboarding.sql`   | Perfil, interesses e Storage                |
-| 3     | `20260725223000_phase5_connections.sql`          | Amizades, sugestões, bloqueios e presença   |
-| 4     | `20260726010000_phase6_servers_members.sql`      | Servidores, membros, convites e propriedade |
-| 5     | `20260726033000_phase6_server_media_rls_fix.sql` | Correção segura de ícones e banners         |
+| Ordem | Arquivo                                                | Responsabilidade                            |
+| ----- | ------------------------------------------------------ | ------------------------------------------- |
+| 1     | `20260725143000_phase3_auth_profiles.sql`              | Auth, perfil mínimo e `@`                   |
+| 2     | `20260725200000_phase4_profile_onboarding.sql`         | Perfil, interesses e Storage                |
+| 3     | `20260725223000_phase5_connections.sql`                | Amizades, sugestões, bloqueios e presença   |
+| 4     | `20260726010000_phase6_servers_members.sql`            | Servidores, membros, convites e propriedade |
+| 5     | `20260726033000_phase6_server_media_rls_fix.sql`       | Correção segura de ícones e banners         |
+| 6     | `20260726050000_phase7_channels_roles_permissions.sql` | Canais, cargos e permissões                 |
+| 7     | `20260726060000_phase8_channel_messages.sql`           | Mensagens, anexos, leitura e Realtime       |
+| 8     | `20260726210000_phase78_role_hierarchy_order.sql`      | Ordenação segura da hierarquia de cargos    |
 
 As migrations são aplicadas somente pela CLI:
 
@@ -150,8 +153,8 @@ A chave composta `(server_id, profile_id)` impede associação duplicada. O clie
 3. cria o cargo de sistema `@everyone`;
 4. cria o canal de texto `Conversa Geral`.
 
-O canal já usa UUID permanente. Categorias, edição, ordenação e permissões serão adicionadas na Fase
-7 sem usar o nome visível como identificador.
+O canal usa UUID permanente. Categorias, edição, ordenação e permissões também usam UUID e nunca
+dependem do nome visível como identificador.
 
 ### Convites
 
@@ -202,6 +205,48 @@ A função `can_manage_server_media` verifica formato, UUID e proprietário com 
 controlados. Assim, a policy do Storage não é bloqueada por uma segunda avaliação da RLS de
 `servers`.
 
+## Categorias, canais e permissões
+
+`server_categories` organiza visualmente os canais e guarda posição estável. `server_channels`
+mantém UUID, categoria opcional, nome visível, nome normalizado apenas para unicidade, ícone, tópico,
+posição, modo lento e opção somente para leitura.
+
+`server_roles` usa uma máscara `bigint` com permissões independentes. `server_member_roles` atribui
+cargos extras; o `@everyone` é implícito para todos. O proprietário também pode receber cargos para
+cor e agrupamento visual, sem perder seu acesso total. A posição define a hierarquia: gerentes não
+criam, editam, movem, excluem nem atribuem cargos iguais ou superiores ao próprio.
+
+`server_permission_overrides` armazena permitir e negar por cargo em uma categoria ou canal. A
+resolução ocorre nesta ordem:
+
+1. permissões combinadas dos cargos;
+2. permissões e negações da categoria;
+3. permissões e negações do canal.
+
+Proprietário e `Administrador` recebem a máscara completa. `get_server_channels`,
+`can_view_channel` e `can_send_message` usam o acesso efetivo.
+
+## Mensagens de canal
+
+`channel_messages` guarda autor, conteúdo, resposta, edição, exclusão lógica e fixação.
+`message_reactions`, `message_user_mentions`, `message_channel_mentions` e
+`channel_read_states` mantêm os estados associados.
+
+`get_channel_messages` pagina por `(created_at, id)` e retorna autor, resposta resumida, reações,
+anexos e decisões `can_edit`, `can_delete` e `can_pin`. `send_channel_message` valida associação,
+permissão, limite de 2.000 caracteres, resposta no mesmo canal, modo lento, até três anexos e até 20
+menções de cada tipo.
+
+O bucket `message-attachments` é privado:
+
+- até 5 MB por arquivo;
+- JPEG, PNG, WebP, GIF, PDF e texto;
+- caminho `{server_id}/{channel_id}/{auth.uid()}/{uuid}.{ext}`;
+- insert exige permissão de anexar;
+- select exige permissão atual de visualizar o canal;
+- delete exige ser uploader ou possuir `Gerenciar mensagens`;
+- a interface usa URL assinada de 15 minutos.
+
 ## Testes
 
 - `profiles_rls.test.sql`: criação, identificador e proteção da Fase 3.
@@ -211,6 +256,8 @@ controlados. Assim, a policy do Storage não é bloqueada por uma segunda avalia
   presença, busca, privacidade e acessos de terceiros da Fase 5.
 - `servers_members_rls.test.sql`: criação atômica, RLS, convites, entrada, saída, transferência e
   exclusão com três usuários na Fase 6.
+- `workspace_messages_rls.test.sql`: categorias, nomes livres, cargos, hierarquia, mensagens,
+  reações, leitura, anexos e isolamento com três usuários nas Fases 7–8.
 
 Execute com Docker Desktop aberto:
 

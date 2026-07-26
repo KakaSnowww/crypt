@@ -1,7 +1,6 @@
 import {
   Bell,
   Compass,
-  Crown,
   Hash,
   Home,
   LogOut,
@@ -13,7 +12,9 @@ import {
   Settings,
   UserRound,
   Users,
+  X,
 } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../common/ToastContext';
 import { useAuth } from '../../features/auth/useAuth';
@@ -31,6 +32,21 @@ import {
   useServerOverview,
 } from '../../features/servers/servers.queries';
 import { useServersRealtime } from '../../features/servers/useServersRealtime';
+import { hasPermission, serverPermission } from '../../features/workspace/workspace.permissions';
+import { ServerMemberGroups } from '../../features/workspace/components/ServerMemberGroups';
+import {
+  useMyServerPermissions,
+  useServerCategories,
+  useServerChannels,
+  useServerMemberRoles,
+  useServerRoles,
+  useServerUnreadCounts,
+} from '../../features/workspace/workspace.queries';
+import type {
+  ChannelUnread,
+  ServerCategory,
+  ServerChannel,
+} from '../../features/workspace/workspace.types';
 import { classNames } from '../../lib/classNames';
 import { isSupabaseConfigured } from '../../lib/supabase/client';
 import { IconButton } from '../common/IconButton';
@@ -71,6 +87,7 @@ const channelLinks = [
 export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [membersOpen, setMembersOpen] = useState(false);
   const { addToast } = useToast();
   const { signOut, user } = useAuth();
   const selectedServerId = getServerIdFromPath(location.pathname);
@@ -79,6 +96,12 @@ export function AppShell() {
   const serversQuery = useMyServers(appDataEnabled);
   const serverOverviewQuery = useServerOverview(selectedServerId, appDataEnabled);
   const serverMembersQuery = useServerMembers(selectedServerId, appDataEnabled);
+  const serverCategoriesQuery = useServerCategories(selectedServerId, appDataEnabled);
+  const serverChannelsQuery = useServerChannels(selectedServerId, appDataEnabled);
+  const serverRolesQuery = useServerRoles(selectedServerId, appDataEnabled);
+  const serverMemberRolesQuery = useServerMemberRoles(selectedServerId, appDataEnabled);
+  const serverPermissionsQuery = useMyServerPermissions(selectedServerId, appDataEnabled);
+  const serverUnreadQuery = useServerUnreadCounts(selectedServerId, appDataEnabled);
   const notificationsQuery = useConnectionNotifications(appDataEnabled);
   useConnectionsRealtime(user?.id ?? null);
   usePresenceHeartbeat(user?.id ?? null);
@@ -87,6 +110,16 @@ export function AppShell() {
     serverOverviewQuery.data ??
     serversQuery.data?.find((server) => server.server_id === selectedServerId);
   const serverMembers = serverMembersQuery.data ?? [];
+  const serverCategories = serverCategoriesQuery.data ?? [];
+  const serverChannels = serverChannelsQuery.data ?? [];
+  const serverRoles = serverRolesQuery.data ?? [];
+  const serverMemberRoles = serverMemberRolesQuery.data ?? [];
+  const serverUnread = serverUnreadQuery.data ?? [];
+  const canManageWorkspace =
+    Boolean(currentServer?.is_owner) ||
+    hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageChannels) ||
+    hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageCategories) ||
+    hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageRoles);
   const unreadNotifications =
     notificationsQuery.data?.filter((notification) => !notification.read_at).length ?? 0;
   const displayName =
@@ -99,17 +132,35 @@ export function AppShell() {
     (typeof user?.user_metadata.handle === 'string' ? user.user_metadata.handle : undefined);
   const identityLabel = handle ? `@${handle}` : user?.email;
   const pageHeader = location.pathname.startsWith('/app/servidores/')
-    ? location.pathname.endsWith('/configuracoes')
+    ? location.pathname.includes('/canais/')
       ? {
-          description: 'Identidade, propriedade e exclusão segura',
-          icon: Settings,
-          title: 'Configurações do servidor',
+          description:
+            serverChannels.find(
+              (channel) => channel.channel_id === getChannelIdFromPath(location.pathname),
+            )?.topic ?? 'Conversa em tempo real',
+          icon: Hash,
+          title:
+            serverChannels.find(
+              (channel) => channel.channel_id === getChannelIdFromPath(location.pathname),
+            )?.channel_name ?? 'Canal',
         }
-      : {
-          description: 'Canal inicial, membros e convites',
-          icon: ServerGlyph,
-          title: currentServer?.server_name ?? 'Servidor',
-        }
+      : location.pathname.endsWith('/gerenciar')
+        ? {
+            description: 'Categorias, canais, cargos e permissões',
+            icon: Settings,
+            title: 'Organizar servidor',
+          }
+        : location.pathname.endsWith('/configuracoes')
+          ? {
+              description: 'Identidade, propriedade e exclusão segura',
+              icon: Settings,
+              title: 'Configurações do servidor',
+            }
+          : {
+              description: 'Canais, membros e convites',
+              icon: ServerGlyph,
+              title: currentServer?.server_name ?? 'Servidor',
+            }
     : location.pathname.startsWith('/app/servidores')
       ? {
           description: 'Crie ou entre em comunidades privadas',
@@ -237,7 +288,7 @@ export function AppShell() {
           {currentServer && selectedServerId ? (
             <>
               <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-                Canais
+                Visão geral
               </p>
               <div className="mt-2 grid gap-1">
                 <NavLink
@@ -253,9 +304,25 @@ export function AppShell() {
                   end
                   to={`/app/servidores/${selectedServerId}`}
                 >
-                  <Hash aria-hidden="true" size={17} />
-                  <span>{currentServer.default_channel_name ?? 'Conversa Geral'}</span>
+                  <ServerGlyph aria-hidden="true" size={17} />
+                  <span>Início do servidor</span>
                 </NavLink>
+                {canManageWorkspace ? (
+                  <NavLink
+                    className={({ isActive }) =>
+                      classNames(
+                        'flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition',
+                        isActive
+                          ? 'bg-white/[0.09] font-medium text-white'
+                          : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
+                      )
+                    }
+                    to={`/app/servidores/${selectedServerId}/gerenciar`}
+                  >
+                    <Settings aria-hidden="true" size={17} />
+                    <span>Organizar servidor</span>
+                  </NavLink>
+                ) : null}
                 {currentServer.is_owner ? (
                   <NavLink
                     className={({ isActive }) =>
@@ -273,6 +340,13 @@ export function AppShell() {
                   </NavLink>
                 ) : null}
               </div>
+
+              <ChannelNavigation
+                categories={serverCategories}
+                channels={serverChannels}
+                serverId={selectedServerId}
+                unread={serverUnread}
+              />
             </>
           ) : null}
 
@@ -350,7 +424,11 @@ export function AppShell() {
       <section className="flex min-h-dvh min-w-0 flex-col">
         <header className="flex min-h-16 items-center gap-3 border-b border-white/5 bg-crypt-background/90 px-4 backdrop-blur-xl sm:px-5">
           <div className="lg:hidden">
-            <IconButton icon={<Menu aria-hidden="true" size={20} />} label="Abrir espaços" />
+            <IconButton
+              icon={<Menu aria-hidden="true" size={20} />}
+              label="Abrir espaços"
+              onClick={() => void navigate('/app/servidores')}
+            />
           </div>
           <span className="grid size-9 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
             <HeaderIcon aria-hidden="true" size={18} />
@@ -381,16 +459,101 @@ export function AppShell() {
               ) : null}
             </NavLink>
             <IconButton
-              className="hidden sm:inline-flex"
+              aria-expanded={membersOpen}
+              className="hidden sm:inline-flex 2xl:hidden"
               icon={<Users aria-hidden="true" size={18} />}
               label="Mostrar membros"
+              onClick={() => setMembersOpen((open) => !open)}
             />
           </div>
         </header>
 
+        {currentServer && selectedServerId ? (
+          <nav
+            aria-label={`Canais móveis de ${currentServer.server_name}`}
+            className="flex gap-2 overflow-x-auto border-b border-white/5 bg-crypt-sidebar/70 px-3 py-2 lg:hidden"
+          >
+            <NavLink
+              className={({ isActive }) =>
+                classNames(
+                  'flex min-h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-xs',
+                  isActive ? 'bg-white/[0.1] text-white' : 'bg-white/[0.035] text-crypt-muted',
+                )
+              }
+              end
+              to={`/app/servidores/${selectedServerId}`}
+            >
+              <ServerGlyph size={14} />
+              Início
+            </NavLink>
+            {serverChannels.map((channel) => (
+              <NavLink
+                className={({ isActive }) =>
+                  classNames(
+                    'flex min-h-9 max-w-52 shrink-0 items-center gap-2 rounded-xl px-3 text-xs',
+                    isActive ? 'bg-white/[0.1] text-white' : 'bg-white/[0.035] text-crypt-muted',
+                  )
+                }
+                key={channel.channel_id}
+                to={`/app/servidores/${selectedServerId}/canais/${channel.channel_id}`}
+              >
+                <span>{channel.channel_icon ?? '#'}</span>
+                <span className="truncate">{channel.channel_name}</span>
+                {serverUnread.find((item) => item.channel_id === channel.channel_id)
+                  ?.mention_count ? (
+                  <span className="rounded-full bg-violet-500 px-1.5 text-[0.6rem] text-white">
+                    {
+                      serverUnread.find((item) => item.channel_id === channel.channel_id)
+                        ?.mention_count
+                    }
+                  </span>
+                ) : null}
+              </NavLink>
+            ))}
+            {canManageWorkspace ? (
+              <NavLink
+                className={({ isActive }) =>
+                  classNames(
+                    'flex min-h-9 shrink-0 items-center gap-2 rounded-xl px-3 text-xs',
+                    isActive ? 'bg-white/[0.1] text-white' : 'bg-white/[0.035] text-crypt-muted',
+                  )
+                }
+                to={`/app/servidores/${selectedServerId}/gerenciar`}
+              >
+                <Settings size={14} />
+                Organizar
+              </NavLink>
+            ) : null}
+          </nav>
+        ) : null}
+
         <div className="min-h-0 flex-1 overflow-y-auto pb-[4.75rem] lg:pb-0">
           <Outlet />
         </div>
+
+        {membersOpen && currentServer ? (
+          <aside
+            aria-label={`Membros de ${currentServer.server_name}`}
+            className="fixed bottom-[4.75rem] right-0 top-16 z-40 w-[min(20rem,92vw)] overflow-y-auto border-l border-white/10 bg-crypt-sidebar px-4 py-5 shadow-2xl 2xl:hidden"
+          >
+            <div className="flex items-center gap-3">
+              <p className="min-w-0 flex-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
+                Membros — {serverMembers.length}
+              </p>
+              <IconButton
+                icon={<X aria-hidden="true" size={17} />}
+                label="Fechar membros"
+                onClick={() => setMembersOpen(false)}
+                size="sm"
+              />
+            </div>
+            <ServerMemberGroups
+              assignments={serverMemberRoles}
+              members={serverMembers}
+              roles={serverRoles}
+            />
+          </aside>
+        ) : null}
 
         <nav
           aria-label="Navegação principal"
@@ -456,40 +619,11 @@ export function AppShell() {
           {currentServer ? `Membros — ${serverMembers.length}` : 'Servidores'}
         </p>
         {currentServer ? (
-          <div className="mt-4 grid gap-2">
-            {serverMembers.map((member) => (
-              <NavLink
-                className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-                key={member.profile_id}
-                to={`/app/pessoas/${member.handle}`}
-              >
-                <span className="relative">
-                  <ProfileAvatar
-                    avatarPath={member.avatar_path}
-                    displayName={member.display_name}
-                    size="sm"
-                  />
-                  <span
-                    className={classNames(
-                      'absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-crypt-sidebar',
-                      member.is_online ? 'bg-emerald-400' : 'bg-slate-500',
-                    )}
-                  />
-                </span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
-                    {member.display_name}
-                    {member.is_owner ? (
-                      <Crown aria-label="Proprietário" className="text-amber-300" size={12} />
-                    ) : null}
-                  </span>
-                  <span className="block truncate text-xs text-crypt-subtle">
-                    {member.is_online ? 'Online' : `@${member.handle}`}
-                  </span>
-                </span>
-              </NavLink>
-            ))}
-          </div>
+          <ServerMemberGroups
+            assignments={serverMemberRoles}
+            members={serverMembers}
+            roles={serverRoles}
+          />
         ) : (
           <div className="mt-4 rounded-2xl border border-dashed border-white/10 p-4 text-xs leading-5 text-crypt-subtle">
             Selecione um servidor para acompanhar os membros em tempo real.
@@ -502,4 +636,83 @@ export function AppShell() {
 
 function getServerIdFromPath(pathname: string) {
   return pathname.match(/^\/app\/servidores\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? null;
+}
+
+function getChannelIdFromPath(pathname: string) {
+  return pathname.match(/\/canais\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? null;
+}
+
+function ChannelNavigation({
+  categories,
+  channels,
+  serverId,
+  unread,
+}: {
+  categories: ServerCategory[];
+  channels: ServerChannel[];
+  serverId: string;
+  unread: ChannelUnread[];
+}) {
+  const groups: Array<{ id: string; label: string; values: ServerChannel[] }> = [
+    {
+      id: 'uncategorized',
+      label: 'Canais',
+      values: channels.filter((channel) => !channel.category_id),
+    },
+    ...categories.map((category) => ({
+      id: category.category_id,
+      label: category.category_name,
+      values: channels.filter((channel) => channel.category_id === category.category_id),
+    })),
+  ].filter((group) => group.values.length > 0);
+
+  return (
+    <div className="mt-7 grid gap-5">
+      {groups.map((group) => (
+        <div key={group.id}>
+          <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
+            {group.label}
+          </p>
+          <div className="mt-2 grid gap-1">
+            {group.values.map((channel) => {
+              const unreadState = unread.find((item) => item.channel_id === channel.channel_id);
+
+              return (
+                <NavLink
+                  className={({ isActive }) =>
+                    classNames(
+                      'flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-sm transition',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
+                      isActive
+                        ? 'bg-white/[0.09] font-medium text-white'
+                        : unreadState?.unread_count
+                          ? 'font-medium text-white hover:bg-white/[0.05]'
+                          : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
+                    )
+                  }
+                  key={channel.channel_id}
+                  to={`/app/servidores/${serverId}/canais/${channel.channel_id}`}
+                >
+                  <span aria-hidden="true" className="w-5 shrink-0 text-center">
+                    {channel.channel_icon ?? '#'}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{channel.channel_name}</span>
+                  {unreadState?.mention_count ? (
+                    <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-bold text-white">
+                      {Math.min(unreadState.mention_count, 99)}
+                    </span>
+                  ) : unreadState?.unread_count ? (
+                    <span
+                      aria-label={`${unreadState.unread_count} mensagens não lidas`}
+                      className="size-2 rounded-full bg-white"
+                    />
+                  ) : null}
+                </NavLink>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }

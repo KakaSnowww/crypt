@@ -8,9 +8,12 @@ describe('rotas do Crypt', () => {
     renderRoute('/app', { authValue: authenticatedAuthValue });
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Escolha onde a conversa começa' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Seus servidores agora têm conversas de verdade',
+      }),
     ).toBeVisible();
-    expect(screen.getByText('Fase 6 — servidores reais')).toBeVisible();
+    expect(screen.getByText('Fases 7 e 8 — entrega unificada')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Abrir meus servidores' })).toHaveAttribute(
       'href',
       '/app/servidores',
