@@ -76,6 +76,26 @@ export const ResetPasswordRoute = lazy(async () => {
   return { default: route.ResetPasswordRoute };
 });
 
+export const ServerInviteRoute = lazy(async () => {
+  const route = await import('../routes/ServerInviteRoute');
+  return { default: route.ServerInviteRoute };
+});
+
+export const ServerRoute = lazy(async () => {
+  const route = await import('../routes/ServerRoute');
+  return { default: route.ServerRoute };
+});
+
+export const ServersRoute = lazy(async () => {
+  const route = await import('../routes/ServersRoute');
+  return { default: route.ServersRoute };
+});
+
+export const ServerSettingsRoute = lazy(async () => {
+  const route = await import('../routes/ServerSettingsRoute');
+  return { default: route.ServerSettingsRoute };
+});
+
 export function LazyRoute({ children }: { children: ReactNode }) {
   return (
     <Suspense

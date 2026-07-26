@@ -1,4 +1,4 @@
-# Segurança — Fases 3 a 5
+# Segurança — Fases 3 a 6
 
 ## Fronteiras de confiança
 
@@ -89,8 +89,9 @@ denunciada não recebe acesso ao registro.
 Notificações são criadas dentro da mesma função que cria ou aceita o pedido e só o destinatário pode
 ler. O Realtime respeita essa RLS.
 
-Presença fica visível somente para o próprio usuário ou para amigos quando `show_online_status`
-estiver ativo. O status online expira na consulta após dois minutos sem heartbeat.
+Presença fica visível somente para o próprio usuário, amigos ou membros de um mesmo servidor quando
+`show_online_status` estiver ativo. O status online expira na consulta após dois minutos sem
+heartbeat.
 
 `can_start_direct_message` já centraliza bloqueios e `allow_direct_messages`. A futura fase de DMs
 deverá chamar essa função no banco antes de criar qualquer conversa.
@@ -107,6 +108,37 @@ indevida.
 Quando um avatar é substituído, o perfil aponta primeiro para o novo arquivo e o anterior é removido
 depois. Se a atualização do banco falhar, o upload novo é limpo.
 
+## Servidores, membros e convites
+
+As tabelas da Fase 6 não concedem escrita direta ao papel `authenticated`. O navegador chama RPCs
+`security definer` com `search_path` vazio.
+
+O banco impede:
+
+- ler servidor ou lista de membros sem associação;
+- inserir a si mesmo ou outra pessoa diretamente;
+- entrar com código inexistente, revogado, expirado ou esgotado;
+- consumir o mesmo convite acima do limite em requisições concorrentes;
+- entrar duas vezes;
+- entrar quando existe banimento;
+- sair enquanto proprietário;
+- transferir para alguém que não seja membro;
+- alterar ou excluir servidor sem propriedade;
+- excluir sem digitar o nome atual.
+
+O código do convite possui 144 bits aleatórios e não contém informação do servidor. A prévia
+retornada por um código válido contém somente identidade pública do servidor, proprietário, número
+de membros e restrições do convite.
+
+RLS permite ao membro ler a estrutura inicial e ao proprietário ou criador ler seus convites. O
+Realtime reutiliza as mesmas políticas.
+
+Ícone e banner usam o bucket `server-media`. A policy exige que o primeiro diretório seja o UUID de
+um servidor atualmente pertencente à sessão. A verificação passa por `can_manage_server_media`, que
+consulta somente UUID e proprietário com privilégios controlados, sem depender da RLS recursiva de
+`servers`. A função de configuração repete a validação do caminho antes de associá-lo à linha do
+servidor.
+
 ## Spotify
 
 O Crypt aceita somente uma URL de faixa em `open.spotify.com`, remove parâmetros de compartilhamento
@@ -119,8 +151,9 @@ player oficial. O Crypt não baixa, copia, transforma nem hospeda áudio.
 `EXCLUIR`. A chave administrativa existe somente na Edge Function.
 
 Antes de excluir `auth.users`, a função lista e remove os arquivos da pasta UUID no bucket
-`profile-media`. Depois, as relações `on delete cascade` removem perfil, configurações e seleções.
-Se a limpeza de mídia falhar, a exclusão é interrompida para não deixar arquivos órfãos.
+`profile-media` e as mídias de todos os servidores que ainda pertencem à conta. Depois, as relações
+`on delete cascade` removem perfil, configurações, seleções, associações e servidores pertencentes à
+conta. Se a limpeza de mídia falhar, a exclusão é interrompida para não deixar arquivos órfãos.
 
 ## Checklist
 
@@ -144,4 +177,11 @@ Se a limpeza de mídia falhar, a exclusão é interrompida para não deixar arqu
 - [ ] Sugestão explica somente fatos em comum.
 - [ ] Denúncia não fica visível para a pessoa denunciada.
 - [ ] Notificações aparecem sem F5 e somente para o destinatário.
+- [ ] Terceira conta não lê servidor nem membros sem convite.
+- [ ] Convite expirado, revogado ou esgotado não adiciona membro.
+- [ ] Entrada concorrente não ultrapassa o limite do convite.
+- [ ] Proprietário não sai antes de transferir ou excluir.
+- [ ] Transferência aceita somente outro membro.
+- [ ] Exclusão exige o nome atual do servidor.
+- [ ] Conta não envia mídia para a pasta de servidor alheio.
 - [ ] Testes pgTAP passam com três usuários.

@@ -21,6 +21,10 @@ import {
   PublicProfileRoute,
   RegisterRoute,
   ResetPasswordRoute,
+  ServerInviteRoute,
+  ServerRoute,
+  ServersRoute,
+  ServerSettingsRoute,
 } from './lazyRoutes';
 
 export const appRoutes: RouteObject[] = [
@@ -133,6 +137,38 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ProfileRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores',
+        element: (
+          <LazyRoute>
+            <ServersRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores/:serverId',
+        element: (
+          <LazyRoute>
+            <ServerRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores/:serverId/configuracoes',
+        element: (
+          <LazyRoute>
+            <ServerSettingsRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'convite/:code',
+        element: (
+          <LazyRoute>
+            <ServerInviteRoute />
           </LazyRoute>
         ),
       },

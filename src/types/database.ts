@@ -31,6 +31,28 @@ export type Database = {
         Args: { target_request_id: string };
         Returns: undefined;
       };
+      create_server: {
+        Args: {
+          server_description?: null | string;
+          server_name: string;
+        };
+        Returns: string;
+      };
+      create_server_invite: {
+        Args: {
+          expires_in_hours?: null | number;
+          invite_max_uses?: null | number;
+          target_server_id: string;
+        };
+        Returns: string;
+      };
+      delete_server: {
+        Args: {
+          confirmation_name: string;
+          target_server_id: string;
+        };
+        Returns: undefined;
+      };
       dismiss_friend_suggestion: {
         Args: {
           dismiss_permanently?: boolean;
@@ -110,6 +132,23 @@ export type Database = {
           profile_id: string;
         }>;
       };
+      get_my_servers: {
+        Args: NoArgs;
+        Returns: Array<{
+          banner_path: null | string;
+          created_at: string;
+          default_channel_id: null | string;
+          default_channel_name: null | string;
+          icon_path: null | string;
+          is_owner: boolean;
+          joined_at: string;
+          member_count: number;
+          owner_id: string;
+          server_description: null | string;
+          server_id: string;
+          server_name: string;
+        }>;
+      };
       get_public_profile_by_handle: {
         Args: { target_handle: string };
         Returns: Array<{
@@ -128,6 +167,68 @@ export type Database = {
           relationship_status: string;
         }>;
       };
+      get_server_invite_preview: {
+        Args: { invite_code: string };
+        Returns: Array<{
+          already_member: boolean;
+          banner_path: null | string;
+          expires_at: null | string;
+          icon_path: null | string;
+          member_count: number;
+          owner_display_name: string;
+          remaining_uses: null | number;
+          server_description: null | string;
+          server_id: string;
+          server_name: string;
+        }>;
+      };
+      get_server_invites: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          created_at: string;
+          created_by: string;
+          creator_display_name: string;
+          creator_handle: string;
+          expires_at: null | string;
+          invite_code: string;
+          invite_id: string;
+          max_uses: null | number;
+          uses_count: number;
+        }>;
+      };
+      get_server_members: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          avatar_path: null | string;
+          display_name: string;
+          handle: string;
+          is_online: boolean;
+          is_owner: boolean;
+          joined_at: string;
+          presence_status: string;
+          profile_id: string;
+        }>;
+      };
+      get_server_overview: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          banner_path: null | string;
+          created_at: string;
+          default_channel_id: null | string;
+          default_channel_name: null | string;
+          icon_path: null | string;
+          is_owner: boolean;
+          is_private: boolean;
+          member_count: number;
+          owner_display_name: string;
+          owner_handle: string;
+          owner_id: string;
+          server_description: null | string;
+          server_id: string;
+          server_name: string;
+          updated_at: string;
+        }>;
+      };
       has_block_between: {
         Args: { target_profile_id: string };
         Returns: boolean;
@@ -136,9 +237,29 @@ export type Database = {
         Args: { candidate_handle: string };
         Returns: boolean;
       };
+      is_server_member: {
+        Args: { target_server_id: string };
+        Returns: boolean;
+      };
+      is_server_owner: {
+        Args: { target_server_id: string };
+        Returns: boolean;
+      };
+      join_server_by_invite: {
+        Args: { invite_code: string };
+        Returns: string;
+      };
+      leave_server: {
+        Args: { target_server_id: string };
+        Returns: undefined;
+      };
       mark_connection_notifications_read: {
         Args: NoArgs;
         Returns: undefined;
+      };
+      normalize_server_name: {
+        Args: { input_value: string };
+        Returns: string;
       };
       remove_friend: {
         Args: { target_profile_id: string };
@@ -161,6 +282,10 @@ export type Database = {
           accept_request: boolean;
           target_request_id: string;
         };
+        Returns: undefined;
+      };
+      revoke_server_invite: {
+        Args: { target_invite_id: string };
         Returns: undefined;
       };
       search_profiles: {
@@ -194,8 +319,25 @@ export type Database = {
         };
         Returns: undefined;
       };
+      transfer_server_ownership: {
+        Args: {
+          new_owner_profile_id: string;
+          target_server_id: string;
+        };
+        Returns: undefined;
+      };
       unblock_profile: {
         Args: { target_profile_id: string };
+        Returns: undefined;
+      };
+      update_server_settings: {
+        Args: {
+          server_banner_path?: null | string;
+          server_description?: null | string;
+          server_icon_path?: null | string;
+          server_name: string;
+          target_server_id: string;
+        };
         Returns: undefined;
       };
     };
@@ -521,6 +663,233 @@ export type Database = {
           favorite_spotify_title?: null | string;
           favorite_spotify_url?: null | string;
           handle?: string;
+          updated_at?: string;
+        };
+      };
+      server_bans: {
+        Insert: {
+          banned_by?: null | string;
+          created_at?: string;
+          profile_id: string;
+          reason?: null | string;
+          server_id: string;
+        };
+        Relationships: [
+          {
+            columns: ['server_id'];
+            foreignKeyName: 'server_bans_server_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'servers';
+          },
+          {
+            columns: ['profile_id'];
+            foreignKeyName: 'server_bans_profile_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'profiles';
+          },
+          {
+            columns: ['banned_by'];
+            foreignKeyName: 'server_bans_banned_by_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'profiles';
+          },
+        ];
+        Row: {
+          banned_by: null | string;
+          created_at: string;
+          profile_id: string;
+          reason: null | string;
+          server_id: string;
+        };
+        Update: {
+          reason?: null | string;
+        };
+      };
+      server_channels: {
+        Insert: {
+          channel_type?: string;
+          created_at?: string;
+          created_by?: null | string;
+          id?: string;
+          name: string;
+          normalized_name: string;
+          position?: number;
+          server_id: string;
+        };
+        Relationships: [
+          {
+            columns: ['server_id'];
+            foreignKeyName: 'server_channels_server_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'servers';
+          },
+          {
+            columns: ['created_by'];
+            foreignKeyName: 'server_channels_created_by_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'profiles';
+          },
+        ];
+        Row: {
+          channel_type: string;
+          created_at: string;
+          created_by: null | string;
+          id: string;
+          name: string;
+          normalized_name: string;
+          position: number;
+          server_id: string;
+        };
+        Update: Record<never, never>;
+      };
+      server_invites: {
+        Insert: {
+          code: string;
+          created_at?: string;
+          created_by: string;
+          expires_at?: null | string;
+          id?: string;
+          max_uses?: null | number;
+          revoked_at?: null | string;
+          server_id: string;
+          uses_count?: number;
+        };
+        Relationships: [
+          {
+            columns: ['server_id'];
+            foreignKeyName: 'server_invites_server_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'servers';
+          },
+          {
+            columns: ['created_by'];
+            foreignKeyName: 'server_invites_created_by_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'profiles';
+          },
+        ];
+        Row: {
+          code: string;
+          created_at: string;
+          created_by: string;
+          expires_at: null | string;
+          id: string;
+          max_uses: null | number;
+          revoked_at: null | string;
+          server_id: string;
+          uses_count: number;
+        };
+        Update: {
+          revoked_at?: null | string;
+          uses_count?: number;
+        };
+      };
+      server_members: {
+        Insert: {
+          joined_at?: string;
+          profile_id: string;
+          server_id: string;
+        };
+        Relationships: [
+          {
+            columns: ['server_id'];
+            foreignKeyName: 'server_members_server_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'servers';
+          },
+          {
+            columns: ['profile_id'];
+            foreignKeyName: 'server_members_profile_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'profiles';
+          },
+        ];
+        Row: {
+          joined_at: string;
+          profile_id: string;
+          server_id: string;
+        };
+        Update: Record<never, never>;
+      };
+      server_roles: {
+        Insert: {
+          color?: null | string;
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          is_system?: boolean;
+          name: string;
+          position?: number;
+          server_id: string;
+        };
+        Relationships: [
+          {
+            columns: ['server_id'];
+            foreignKeyName: 'server_roles_server_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'servers';
+          },
+        ];
+        Row: {
+          color: null | string;
+          created_at: string;
+          id: string;
+          is_default: boolean;
+          is_system: boolean;
+          name: string;
+          position: number;
+          server_id: string;
+        };
+        Update: Record<never, never>;
+      };
+      servers: {
+        Insert: {
+          banner_path?: null | string;
+          created_at?: string;
+          description?: null | string;
+          icon_path?: null | string;
+          id?: string;
+          is_private?: boolean;
+          name: string;
+          owner_id: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            columns: ['owner_id'];
+            foreignKeyName: 'servers_owner_id_fkey';
+            isOneToOne: false;
+            referencedColumns: ['id'];
+            referencedRelation: 'profiles';
+          },
+        ];
+        Row: {
+          banner_path: null | string;
+          created_at: string;
+          description: null | string;
+          icon_path: null | string;
+          id: string;
+          is_private: boolean;
+          name: string;
+          owner_id: string;
+          updated_at: string;
+        };
+        Update: {
+          banner_path?: null | string;
+          description?: null | string;
+          icon_path?: null | string;
+          name?: string;
+          owner_id?: string;
           updated_at?: string;
         };
       };

@@ -1,5 +1,6 @@
-import { AtSign, Image, Plus, Send, Smile, Sparkles } from 'lucide-react';
+import { AtSign, Image, Plus, Send, Server, Smile, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { IconButton } from '../components/common/IconButton';
 import { useToast } from '../components/common/ToastContext';
@@ -45,14 +46,21 @@ export function AppHomeRoute() {
           <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-violet-950/40">
             <Sparkles aria-hidden="true" size={22} />
           </span>
-          <p className="eyebrow mt-7">Prévia visual — dados simulados</p>
+          <p className="eyebrow mt-7">Fase 6 — servidores reais</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Bem-vindo à Conversa Geral
+            Escolha onde a conversa começa
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Este é o ponto de encontro da comunidade. As mensagens abaixo existem apenas para
-            validar o layout nesta fase.
+            Servidores, membros e convites já usam o Supabase. As mensagens abaixo continuam como
+            prévia visual até a Fase 8.
           </p>
+          <Link
+            className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.07] px-4 text-sm font-semibold text-white transition hover:bg-white/[0.11]"
+            to="/app/servidores"
+          >
+            <Server aria-hidden="true" size={17} />
+            Abrir meus servidores
+          </Link>
         </section>
 
         <section aria-label="Prévia de mensagens" className="mt-8 grid gap-2">

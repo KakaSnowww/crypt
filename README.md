@@ -4,29 +4,26 @@ Plataforma social de comunidades, conversas, amizades e descoberta de pessoas po
 Crypt possui identidade visual própria em roxo e azul e está sendo construído em fases para web,
 Windows e Android.
 
-## Estado atual — Fase 5
+## Estado atual — Fase 6
 
-Além do perfil e onboarding entregues na Fase 4, esta fase adiciona:
+Além de perfil, onboarding e conexões entregues nas fases anteriores, esta fase adiciona:
 
-- busca exata ou parcial pelo `@`, limitada a 20 resultados;
-- perfis públicos sem e-mail ou configurações internas;
-- pedidos recebidos e enviados;
-- aceitar, recusar e cancelar pedidos;
-- amizade armazenada uma única vez em par canônico;
-- lista de amigos online e offline;
-- presença leve com expiração automática;
-- remover amizade, bloquear e desbloquear;
-- bloqueio válido nos dois sentidos para novas interações;
-- aba **Descobrir** com sugestões por interesses e amigos em comum;
-- pontuação transparente calculada somente no banco, sem IA;
-- explicações objetivas dos interesses compartilhados;
-- ignorar por 30 dias ou não sugerir novamente;
-- notificações de pedido novo e pedido aceito;
-- denúncia privada com motivo controlado e proteção contra repetição;
-- atualização por Realtime sem depender de F5;
-- preferências separadas para aparecer na busca e aceitar pedidos;
-- RLS e RPCs protegidas para todas as ações sociais;
-- 56 testes pgTAP da Fase 5 e testes de interface.
+- criação de servidores privados;
+- proprietário e lista real de membros online ou offline;
+- cargo de sistema `@everyone` criado automaticamente;
+- canal inicial **Conversa Geral** com UUID permanente;
+- entrada somente por convite validado no backend;
+- convites aleatórios com validade, limite de usos e revogação;
+- aceitar link completo ou somente o código do convite;
+- saída segura de membros;
+- proteção que impede o proprietário de sair sem transferir ou excluir;
+- configurações de nome, descrição, ícone e banner;
+- mídias armazenadas na pasta UUID do servidor;
+- transferência de propriedade somente para outro membro;
+- exclusão permanente com confirmação explícita pelo nome;
+- Realtime para servidores, membros e convites;
+- RLS sem escrita direta nas tabelas;
+- 83 testes pgTAP da Fase 6 e 41 testes de interface e domínio.
 
 ## Tecnologias
 
@@ -89,12 +86,18 @@ npx supabase migration list
 npm run supabase:db:push
 ```
 
-A migration da Fase 5 cria amizades, pedidos, bloqueios, sugestões, notificações, presença e todas
-as funções protegidas automaticamente. Não crie tabelas ou políticas manualmente no painel.
+A migration da Fase 6 cria servidores, membros, cargo padrão, canal inicial, convites, reserva de
+banimentos, bucket de mídia e todas as funções protegidas automaticamente. Não crie tabelas ou
+políticas manualmente no painel.
+
+A migration corretiva `20260726033000_phase6_server_media_rls_fix.sql` autoriza ícones e banners
+somente para o proprietário sem depender da leitura recursiva de `servers` dentro da policy do
+Storage.
 
 ## Edge Function da conta
 
-A função de exclusão agora também limpa as mídias do perfil e deve ser publicada novamente:
+A função de exclusão limpa as mídias do perfil e dos servidores pertencentes à conta. Publique a
+nova versão depois de aplicar a migration:
 
 ```powershell
 npx supabase secrets set "ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173"
@@ -116,6 +119,10 @@ Rotas principais:
 - `/auth/callback`
 - `/onboarding`
 - `/app`
+- `/app/servidores`
+- `/app/servidores/{uuid}`
+- `/app/servidores/{uuid}/configuracoes`
+- `/app/convite/{codigo}`
 - `/app/conexoes`
 - `/app/pessoas/@identificador`
 - `/app/perfil`
@@ -154,13 +161,14 @@ src/
 │   ├── auth/
 │   ├── connections/
 │   ├── onboarding/
-│   └── profile/
+│   ├── profile/
+│   └── servers/
 │       ├── components/
-│       ├── profile.errors.ts
-│       ├── profile.queries.ts
-│       ├── profile.schemas.ts
-│       ├── profile.service.ts
-│       └── profile.types.ts
+│       ├── servers.errors.ts
+│       ├── servers.queries.ts
+│       ├── servers.schemas.ts
+│       ├── servers.service.ts
+│       └── servers.types.ts
 ├── lib/
 ├── routes/
 └── types/
@@ -187,9 +195,15 @@ supabase/
 - score de sugestão nunca é enviado pelo cliente;
 - pessoas bloqueadas são removidas de pedidos, amizades, busca e sugestões;
 - a barreira `can_start_direct_message` já impede futuras DMs entre bloqueados.
+- servidor privado só pode ser lido por membros;
+- entrada exige convite existente, ativo, não expirado e com uso disponível;
+- cliente não insere membros, servidores ou convites diretamente;
+- transferência e exclusão verificam o proprietário dentro do banco;
+- ícone e banner só podem ser enviados pelo proprietário para a pasta UUID do servidor.
 
 Consulte [docs/security.md](docs/security.md), [docs/database.md](docs/database.md) e
-[docs/profile-onboarding.md](docs/profile-onboarding.md) e [docs/connections.md](docs/connections.md).
+[docs/profile-onboarding.md](docs/profile-onboarding.md), [docs/connections.md](docs/connections.md)
+e [docs/servers-members.md](docs/servers-members.md).
 
 ### Nota da auditoria
 
@@ -200,12 +214,14 @@ que não são usadas neste aplicativo SPA. Não execute `npm audit fix --force`.
 
 - o envio padrão de e-mails do Supabase é apropriado apenas para testes;
 - presença depende de a aplicação permanecer aberta e expira após dois minutos sem atividade;
-- servidores em comum entrarão na pontuação quando as comunidades existirem;
+- sugestões ainda usam interesses e amigos em comum; o peso de servidores em comum será conectado
+  junto da estrutura completa de canais e permissões;
 - a análise administrativa das denúncias será conectada na fase própria;
-- mensagens e comunidades continuam simuladas;
+- mensagens continuam simuladas;
+- categorias, novos canais, cargos personalizados e permissões entram na Fase 7;
 - publicação web, Windows e Android será feita em fases posteriores.
 
 ## Próxima fase
 
-A Fase 6 implementará servidores, convites, entrada, saída, membros, propriedade, transferência e
-exclusão. Ela só começa depois dos testes reais da Fase 5 com duas contas.
+A Fase 7 implementará categorias, canais de texto com nomes livres, ordenação, cargos, permissões e
+sobrescritas de acesso. Ela só começa depois dos testes reais da Fase 6 com duas contas.

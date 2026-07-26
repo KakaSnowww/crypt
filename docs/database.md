@@ -1,12 +1,14 @@
-# Banco de dados — Fases 3 a 5
+# Banco de dados — Fases 3 a 6
 
 ## Migrations
 
-| Ordem | Arquivo                                        | Responsabilidade                          |
-| ----- | ---------------------------------------------- | ----------------------------------------- |
-| 1     | `20260725143000_phase3_auth_profiles.sql`      | Auth, perfil mínimo e `@`                 |
-| 2     | `20260725200000_phase4_profile_onboarding.sql` | Perfil, interesses e Storage              |
-| 3     | `20260725223000_phase5_connections.sql`        | Amizades, sugestões, bloqueios e presença |
+| Ordem | Arquivo                                          | Responsabilidade                            |
+| ----- | ------------------------------------------------ | ------------------------------------------- |
+| 1     | `20260725143000_phase3_auth_profiles.sql`        | Auth, perfil mínimo e `@`                   |
+| 2     | `20260725200000_phase4_profile_onboarding.sql`   | Perfil, interesses e Storage                |
+| 3     | `20260725223000_phase5_connections.sql`          | Amizades, sugestões, bloqueios e presença   |
+| 4     | `20260726010000_phase6_servers_members.sql`      | Servidores, membros, convites e propriedade |
+| 5     | `20260726033000_phase6_server_media_rls_fix.sql` | Correção segura de ícones e banners         |
 
 As migrations são aplicadas somente pela CLI:
 
@@ -109,7 +111,8 @@ atomicamente pedidos pendentes e uma amizade existente.
 - `dismissed_friend_suggestions`: oculta por 30 dias ou permanentemente;
 - `connection_notifications`: pedido novo e pedido aceito, legíveis somente pelo destinatário;
 - `user_reports`: denúncia privada, com motivo controlado e limite de repetição em 24 horas;
-- `user_presence`: status e último sinal, visíveis somente para amigos quando autorizado.
+- `user_presence`: status e último sinal, visíveis somente para amigos ou membros de um mesmo
+  servidor quando autorizado.
 
 As funções `send_friend_request`, `respond_friend_request`, `cancel_friend_request`,
 `remove_friend`, `block_profile`, `unblock_profile` e `dismiss_friend_suggestion` derivam o autor de
@@ -125,6 +128,53 @@ As funções `send_friend_request`, `respond_friend_request`, `cancel_friend_req
 O cliente nunca envia score. Perfis já conectados, pendentes, bloqueados, não encontráveis,
 desativados ou descartados são removidos antes do resultado.
 
+## Servidores e membros
+
+### `servers`
+
+Cada comunidade possui UUID permanente, nome, descrição opcional, ícone, banner, proprietário,
+privacidade e datas. Servidores são privados na Fase 6. O navegador pode ler somente servidores dos
+quais a sessão é membro.
+
+### `server_members`
+
+A chave composta `(server_id, profile_id)` impede associação duplicada. O cliente não recebe
+`insert`, `update` ou `delete`: entrada e saída acontecem exclusivamente pelas funções protegidas.
+
+### Estrutura automática
+
+`create_server` executa na mesma transação:
+
+1. valida e cria o servidor;
+2. adiciona o proprietário como membro;
+3. cria o cargo de sistema `@everyone`;
+4. cria o canal de texto `Conversa Geral`.
+
+O canal já usa UUID permanente. Categorias, edição, ordenação e permissões serão adicionadas na Fase
+7 sem usar o nome visível como identificador.
+
+### Convites
+
+`server_invites` armazena código aleatório hexadecimal de 36 caracteres, criador, expiração
+opcional, limite opcional, usos e revogação. `join_server_by_invite` usa lock transacional e valida:
+
+- existência e formato;
+- revogação e expiração;
+- limite de usos;
+- banimento;
+- associação já existente.
+
+`server_bans` já existe como barreira de entrada, mas sua interface de moderação será exposta em uma
+fase posterior.
+
+### Propriedade
+
+- `leave_server` recusa a saída do proprietário;
+- `transfer_server_ownership` aceita somente outro membro atual;
+- `delete_server` exige o nome atual como confirmação;
+- `update_server_settings` aceita somente o proprietário e valida os caminhos de mídia;
+- todas as decisões derivam a pessoa atual de `auth.uid()`.
+
 ## Storage
 
 O bucket público `profile-media` guarda somente imagens de apresentação:
@@ -139,6 +189,19 @@ O arquivo é público para permitir avatar em perfis visíveis. A associação n
 o primeiro segmento de `avatar_path` seja igual ao UUID do perfil, impedindo apontar para o avatar
 de outra conta.
 
+O bucket público `server-media` guarda ícones e banners:
+
+- ícone de até 2 MB no cliente;
+- banner de até 5 MB;
+- MIME permitido: JPEG, PNG e WebP;
+- caminho `{server_id}/icon-{uuid}.ext` ou `{server_id}/banner-{uuid}.ext`;
+- somente o proprietário atual pode inserir ou excluir;
+- constraints impedem associar ao servidor um arquivo de outra pasta.
+
+A função `can_manage_server_media` verifica formato, UUID e proprietário com privilégios
+controlados. Assim, a policy do Storage não é bloqueada por uma segunda avaliação da RLS de
+`servers`.
+
 ## Testes
 
 - `profiles_rls.test.sql`: criação, identificador e proteção da Fase 3.
@@ -146,6 +209,8 @@ de outra conta.
   progresso e privilégios da Fase 4.
 - `connections_rls.test.sql`: pedidos, amizade canônica, bloqueios, sugestões, notificações,
   presença, busca, privacidade e acessos de terceiros da Fase 5.
+- `servers_members_rls.test.sql`: criação atômica, RLS, convites, entrada, saída, transferência e
+  exclusão com três usuários na Fase 6.
 
 Execute com Docker Desktop aberto:
 

@@ -1,16 +1,16 @@
 import {
   Bell,
   Compass,
+  Crown,
   Hash,
   Home,
   LogOut,
   Menu,
-  MessageCircle,
   Palette,
   Plus,
   Search,
+  Server as ServerGlyph,
   Settings,
-  Sparkles,
   UserRound,
   Users,
 } from 'lucide-react';
@@ -24,21 +24,16 @@ import {
 } from '../../features/connections/useConnectionsRealtime';
 import { ProfileAvatar } from '../../features/profile/components/ProfileAvatar';
 import { useCurrentProfile } from '../../features/profile/profile.queries';
+import { ServerIcon } from '../../features/servers/components/ServerIcon';
+import {
+  useMyServers,
+  useServerMembers,
+  useServerOverview,
+} from '../../features/servers/servers.queries';
+import { useServersRealtime } from '../../features/servers/useServersRealtime';
 import { classNames } from '../../lib/classNames';
 import { isSupabaseConfigured } from '../../lib/supabase/client';
 import { IconButton } from '../common/IconButton';
-
-const spaces = [
-  { color: 'from-violet-500 to-blue-500', label: 'Órbita do Snow', shortLabel: 'OS' },
-  { color: 'from-fuchsia-500 to-rose-500', label: 'Jogos e histórias', shortLabel: 'JH' },
-  { color: 'from-cyan-500 to-blue-500', label: 'Laboratório', shortLabel: 'LB' },
-] as const;
-
-const members = [
-  { color: 'bg-violet-500', name: 'Kaio Snow', status: 'Criando o Crypt' },
-  { color: 'bg-blue-500', name: 'Luna', status: 'Online' },
-  { color: 'bg-emerald-500', name: 'Theo', status: 'Explorando' },
-] as const;
 
 const channelLinks = [
   {
@@ -46,6 +41,12 @@ const channelLinks = [
     icon: Hash,
     label: 'Conversa Geral',
     to: '/app',
+  },
+  {
+    end: false,
+    icon: ServerGlyph,
+    label: 'Servidores',
+    to: '/app/servidores',
   },
   {
     end: false,
@@ -72,14 +73,20 @@ export function AppShell() {
   const location = useLocation();
   const { addToast } = useToast();
   const { signOut, user } = useAuth();
-  const profileQuery = useCurrentProfile(
-    user?.id ?? null,
-    isSupabaseConfigured() && import.meta.env.MODE !== 'test',
-  );
-  const connectionsEnabled = isSupabaseConfigured() && import.meta.env.MODE !== 'test';
-  const notificationsQuery = useConnectionNotifications(connectionsEnabled);
+  const selectedServerId = getServerIdFromPath(location.pathname);
+  const appDataEnabled = isSupabaseConfigured() && import.meta.env.MODE !== 'test';
+  const profileQuery = useCurrentProfile(user?.id ?? null, appDataEnabled);
+  const serversQuery = useMyServers(appDataEnabled);
+  const serverOverviewQuery = useServerOverview(selectedServerId, appDataEnabled);
+  const serverMembersQuery = useServerMembers(selectedServerId, appDataEnabled);
+  const notificationsQuery = useConnectionNotifications(appDataEnabled);
   useConnectionsRealtime(user?.id ?? null);
   usePresenceHeartbeat(user?.id ?? null);
+  useServersRealtime(user?.id ?? null, selectedServerId);
+  const currentServer =
+    serverOverviewQuery.data ??
+    serversQuery.data?.find((server) => server.server_id === selectedServerId);
+  const serverMembers = serverMembersQuery.data ?? [];
   const unreadNotifications =
     notificationsQuery.data?.filter((notification) => !notification.read_at).length ?? 0;
   const displayName =
@@ -91,41 +98,65 @@ export function AppShell() {
     profileQuery.data?.handle ??
     (typeof user?.user_metadata.handle === 'string' ? user.user_metadata.handle : undefined);
   const identityLabel = handle ? `@${handle}` : user?.email;
-  const pageHeader = location.pathname.startsWith('/app/conexoes')
-    ? {
-        description: 'Amigos, pedidos e pessoas para conhecer',
-        icon: Users,
-        title: 'Conexões',
-      }
-    : location.pathname.startsWith('/app/pessoas/')
+  const pageHeader = location.pathname.startsWith('/app/servidores/')
+    ? location.pathname.endsWith('/configuracoes')
       ? {
-          description: 'Perfil público e informações compartilhadas',
-          icon: UserRound,
-          title: 'Perfil',
+          description: 'Identidade, propriedade e exclusão segura',
+          icon: Settings,
+          title: 'Configurações do servidor',
         }
-      : location.pathname.startsWith('/app/perfil/editar')
+      : {
+          description: 'Canal inicial, membros e convites',
+          icon: ServerGlyph,
+          title: currentServer?.server_name ?? 'Servidor',
+        }
+    : location.pathname.startsWith('/app/servidores')
+      ? {
+          description: 'Crie ou entre em comunidades privadas',
+          icon: ServerGlyph,
+          title: 'Servidores',
+        }
+      : location.pathname.startsWith('/app/convite/')
         ? {
-            description: 'Avatar, interesses, privacidade e música',
-            icon: Settings,
-            title: 'Editar perfil',
+            description: 'Validação segura antes de entrar',
+            icon: UserRound,
+            title: 'Convite',
           }
-        : location.pathname.startsWith('/app/perfil')
+        : location.pathname.startsWith('/app/conexoes')
           ? {
-              description: 'Sua identidade e as escolhas que você decidiu compartilhar',
-              icon: UserRound,
-              title: 'Meu perfil',
+              description: 'Amigos, pedidos e pessoas para conhecer',
+              icon: Users,
+              title: 'Conexões',
             }
-          : location.pathname.startsWith('/app/conta')
+          : location.pathname.startsWith('/app/pessoas/')
             ? {
-                description: 'Sessão, senha e exclusão da conta',
-                icon: Settings,
-                title: 'Conta e segurança',
+                description: 'Perfil público e informações compartilhadas',
+                icon: UserRound,
+                title: 'Perfil',
               }
-            : {
-                description: 'Ideias, novidades e conversas da comunidade',
-                icon: Hash,
-                title: 'Conversa Geral',
-              };
+            : location.pathname.startsWith('/app/perfil/editar')
+              ? {
+                  description: 'Avatar, interesses, privacidade e música',
+                  icon: Settings,
+                  title: 'Editar perfil',
+                }
+              : location.pathname.startsWith('/app/perfil')
+                ? {
+                    description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+                    icon: UserRound,
+                    title: 'Meu perfil',
+                  }
+                : location.pathname.startsWith('/app/conta')
+                  ? {
+                      description: 'Sessão, senha e exclusão da conta',
+                      icon: Settings,
+                      title: 'Conta e segurança',
+                    }
+                  : {
+                      description: 'Seu ponto de partida no Crypt',
+                      icon: Home,
+                      title: 'Início',
+                    };
   const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
@@ -153,30 +184,30 @@ export function AppShell() {
         </NavLink>
         <div className="my-4 h-px w-8 bg-white/10" />
         <div className="grid gap-3">
-          {spaces.map((space, index) => (
-            <button
-              aria-label={space.label}
-              className={classNames(
-                'group relative grid size-11 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br text-xs font-bold text-white shadow-lg transition',
-                'hover:rounded-xl focus-visible:rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
-                space.color,
-              )}
-              key={space.label}
-              type="button"
+          {(serversQuery.data ?? []).map((server) => (
+            <NavLink
+              aria-label={server.server_name}
+              className="group relative rounded-2xl transition hover:rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+              key={server.server_id}
+              to={`/app/servidores/${server.server_id}`}
             >
-              {space.shortLabel}
-              {index === 0 ? (
-                <span className="absolute -left-2 h-6 w-1 rounded-r-full bg-white" />
-              ) : null}
-            </button>
+              {({ isActive }) => (
+                <>
+                  <ServerIcon iconPath={server.icon_path} name={server.server_name} size="sm" />
+                  {isActive ? (
+                    <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white" />
+                  ) : null}
+                </>
+              )}
+            </NavLink>
           ))}
-          <button
-            aria-label="Criar espaço"
+          <NavLink
+            aria-label="Criar servidor"
             className="grid size-11 place-items-center rounded-2xl border border-dashed border-white/15 text-crypt-muted transition hover:rounded-xl hover:border-violet-400/40 hover:bg-violet-500/10 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-            type="button"
+            to="/app/servidores?criar=1"
           >
             <Plus aria-hidden="true" size={18} />
-          </button>
+          </NavLink>
         </div>
         <div className="mt-auto">
           <NavLink
@@ -190,17 +221,65 @@ export function AppShell() {
       </aside>
 
       <aside
-        aria-label="Canais de Órbita do Snow"
+        aria-label={currentServer ? `Canais de ${currentServer.server_name}` : 'Navegação do Crypt'}
         className="hidden border-r border-white/5 bg-crypt-sidebar lg:flex lg:min-h-dvh lg:flex-col"
       >
         <div className="border-b border-white/5 px-4 py-4">
-          <p className="text-xs font-medium text-violet-300">Espaço atual</p>
-          <h1 className="mt-1 truncate font-semibold text-white">Órbita do Snow</h1>
+          <p className="text-xs font-medium text-violet-300">
+            {currentServer ? 'Servidor atual' : 'Navegação'}
+          </p>
+          <h1 className="mt-1 truncate font-semibold text-white">
+            {currentServer?.server_name ?? 'Crypt'}
+          </h1>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5">
-          <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-            Conversas
+          {currentServer && selectedServerId ? (
+            <>
+              <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
+                Canais
+              </p>
+              <div className="mt-2 grid gap-1">
+                <NavLink
+                  className={({ isActive }) =>
+                    classNames(
+                      'flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
+                      isActive
+                        ? 'bg-white/[0.09] font-medium text-white'
+                        : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
+                    )
+                  }
+                  end
+                  to={`/app/servidores/${selectedServerId}`}
+                >
+                  <Hash aria-hidden="true" size={17} />
+                  <span>{currentServer.default_channel_name ?? 'Conversa Geral'}</span>
+                </NavLink>
+                {currentServer.is_owner ? (
+                  <NavLink
+                    className={({ isActive }) =>
+                      classNames(
+                        'flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition',
+                        isActive
+                          ? 'bg-white/[0.09] font-medium text-white'
+                          : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
+                      )
+                    }
+                    to={`/app/servidores/${selectedServerId}/configuracoes`}
+                  >
+                    <Settings aria-hidden="true" size={17} />
+                    <span>Configurações</span>
+                  </NavLink>
+                ) : null}
+              </div>
+            </>
+          ) : null}
+
+          <p
+            className={`${currentServer ? 'mt-7' : ''} px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle`}
+          >
+            Crypt
           </p>
           <div className="mt-2 grid gap-1">
             {channelLinks.map((channel) => {
@@ -231,22 +310,13 @@ export function AppShell() {
           <p className="mt-7 px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
             Descoberta
           </p>
-          <div className="mt-2 grid gap-1">
-            <NavLink
-              className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              to="/app/conexoes?aba=discover"
-            >
-              <Compass aria-hidden="true" size={17} />
-              Descobrir pessoas
-            </NavLink>
-            <NavLink
-              className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              to="/app/perfil/editar"
-            >
-              <Sparkles aria-hidden="true" size={17} />
-              Interesses
-            </NavLink>
-          </div>
+          <NavLink
+            className="mt-2 flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+            to="/app/conexoes?aba=discover"
+          >
+            <Compass aria-hidden="true" size={17} />
+            Descobrir pessoas
+          </NavLink>
         </nav>
 
         <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-3">
@@ -333,19 +403,24 @@ export function AppShell() {
                 isActive ? 'text-violet-200' : 'text-crypt-subtle',
               )
             }
+            to="/app/servidores"
+          >
+            <ServerGlyph aria-hidden="true" size={19} />
+            Servidores
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              classNames(
+                'grid min-h-12 place-items-center gap-0.5 rounded-xl text-[0.65rem] font-medium',
+                isActive ? 'text-violet-200' : 'text-crypt-subtle',
+              )
+            }
             end
             to="/app"
           >
             <Home aria-hidden="true" size={19} />
-            Conversas
+            Início
           </NavLink>
-          <button
-            className="grid min-h-12 place-items-center gap-0.5 rounded-xl text-[0.65rem] font-medium text-crypt-subtle"
-            type="button"
-          >
-            <MessageCircle aria-hidden="true" size={19} />
-            Mensagens
-          </button>
           <NavLink
             className={({ isActive }) =>
               classNames(
@@ -374,40 +449,57 @@ export function AppShell() {
       </section>
 
       <aside
-        aria-label="Membros online"
+        aria-label={currentServer ? `Membros de ${currentServer.server_name}` : 'Painel contextual'}
         className="hidden border-l border-white/5 bg-crypt-sidebar px-4 py-5 2xl:block"
       >
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-          Online — {members.length}
+          {currentServer ? `Membros — ${serverMembers.length}` : 'Servidores'}
         </p>
-        <div className="mt-4 grid gap-2">
-          {members.map((member) => (
-            <button
-              className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              key={member.name}
-              type="button"
-            >
-              <span
-                className={classNames(
-                  'relative grid size-9 shrink-0 place-items-center rounded-xl text-xs font-bold text-white',
-                  member.color,
-                )}
+        {currentServer ? (
+          <div className="mt-4 grid gap-2">
+            {serverMembers.map((member) => (
+              <NavLink
+                className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+                key={member.profile_id}
+                to={`/app/pessoas/${member.handle}`}
               >
-                {member.name
-                  .split(' ')
-                  .map((part) => part[0])
-                  .join('')
-                  .slice(0, 2)}
-                <span className="absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-crypt-sidebar bg-emerald-400" />
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-white">{member.name}</span>
-                <span className="block truncate text-xs text-crypt-subtle">{member.status}</span>
-              </span>
-            </button>
-          ))}
-        </div>
+                <span className="relative">
+                  <ProfileAvatar
+                    avatarPath={member.avatar_path}
+                    displayName={member.display_name}
+                    size="sm"
+                  />
+                  <span
+                    className={classNames(
+                      'absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-crypt-sidebar',
+                      member.is_online ? 'bg-emerald-400' : 'bg-slate-500',
+                    )}
+                  />
+                </span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
+                    {member.display_name}
+                    {member.is_owner ? (
+                      <Crown aria-label="Proprietário" className="text-amber-300" size={12} />
+                    ) : null}
+                  </span>
+                  <span className="block truncate text-xs text-crypt-subtle">
+                    {member.is_online ? 'Online' : `@${member.handle}`}
+                  </span>
+                </span>
+              </NavLink>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 rounded-2xl border border-dashed border-white/10 p-4 text-xs leading-5 text-crypt-subtle">
+            Selecione um servidor para acompanhar os membros em tempo real.
+          </div>
+        )}
       </aside>
     </div>
   );
+}
+
+function getServerIdFromPath(pathname: string) {
+  return pathname.match(/^\/app\/servidores\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? null;
 }

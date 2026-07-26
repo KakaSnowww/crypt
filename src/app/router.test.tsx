@@ -4,13 +4,17 @@ import { describe, expect, it } from 'vitest';
 import { authenticatedAuthValue, renderRoute } from '../test/renderRoute';
 
 describe('rotas do Crypt', () => {
-  it('abre a prévia da conversa principal', async () => {
+  it('abre o início com acesso aos servidores', async () => {
     renderRoute('/app', { authValue: authenticatedAuthValue });
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Bem-vindo à Conversa Geral' }),
+      await screen.findByRole('heading', { level: 1, name: 'Escolha onde a conversa começa' }),
     ).toBeVisible();
-    expect(screen.getByText('Prévia visual — dados simulados')).toBeVisible();
+    expect(screen.getByText('Fase 6 — servidores reais')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Abrir meus servidores' })).toHaveAttribute(
+      'href',
+      '/app/servidores',
+    );
   });
 
   it('protege a área privada quando não existe sessão', async () => {

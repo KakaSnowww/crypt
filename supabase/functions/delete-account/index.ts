@@ -127,6 +127,47 @@ Deno.serve(async (request) => {
     },
   });
 
+  const { data: ownedServers, error: ownedServersError } = await adminClient
+    .from('servers')
+    .select('id')
+    .eq('owner_id', user.id)
+    .limit(1000);
+
+  if (ownedServersError) {
+    console.error('delete-account: owned servers listing failed');
+    return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+  }
+
+  for (const server of ownedServers) {
+    const { data: serverMedia, error: listServerMediaError } = await adminClient.storage
+      .from('server-media')
+      .list(server.id, {
+        limit: 1000,
+        sortBy: {
+          column: 'name',
+          order: 'asc',
+        },
+      });
+
+    if (listServerMediaError) {
+      console.error('delete-account: server media listing failed');
+      return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+    }
+
+    const serverMediaPaths = serverMedia.map((object) => `${server.id}/${object.name}`);
+
+    if (serverMediaPaths.length > 0) {
+      const { error: removeServerMediaError } = await adminClient.storage
+        .from('server-media')
+        .remove(serverMediaPaths);
+
+      if (removeServerMediaError) {
+        console.error('delete-account: server media removal failed');
+        return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+      }
+    }
+  }
+
   const { data: profileMedia, error: listMediaError } = await adminClient.storage
     .from('profile-media')
     .list(user.id, {

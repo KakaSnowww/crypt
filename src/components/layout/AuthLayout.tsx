@@ -63,7 +63,7 @@ export function AuthLayout() {
 
         <p className="relative flex items-center gap-2 text-xs text-crypt-subtle">
           <CheckCircle2 aria-hidden="true" size={15} />
-          Fase 5 — amizades, descoberta e privacidade
+          Fase 6 — servidores, membros e convites
         </p>
       </section>
 
