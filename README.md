@@ -3,9 +3,18 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 9
+## Estado atual — Fase 10
 
-Além das fases anteriores, a Fase 9 adiciona:
+Além das fases anteriores, a Fase 10 adiciona:
+
+- expulsões e banimentos protegidos por hierarquia;
+- remoção de ban sem restaurar associação automaticamente;
+- denúncias internas privadas;
+- caixa de moderação;
+- auditoria administrativa imutável para o cliente;
+- preferências de moderação do servidor;
+
+A Fase 9 adicionou:
 
 - mensagens privadas individuais;
 - abertura pelo perfil e lista de conversas recentes;
@@ -33,7 +42,8 @@ As Fases 7–8 já oferecem:
 - até três anexos privados por mensagem, com 5 MB por arquivo;
 - limpeza de anexos ao excluir mensagem, servidor ou conta;
 - RLS, RPCs protegidas e isolamento de canais por permissão;
-- 62 verificações pgTAP das Fases 7–8, 44 da Fase 9 e 53 testes de interface e domínio.
+- 62 verificações pgTAP das Fases 7–8, 44 da Fase 9, 42 da Fase 10 e 55 testes de
+  interface e domínio.
 
 ## Tecnologias
 
@@ -91,7 +101,8 @@ As migrations novas são:
 2. `20260726060000_phase8_channel_messages.sql`;
 3. `20260726210000_phase78_role_hierarchy_order.sql`;
 4. `20260726230000_phase9_direct_messages.sql`;
-5. `20260726233000_phase9_direct_attachments_rls_fix.sql`.
+5. `20260726233000_phase9_direct_attachments_rls_fix.sql`;
+6. `20260727010000_phase10_moderation_settings.sql`.
 
 Elas criam tabelas, funções, índices, buckets, policies, publicação Realtime e a movimentação segura
 da hierarquia de cargos. Não crie esses recursos manualmente no painel.
@@ -203,5 +214,4 @@ RSC, que não são usadas neste aplicativo SPA. Não execute `npm audit fix --fo
 
 ## Próxima fase
 
-A Fase 10 implementará moderação e configurações avançadas: auditoria, expulsões, banimentos,
-denúncias e preferências administrativas.
+A Fase 11 implementará voz e vídeo com LiveKit e emissão protegida de tokens.

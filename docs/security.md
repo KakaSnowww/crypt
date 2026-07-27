@@ -236,4 +236,8 @@ interrompida.
 - [ ] Terceira conta não lista nem consulta a DM entre outras duas pessoas.
 - [ ] Fechar uma DM não apaga o histórico e afeta somente a própria lista.
 - [ ] Política de novas DMs é aplicada no banco.
+- [ ] Moderador não expulsa, bane ou altera o dono.
+- [ ] Hierarquia impede moderação de cargo igual ou superior.
+- [ ] Membro comum não abre denúncias ou auditoria pela URL direta.
+- [ ] Cliente não insere, edita ou apaga registros de auditoria.
 - [ ] Testes pgTAP passam com três usuários.

@@ -1,4 +1,4 @@
-# Banco de dados — Fases 3 a 9
+# Banco de dados — Fases 3 a 10
 
 ## Migrations
 
@@ -13,6 +13,8 @@
 | 7     | `20260726060000_phase8_channel_messages.sql`           | Mensagens, anexos, leitura e Realtime       |
 | 8     | `20260726210000_phase78_role_hierarchy_order.sql`      | Ordenação segura da hierarquia de cargos    |
 | 9     | `20260726230000_phase9_direct_messages.sql`            | DMs, privacidade, anexos e leitura          |
+| 10    | `20260726233000_phase9_direct_attachments_rls_fix.sql` | Correção de leitura dos anexos privados     |
+| 11    | `20260727010000_phase10_moderation_settings.sql`       | Moderação, denúncias e auditoria            |
 
 As migrations são aplicadas somente pela CLI:
 

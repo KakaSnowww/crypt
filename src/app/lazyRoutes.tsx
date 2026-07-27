@@ -116,6 +116,11 @@ export const ServerManageRoute = lazy(async () => {
   return { default: route.ServerManageRoute };
 });
 
+export const ServerModerationRoute = lazy(async () => {
+  const route = await import('../routes/ServerModerationRoute');
+  return { default: route.ServerModerationRoute };
+});
+
 export function LazyRoute({ children }: { children: ReactNode }) {
   return (
     <Suspense

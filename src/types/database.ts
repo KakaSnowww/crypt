@@ -15,6 +15,18 @@ export type Database = {
         Args: { target_profile_id: string };
         Returns: undefined;
       };
+      ban_server_member: {
+        Args: {
+          moderation_reason?: null | string;
+          target_profile_id: string;
+          target_server_id: string;
+        };
+        Returns: undefined;
+      };
+      can_moderate_server_member: {
+        Args: { target_profile_id: string; target_server_id: string };
+        Returns: boolean;
+      };
       can_start_direct_message: {
         Args: { target_profile_id: string };
         Returns: boolean;
@@ -354,6 +366,58 @@ export type Database = {
         Args: { target_server_id: string };
         Returns: Array<{ profile_id: string; role_ids: string[] }>;
       };
+      get_server_audit_logs: {
+        Args: { result_limit?: number; target_server_id: string };
+        Returns: Array<{
+          action: string;
+          actor_display_name: null | string;
+          actor_handle: null | string;
+          audit_id: number;
+          created_at: string;
+          metadata: Json;
+          reason: null | string;
+          target_display_name: null | string;
+          target_handle: null | string;
+        }>;
+      };
+      get_server_bans: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          avatar_path: null | string;
+          banned_by_display_name: null | string;
+          created_at: string;
+          display_name: string;
+          handle: string;
+          profile_id: string;
+          reason: null | string;
+        }>;
+      };
+      get_server_moderation_settings: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          allow_member_reports: boolean;
+          notify_moderators_on_report: boolean;
+          require_ban_reason: boolean;
+          updated_at: string;
+        }>;
+      };
+      get_server_reports: {
+        Args: { report_status?: string; target_server_id: string };
+        Returns: Array<{
+          created_at: string;
+          details: null | string;
+          reason: string;
+          report_id: string;
+          reported_display_name: string;
+          reported_handle: string;
+          reported_profile_id: string;
+          reporter_display_name: string;
+          reporter_handle: string;
+          resolution_note: null | string;
+          resolved_at: null | string;
+          status: string;
+        }>;
+      };
       get_server_message_attachment_paths: {
         Args: { target_server_id: string };
         Returns: string[];
@@ -453,6 +517,14 @@ export type Database = {
         Args: NoArgs;
         Returns: undefined;
       };
+      kick_server_member: {
+        Args: {
+          moderation_reason?: null | string;
+          target_profile_id: string;
+          target_server_id: string;
+        };
+        Returns: undefined;
+      };
       mark_channel_read: {
         Args: {
           target_channel_id: string;
@@ -495,6 +567,23 @@ export type Database = {
           target_profile_id: string;
         };
         Returns: string;
+      };
+      report_server_member: {
+        Args: {
+          report_details?: null | string;
+          report_reason: string;
+          target_profile_id: string;
+          target_server_id: string;
+        };
+        Returns: string;
+      };
+      resolve_server_report: {
+        Args: {
+          resolution_details?: null | string;
+          resolution_status: string;
+          target_report_id: string;
+        };
+        Returns: undefined;
       };
       replace_my_interests: {
         Args: { selected_interest_ids: number[] };
@@ -606,6 +695,23 @@ export type Database = {
       };
       unblock_profile: {
         Args: { target_profile_id: string };
+        Returns: undefined;
+      };
+      unban_server_member: {
+        Args: {
+          moderation_reason?: null | string;
+          target_profile_id: string;
+          target_server_id: string;
+        };
+        Returns: undefined;
+      };
+      update_server_moderation_settings: {
+        Args: {
+          ban_reason_required: boolean;
+          report_notifications_enabled: boolean;
+          reports_enabled: boolean;
+          target_server_id: string;
+        };
         Returns: undefined;
       };
       update_server_settings: {

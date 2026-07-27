@@ -26,6 +26,7 @@ import {
   ResetPasswordRoute,
   ServerInviteRoute,
   ServerManageRoute,
+  ServerModerationRoute,
   ServerRoute,
   ServersRoute,
   ServerSettingsRoute,
@@ -189,6 +190,14 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ServerManageRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores/:serverId/moderacao',
+        element: (
+          <LazyRoute>
+            <ServerModerationRoute />
           </LazyRoute>
         ),
       },

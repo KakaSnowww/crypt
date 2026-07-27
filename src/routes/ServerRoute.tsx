@@ -2,7 +2,9 @@ import {
   CalendarClock,
   Copy,
   Crown,
+  Flag,
   Hash,
+  Gavel,
   Link2,
   LogOut,
   MessageCircle,
@@ -18,7 +20,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
+import { Textarea } from '../components/common/Textarea';
 import { useToast } from '../components/common/ToastContext';
+import { useModerationActions } from '../features/moderation/useModerationActions';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { ServerIcon } from '../features/servers/components/ServerIcon';
 import { toServerActionError } from '../features/servers/servers.errors';
@@ -29,7 +33,8 @@ import {
 } from '../features/servers/servers.queries';
 import { getServerMediaUrl } from '../features/servers/servers.service';
 import { useServerActions } from '../features/servers/useServerActions';
-import { useServerChannels } from '../features/workspace/workspace.queries';
+import { hasPermission, serverPermission } from '../features/workspace/workspace.permissions';
+import { useMyServerPermissions, useServerChannels } from '../features/workspace/workspace.queries';
 
 const expirationOptions = [
   { label: '1 hora', value: '1' },
@@ -55,17 +60,23 @@ export function ServerRoute() {
   const membersQuery = useServerMembers(serverId);
   const invitesQuery = useServerInvites(serverId);
   const actions = useServerActions();
+  const moderationActions = useModerationActions(serverId);
   const channelsQuery = useServerChannels(serverId);
+  const permissionsQuery = useMyServerPermissions(serverId);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [expiration, setExpiration] = useState('168');
   const [maxUses, setMaxUses] = useState('unlimited');
   const [createdCode, setCreatedCode] = useState<string>();
+  const [reportTarget, setReportTarget] = useState<null | { id: string; name: string }>(null);
+  const [reportReason, setReportReason] = useState('harassment');
+  const [reportDetails, setReportDetails] = useState('');
 
   if (
     overviewQuery.isPending ||
     membersQuery.isPending ||
     invitesQuery.isPending ||
-    channelsQuery.isPending
+    channelsQuery.isPending ||
+    permissionsQuery.isPending
   ) {
     return (
       <div aria-label="Carregando servidor" className="grid min-h-72 place-items-center">
@@ -75,6 +86,9 @@ export function ServerRoute() {
   }
 
   const overview = overviewQuery.data;
+  const canModerate =
+    Boolean(overview?.is_owner) ||
+    hasPermission(permissionsQuery.data ?? 0, serverPermission.manageMembers);
 
   if (overviewQuery.error || !overview) {
     return (
@@ -174,6 +188,15 @@ export function ServerRoute() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2 pb-1">
+              {canModerate ? (
+                <Button
+                  leadingIcon={<Gavel aria-hidden="true" size={16} />}
+                  onClick={() => void navigate(`/app/servidores/${serverId}/moderacao`)}
+                  variant="secondary"
+                >
+                  Moderação
+                </Button>
+              ) : null}
               {overview.is_owner ? (
                 <>
                   <Button
@@ -396,37 +419,111 @@ export function ServerRoute() {
           </div>
           <div className="mt-4 grid gap-2">
             {members.map((member) => (
-              <Link
-                className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-white/[0.05]"
-                key={member.profile_id}
-                to={`/app/pessoas/${member.handle}`}
-              >
-                <span className="relative">
-                  <ProfileAvatar
-                    avatarPath={member.avatar_path}
-                    displayName={member.display_name}
-                    size="sm"
-                  />
-                  <span
-                    className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-crypt-panel ${
-                      member.is_online ? 'bg-emerald-400' : 'bg-slate-500'
-                    }`}
-                  />
-                </span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
-                    {member.display_name}
-                    {member.is_owner ? (
-                      <Crown aria-label="Proprietário" className="text-amber-300" size={13} />
-                    ) : null}
+              <div className="flex items-center gap-1 rounded-xl" key={member.profile_id}>
+                <Link
+                  className="flex min-w-0 flex-1 items-center gap-3 p-2 transition hover:bg-white/[0.05]"
+                  to={`/app/pessoas/${member.handle}`}
+                >
+                  <span className="relative">
+                    <ProfileAvatar
+                      avatarPath={member.avatar_path}
+                      displayName={member.display_name}
+                      size="sm"
+                    />
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-crypt-panel ${
+                        member.is_online ? 'bg-emerald-400' : 'bg-slate-500'
+                      }`}
+                    />
                   </span>
-                  <span className="block truncate text-xs text-crypt-subtle">@{member.handle}</span>
-                </span>
-              </Link>
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
+                      {member.display_name}
+                      {member.is_owner ? (
+                        <Crown aria-label="Proprietário" className="text-amber-300" size={13} />
+                      ) : null}
+                    </span>
+                    <span className="block truncate text-xs text-crypt-subtle">
+                      @{member.handle}
+                    </span>
+                  </span>
+                </Link>
+                {!member.is_owner ? (
+                  <button
+                    aria-label={`Denunciar ${member.display_name}`}
+                    className="rounded-lg p-2 text-crypt-subtle hover:bg-red-500/10 hover:text-red-300"
+                    onClick={() =>
+                      setReportTarget({ id: member.profile_id, name: member.display_name })
+                    }
+                    type="button"
+                  >
+                    <Flag aria-hidden="true" size={15} />
+                  </button>
+                ) : null}
+              </div>
             ))}
           </div>
         </aside>
       </div>
+
+      <Modal
+        description="A denúncia ficará visível apenas para a equipe de moderação deste servidor."
+        footer={
+          <>
+            <Button onClick={() => setReportTarget(null)} variant="ghost">
+              Cancelar
+            </Button>
+            <Button
+              loading={moderationActions.report.isPending}
+              onClick={() => {
+                if (!reportTarget) return;
+                void moderationActions.report
+                  .mutateAsync({
+                    details: reportDetails,
+                    profileId: reportTarget.id,
+                    reason: reportReason,
+                  })
+                  .then(() => {
+                    setReportTarget(null);
+                    setReportDetails('');
+                    addToast({ message: 'Denúncia enviada à moderação.', tone: 'success' });
+                  });
+              }}
+            >
+              Enviar denúncia
+            </Button>
+          </>
+        }
+        onOpenChange={(open) => !open && setReportTarget(null)}
+        open={Boolean(reportTarget)}
+        title={`Denunciar ${reportTarget?.name ?? 'membro'}`}
+      >
+        <label className="grid gap-2 text-sm font-medium text-white">
+          Motivo
+          <select
+            className="min-h-11 rounded-2xl border border-white/10 bg-crypt-elevated px-3"
+            onChange={(event) => setReportReason(event.target.value)}
+            value={reportReason}
+          >
+            <option value="harassment">Assédio</option>
+            <option value="spam">Spam</option>
+            <option value="inappropriate_content">Conteúdo impróprio</option>
+            <option value="impersonation">Falsidade ideológica</option>
+            <option value="other">Outro</option>
+          </select>
+        </label>
+        <div className="mt-4">
+          <Textarea
+            label="Detalhes"
+            maxLength={1000}
+            onChange={(event) => setReportDetails(event.target.value)}
+            value={reportDetails}
+          />
+        </div>
+        {moderationActions.report.error ? (
+          <p className="mt-3 text-xs text-red-300">{moderationActions.report.error.message}</p>
+        ) : null}
+      </Modal>
 
       <Modal
         description="Você perderá acesso ao conteúdo privado. Para retornar, precisará de outro convite."
