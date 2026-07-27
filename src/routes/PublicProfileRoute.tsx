@@ -2,6 +2,7 @@ import {
   Ban,
   CalendarDays,
   Check,
+  MessageCircle,
   ShieldCheck,
   Sparkles,
   UserMinus,
@@ -10,7 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
@@ -22,16 +23,19 @@ import {
   useSentFriendRequests,
 } from '../features/connections/connections.queries';
 import { useConnectionActions } from '../features/connections/useConnectionActions';
+import { useDirectMessageActions } from '../features/directMessages/useDirectMessageActions';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { SpotifyEmbed } from '../features/profile/components/SpotifyEmbed';
 
 export function PublicProfileRoute() {
+  const navigate = useNavigate();
   const { handle = '' } = useParams();
   const normalizedHandle = handle.replace(/^@/, '').toLocaleLowerCase('en-US');
   const profileQuery = usePublicConnectionProfile(normalizedHandle);
   const receivedQuery = useReceivedFriendRequests();
   const sentQuery = useSentFriendRequests();
   const actions = useConnectionActions();
+  const directActions = useDirectMessageActions();
   const [confirmation, setConfirmation] = useState<'block' | 'remove'>();
   const [reportOpen, setReportOpen] = useState(false);
   const actionError =
@@ -186,6 +190,16 @@ export function PublicProfileRoute() {
     }
   }
 
+  async function startDirectMessage() {
+    const conversationId = await directActions.open
+      .mutateAsync(profile.profile_id)
+      .catch(() => null);
+
+    if (conversationId) {
+      void navigate(`/app/mensagens/${conversationId}`);
+    }
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       <section className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-crypt-panel shadow-2xl shadow-black/20">
@@ -227,6 +241,14 @@ export function PublicProfileRoute() {
               {primaryActions()}
               {profile.relationship_status !== 'self' ? (
                 <>
+                  <Button
+                    leadingIcon={<MessageCircle aria-hidden="true" size={16} />}
+                    loading={directActions.open.isPending}
+                    onClick={() => void startDirectMessage()}
+                    variant="secondary"
+                  >
+                    Mensagem
+                  </Button>
                   <Button
                     leadingIcon={<Ban aria-hidden="true" size={16} />}
                     onClick={() => setConfirmation('block')}

@@ -3,9 +3,22 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fases 7 e 8
+## Estado atual — Fase 9
 
-Além de autenticação, perfil, onboarding, conexões e servidores, a entrega unificada adiciona:
+Além das fases anteriores, a Fase 9 adiciona:
+
+- mensagens privadas individuais;
+- abertura pelo perfil e lista de conversas recentes;
+- privacidade para qualquer pessoa, amigos, servidor compartilhado ou ninguém;
+- bloqueios aplicados no banco;
+- histórico paginado, resposta, edição, exclusão e reações;
+- anexos privados com URL assinada;
+- não lidas, leitura, digitação e Realtime;
+- fechar conversa sem apagar o histórico;
+- isolamento por RLS contra uma terceira conta;
+- estrutura preparada para grupos futuros, sem habilitá-los nesta fase.
+
+As Fases 7–8 já oferecem:
 
 - categorias e canais de texto persistidos;
 - nomes com espaços, maiúsculas, acentos e emojis, mantendo UUID como identificador;
@@ -20,7 +33,7 @@ Além de autenticação, perfil, onboarding, conexões e servidores, a entrega u
 - até três anexos privados por mensagem, com 5 MB por arquivo;
 - limpeza de anexos ao excluir mensagem, servidor ou conta;
 - RLS, RPCs protegidas e isolamento de canais por permissão;
-- 62 verificações pgTAP próprias das Fases 7–8 e 50 testes de interface e domínio.
+- 62 verificações pgTAP das Fases 7–8, 44 da Fase 9 e 53 testes de interface e domínio.
 
 ## Tecnologias
 
@@ -76,7 +89,9 @@ As migrations novas são:
 
 1. `20260726050000_phase7_channels_roles_permissions.sql`;
 2. `20260726060000_phase8_channel_messages.sql`;
-3. `20260726210000_phase78_role_hierarchy_order.sql`.
+3. `20260726210000_phase78_role_hierarchy_order.sql`;
+4. `20260726230000_phase9_direct_messages.sql`;
+5. `20260726233000_phase9_direct_attachments_rls_fix.sql`.
 
 Elas criam tabelas, funções, índices, buckets, policies, publicação Realtime e a movimentação segura
 da hierarquia de cargos. Não crie esses recursos manualmente no painel.
@@ -108,6 +123,8 @@ Rotas principais:
 - `/app/servidores/{uuid}/configuracoes`
 - `/app/convite/{codigo}`
 - `/app/conexoes`
+- `/app/mensagens`
+- `/app/mensagens/{uuid-da-conversa}`
 - `/app/pessoas/@identificador`
 - `/app/perfil`, `/app/perfil/editar`, `/app/conta`
 
@@ -159,7 +176,7 @@ supabase/
 - conteúdo é renderizado como texto, nunca como HTML;
 - anexos usam bucket privado, caminho com UUIDs e URLs assinadas de 15 minutos;
 - modo lento, somente leitura, resposta e menções são validados no banco;
-- bloqueios continuam impedindo futuras mensagens diretas;
+- bloqueios impedem mensagens, reações e anexos em DMs;
 - segredos administrativos ficam somente na Edge Function.
 
 Consulte:
@@ -170,6 +187,7 @@ Consulte:
 - [docs/connections.md](docs/connections.md)
 - [docs/servers-members.md](docs/servers-members.md)
 - [docs/channels-messages.md](docs/channels-messages.md)
+- [docs/direct-messages.md](docs/direct-messages.md)
 
 ### Nota da auditoria
 
@@ -181,10 +199,9 @@ RSC, que não são usadas neste aplicativo SPA. Não execute `npm audit fix --fo
 - o envio padrão de e-mails do Supabase é apropriado apenas para testes;
 - presença depende de a aplicação permanecer aberta;
 - busca global no histórico ainda não foi adicionada;
-- mensagens diretas ainda não foram adicionadas;
 - moderação completa, publicação web, Windows e Android ficam para fases posteriores.
 
 ## Próxima fase
 
-A Fase 9 implementará mensagens diretas entre amigos, reutilizando a barreira de privacidade e
-bloqueios já existente.
+A Fase 10 implementará moderação e configurações avançadas: auditoria, expulsões, banimentos,
+denúncias e preferências administrativas.

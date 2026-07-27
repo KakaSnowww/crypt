@@ -49,11 +49,6 @@ const toggleFields: Array<{
     label: 'Permitir pedidos de amizade',
   },
   {
-    description: 'Controlará novas conversas diretas na fase de mensagens privadas.',
-    field: 'allow_direct_messages',
-    label: 'Permitir mensagens privadas',
-  },
-  {
     description: 'Permite mostrar quando você estiver online, ausente ou ocupado.',
     field: 'show_online_status',
     label: 'Mostrar status online',
@@ -80,8 +75,8 @@ export function PrivacySettingsForm({
   const { user } = useAuth();
   const form = useForm<PrivacyFormValues>({
     defaultValues: {
-      allow_direct_messages: settings.allow_direct_messages,
       allow_friend_requests: settings.allow_friend_requests,
+      direct_message_policy: settings.direct_message_policy,
       discoverable_by_search: settings.discoverable_by_search,
       hide_all_interests: settings.hide_all_interests,
       show_interests_on_profile: settings.show_interests_on_profile,
@@ -123,6 +118,23 @@ export function PrivacySettingsForm({
         })(event)
       }
     >
+      <label className="grid gap-2 rounded-2xl border border-white/8 bg-white/[0.025] p-4">
+        <span className="text-sm font-medium text-white">
+          Quem pode iniciar uma mensagem privada
+        </span>
+        <span className="text-xs leading-5 text-crypt-subtle">
+          A escolha vale para novas conversas. Bloqueios sempre impedem o envio.
+        </span>
+        <select
+          className="mt-1 min-h-11 rounded-xl border border-white/10 bg-crypt-elevated px-3 text-sm text-white outline-none focus:border-violet-400"
+          {...form.register('direct_message_policy')}
+        >
+          <option value="anyone">Qualquer pessoa</option>
+          <option value="friends">Somente amigos</option>
+          <option value="shared_servers">Amigos ou membros do mesmo servidor</option>
+          <option value="none">Não permitir novas conversas</option>
+        </select>
+      </label>
       {toggleFields.map((item) => (
         <Toggle
           checked={Boolean(watchedValues[item.field])}

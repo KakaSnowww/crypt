@@ -4,7 +4,7 @@ import type { ChannelMessageRow } from './messages.types';
 
 export const messageKeys = {
   all: ['messages'] as const,
-  attachment: (path: string) => ['messages', 'attachment', path] as const,
+  attachment: (bucket: string, path: string) => ['messages', 'attachment', bucket, path] as const,
   channel: (channelId: string) => ['messages', 'channel', channelId] as const,
 };
 
@@ -30,10 +30,10 @@ export function useChannelMessages(channelId: string, enabled = true) {
   });
 }
 
-export function useAttachmentSignedUrl(path: string) {
+export function useAttachmentSignedUrl(path: string, bucket = 'message-attachments') {
   return useQuery({
-    queryFn: () => createAttachmentSignedUrl(path),
-    queryKey: messageKeys.attachment(path),
+    queryFn: () => createAttachmentSignedUrl(path, bucket),
+    queryKey: messageKeys.attachment(bucket, path),
     staleTime: 12 * 60 * 1000,
   });
 }

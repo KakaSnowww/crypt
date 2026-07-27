@@ -4,6 +4,7 @@ import {
   MAX_AVATAR_BYTES,
   parseSpotifyTrackUrl,
   profileDetailsSchema,
+  privacySchema,
   validateAvatarFile,
 } from './profile.schemas';
 
@@ -58,5 +59,28 @@ describe('validação do perfil', () => {
         }),
       ),
     ).toThrow(ProfileActionError);
+  });
+
+  it('aceita somente as quatro políticas previstas para novas DMs', () => {
+    const base = {
+      allow_friend_requests: true,
+      discoverable_by_search: true,
+      hide_all_interests: false,
+      show_interests_on_profile: true,
+      show_mutual_friends: true,
+      show_mutual_servers: true,
+      show_online_status: true,
+      use_interests_for_suggestions: true,
+    };
+
+    expect(
+      ['anyone', 'friends', 'shared_servers', 'none'].every(
+        (direct_message_policy) =>
+          privacySchema.safeParse({ ...base, direct_message_policy }).success,
+      ),
+    ).toBe(true);
+    expect(
+      privacySchema.safeParse({ ...base, direct_message_policy: 'servidor_desconhecido' }).success,
+    ).toBe(false);
   });
 });

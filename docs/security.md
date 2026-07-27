@@ -84,7 +84,7 @@ Denúncias aceitam somente motivos controlados e até 500 caracteres opcionais. 
 e a janela de 24 horas impedem repetição imediata. Somente o autor lê a própria denúncia; a pessoa
 denunciada não recebe acesso ao registro.
 
-## Notificações, presença e futuras DMs
+## Notificações, presença e mensagens privadas
 
 Notificações são criadas dentro da mesma função que cria ou aceita o pedido e só o destinatário pode
 ler. O Realtime respeita essa RLS.
@@ -93,8 +93,9 @@ Presença fica visível somente para o próprio usuário, amigos ou membros de u
 `show_online_status` estiver ativo. O status online expira na consulta após dois minutos sem
 heartbeat.
 
-`can_start_direct_message` já centraliza bloqueios e `allow_direct_messages`. A futura fase de DMs
-deverá chamar essa função no banco antes de criar qualquer conversa.
+`can_start_direct_message` centraliza bloqueios e a política de novas DMs: qualquer pessoa, somente
+amigos, amigos ou servidor compartilhado, ou ninguém. Conversas existentes permanecem no histórico,
+mas `can_send_direct_message` impede mensagens, reações e anexos enquanto houver bloqueio.
 
 ## Avatar e Storage
 
@@ -163,6 +164,19 @@ Realtime não substitui autorização: eventos Postgres continuam sob RLS e cada
 funções protegidas. O Broadcast de digitação transmite somente UUID e nome de exibição, nunca o
 conteúdo digitado.
 
+## Isolamento das mensagens privadas
+
+Uma DM possui uma chave canônica única para o par, evitando conversas duplicadas. Participação é
+armazenada separadamente para permitir fechar a conversa apenas da própria lista e preparar grupos
+futuros sem habilitá-los.
+
+Uma terceira conta não lê conversa, participantes, mensagens, reações ou anexos, mesmo conhecendo
+todos os UUIDs. As tabelas concedem somente leitura condicionada por RLS; escrita ocorre por RPCs
+com `auth.uid()` validado novamente.
+
+O bucket `direct-message-attachments` é privado. A leitura exige participação e a exclusão exige
+que o UUID do autor no caminho seja o da sessão. A interface recebe apenas URLs assinadas curtas.
+
 ## Spotify
 
 O Crypt aceita somente uma URL de faixa em `open.spotify.com`, remove parâmetros de compartilhamento
@@ -174,10 +188,11 @@ player oficial. O Crypt não baixa, copia, transforma nem hospeda áudio.
 `delete-account` continua validando origem, Publishable key, JWT, senha atual no frontend e a palavra
 `EXCLUIR`. A chave administrativa existe somente na Edge Function.
 
-Antes de excluir `auth.users`, a função remove os arquivos de `profile-media`, anexos enviados pela
-conta, anexos dos servidores pertencentes a ela e suas mídias. Depois, as relações
-`on delete cascade` removem perfil, configurações, seleções, associações e servidores. Se a limpeza
-falhar, a exclusão é interrompida.
+Antes de excluir `auth.users`, a função remove os arquivos de `profile-media`, anexos das DMs,
+anexos enviados pela conta, anexos dos servidores pertencentes a ela e suas mídias. Depois, as
+relações `on delete cascade` removem perfil, configurações, seleções, associações e servidores. Uma
+DM individual com participante excluído também é removida. Se a limpeza falhar, a exclusão é
+interrompida.
 
 ## Checklist
 
@@ -197,7 +212,7 @@ falhar, a exclusão é interrompida.
 - [ ] Terceira conta não lê pedidos ou amizades.
 - [ ] Terceira conta não enumera a tabela de perfis.
 - [ ] Bloqueado some da busca e das sugestões.
-- [ ] Bloqueado não envia pedido nem inicia futura DM.
+- [ ] Bloqueado não envia pedido, mensagem, reação ou anexo em DM.
 - [ ] Sugestão explica somente fatos em comum.
 - [ ] Denúncia não fica visível para a pessoa denunciada.
 - [ ] Notificações aparecem sem F5 e somente para o destinatário.
@@ -218,4 +233,7 @@ falhar, a exclusão é interrompida.
 - [ ] Anexo usa bucket privado e URL assinada.
 - [ ] Exclusão de mensagem, servidor e conta limpa anexos privados.
 - [ ] Não lidas e menções são calculadas somente em canais visíveis.
+- [ ] Terceira conta não lista nem consulta a DM entre outras duas pessoas.
+- [ ] Fechar uma DM não apaga o histórico e afeta somente a própria lista.
+- [ ] Política de novas DMs é aplicada no banco.
 - [ ] Testes pgTAP passam com três usuários.

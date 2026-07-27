@@ -26,6 +26,16 @@ export const DesignSystemRoute = lazy(async () => {
   return { default: route.DesignSystemRoute };
 });
 
+export const DirectConversationRoute = lazy(async () => {
+  const route = await import('../routes/DirectConversationRoute');
+  return { default: route.DirectConversationRoute };
+});
+
+export const DirectMessagesRoute = lazy(async () => {
+  const route = await import('../routes/DirectMessagesRoute');
+  return { default: route.DirectMessagesRoute };
+});
+
 export const ConnectionsRoute = lazy(async () => {
   const route = await import('../routes/ConnectionsRoute');
   return { default: route.ConnectionsRoute };

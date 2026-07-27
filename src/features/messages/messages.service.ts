@@ -141,10 +141,8 @@ export async function markChannelRead(channelId: string, messageId: null | strin
   }
 }
 
-export async function createAttachmentSignedUrl(path: string) {
-  const { data, error } = await getSupabaseClient()
-    .storage.from(MESSAGE_ATTACHMENTS_BUCKET)
-    .createSignedUrl(path, 900);
+export async function createAttachmentSignedUrl(path: string, bucket = MESSAGE_ATTACHMENTS_BUCKET) {
+  const { data, error } = await getSupabaseClient().storage.from(bucket).createSignedUrl(path, 900);
 
   if (error) {
     throw toMessageActionError(error);

@@ -12,6 +12,8 @@ import {
   ChannelRoute,
   ConnectionsRoute,
   DesignSystemRoute,
+  DirectConversationRoute,
+  DirectMessagesRoute,
   ForgotPasswordRoute,
   LazyRoute,
   LoginRoute,
@@ -131,6 +133,22 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ConnectionsRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'mensagens',
+        element: (
+          <LazyRoute>
+            <DirectMessagesRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'mensagens/:conversationId',
+        element: (
+          <LazyRoute>
+            <DirectConversationRoute />
           </LazyRoute>
         ),
       },

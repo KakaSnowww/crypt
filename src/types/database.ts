@@ -76,6 +76,10 @@ export type Database = {
         Args: { target_message_id: string };
         Returns: string[];
       };
+      delete_direct_message: {
+        Args: { target_message_id: string };
+        Returns: string[];
+      };
       delete_server: {
         Args: {
           confirmation_name: string;
@@ -152,6 +156,33 @@ export type Database = {
           server_id: string;
         }>;
       };
+      get_direct_messages: {
+        Args: {
+          before_created_at?: null | string;
+          before_message_id?: null | string;
+          result_limit?: number;
+          target_conversation_id: string;
+        };
+        Returns: Array<{
+          attachment_summary: Json;
+          author_avatar_path: null | string;
+          author_display_name: string;
+          author_handle: string;
+          author_id: null | string;
+          can_delete: boolean;
+          can_edit: boolean;
+          content: null | string;
+          conversation_id: string;
+          created_at: string;
+          deleted_at: null | string;
+          edited_at: null | string;
+          message_id: string;
+          reaction_summary: Json;
+          reply_author_display_name: null | string;
+          reply_content: null | string;
+          reply_to_id: null | string;
+        }>;
+      };
       get_friend_requests: {
         Args: { request_direction: string };
         Returns: Array<{
@@ -208,6 +239,22 @@ export type Database = {
           mutual_friend_count: number;
           presence_status: string;
           profile_id: string;
+        }>;
+      };
+      get_my_direct_conversations: {
+        Args: NoArgs;
+        Returns: Array<{
+          conversation_id: string;
+          is_blocked: boolean;
+          is_online: boolean;
+          last_message_at: string;
+          last_message_author_id: null | string;
+          last_message_preview: string;
+          other_avatar_path: null | string;
+          other_display_name: string;
+          other_handle: string;
+          other_profile_id: string;
+          unread_count: number;
         }>;
       };
       get_my_servers: {
@@ -413,6 +460,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      mark_direct_conversation_read: {
+        Args: { target_conversation_id: string };
+        Returns: undefined;
+      };
       move_server_category: {
         Args: { direction: number; target_category_id: string };
         Returns: undefined;
@@ -427,6 +478,10 @@ export type Database = {
       };
       normalize_server_name: {
         Args: { input_value: string };
+        Returns: string;
+      };
+      open_direct_conversation: {
+        Args: { target_profile_id: string };
         Returns: string;
       };
       remove_friend: {
@@ -487,6 +542,15 @@ export type Database = {
         };
         Returns: string;
       };
+      send_direct_message: {
+        Args: {
+          attachment_items?: Json;
+          message_content: string;
+          target_conversation_id: string;
+          target_reply_id?: null | string;
+        };
+        Returns: string;
+      };
       set_server_member_roles: {
         Args: {
           target_profile_id: string;
@@ -510,6 +574,10 @@ export type Database = {
         Args: { next_status: string };
         Returns: undefined;
       };
+      hide_direct_conversation: {
+        Args: { target_conversation_id: string };
+        Returns: undefined;
+      };
       set_profile_interests: {
         Args: {
           category_slug: string;
@@ -525,6 +593,10 @@ export type Database = {
         Returns: undefined;
       };
       toggle_message_reaction: {
+        Args: { reaction_emoji: string; target_message_id: string };
+        Returns: boolean;
+      };
+      toggle_direct_message_reaction: {
         Args: { reaction_emoji: string; target_message_id: string };
         Returns: boolean;
       };
@@ -570,6 +642,10 @@ export type Database = {
           role_permissions: number;
           target_role_id: string;
         };
+        Returns: undefined;
+      };
+      edit_direct_message: {
+        Args: { new_content: string; target_message_id: string };
         Returns: undefined;
       };
       edit_channel_message: {
@@ -805,6 +881,7 @@ export type Database = {
           allow_direct_messages?: boolean;
           allow_friend_requests?: boolean;
           created_at?: string;
+          direct_message_policy?: 'anyone' | 'friends' | 'none' | 'shared_servers';
           discoverable_by_search?: boolean;
           hide_all_interests?: boolean;
           onboarding_completed_at?: null | string;
@@ -830,6 +907,7 @@ export type Database = {
           allow_direct_messages: boolean;
           allow_friend_requests: boolean;
           created_at: string;
+          direct_message_policy: 'anyone' | 'friends' | 'none' | 'shared_servers';
           discoverable_by_search: boolean;
           hide_all_interests: boolean;
           onboarding_completed_at: null | string;
@@ -845,6 +923,7 @@ export type Database = {
         Update: {
           allow_direct_messages?: boolean;
           allow_friend_requests?: boolean;
+          direct_message_policy?: 'anyone' | 'friends' | 'none' | 'shared_servers';
           discoverable_by_search?: boolean;
           hide_all_interests?: boolean;
           onboarding_completed_at?: null | string;

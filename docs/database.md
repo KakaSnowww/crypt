@@ -1,4 +1,4 @@
-# Banco de dados — Fases 3 a 8
+# Banco de dados — Fases 3 a 9
 
 ## Migrations
 
@@ -12,6 +12,7 @@
 | 6     | `20260726050000_phase7_channels_roles_permissions.sql` | Canais, cargos e permissões                 |
 | 7     | `20260726060000_phase8_channel_messages.sql`           | Mensagens, anexos, leitura e Realtime       |
 | 8     | `20260726210000_phase78_role_hierarchy_order.sql`      | Ordenação segura da hierarquia de cargos    |
+| 9     | `20260726230000_phase9_direct_messages.sql`            | DMs, privacidade, anexos e leitura          |
 
 As migrations são aplicadas somente pela CLI:
 
@@ -247,6 +248,19 @@ O bucket `message-attachments` é privado:
 - delete exige ser uploader ou possuir `Gerenciar mensagens`;
 - a interface usa URL assinada de 15 minutos.
 
+## Mensagens privadas
+
+`direct_conversations` representa o contêiner e mantém uma chave única para cada par.
+`direct_conversation_participants` registra participantes, fechamento individual e última leitura.
+`direct_messages`, `direct_message_reactions` e `direct_message_attachments` armazenam o histórico.
+
+`open_direct_conversation` reutiliza o par existente e valida a política somente ao criar uma nova
+DM. `get_direct_messages` exige participação e pagina por `(created_at, id)`. Uma terceira pessoa
+não consulta o histórico mesmo conhecendo o UUID.
+
+O bucket `direct-message-attachments` é privado, aceita os mesmos seis MIME seguros e usa caminho
+`{conversation_id}/{auth.uid()}/{uuid}.{ext}`. Leitura exige participação; exclusão exige autoria.
+
 ## Testes
 
 - `profiles_rls.test.sql`: criação, identificador e proteção da Fase 3.
@@ -258,6 +272,8 @@ O bucket `message-attachments` é privado:
   exclusão com três usuários na Fase 6.
 - `workspace_messages_rls.test.sql`: categorias, nomes livres, cargos, hierarquia, mensagens,
   reações, leitura, anexos e isolamento com três usuários nas Fases 7–8.
+- `direct_messages_rls.test.sql`: privacidade, histórico, bloqueio, leitura, fechamento, anexos e
+  isolamento obrigatório da terceira pessoa na Fase 9.
 
 Execute com Docker Desktop aberto:
 

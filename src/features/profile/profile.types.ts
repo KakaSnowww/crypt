@@ -18,8 +18,8 @@ export type SpotifyTrackPreview = {
 
 export type PrivacyValues = Pick<
   ProfileSettings,
-  | 'allow_direct_messages'
   | 'allow_friend_requests'
+  | 'direct_message_policy'
   | 'hide_all_interests'
   | 'show_interests_on_profile'
   | 'show_mutual_friends'

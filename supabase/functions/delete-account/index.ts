@@ -127,6 +127,26 @@ Deno.serve(async (request) => {
     },
   });
 
+  const { data: directAttachmentPaths, error: directAttachmentsError } = await userClient.rpc(
+    'get_my_direct_attachment_paths',
+  );
+
+  if (directAttachmentsError) {
+    console.error('delete-account: direct attachment listing failed');
+    return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+  }
+
+  if (directAttachmentPaths.length > 0) {
+    const { error: removeDirectAttachmentsError } = await adminClient.storage
+      .from('direct-message-attachments')
+      .remove([...new Set(directAttachmentPaths)]);
+
+    if (removeDirectAttachmentsError) {
+      console.error('delete-account: direct attachment removal failed');
+      return jsonResponse(origin, 500, { error: 'media_cleanup_failed' });
+    }
+  }
+
   const { data: authoredAttachments, error: authoredAttachmentsError } = await adminClient
     .from('message_attachments')
     .select('storage_path')

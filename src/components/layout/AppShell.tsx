@@ -5,6 +5,7 @@ import {
   Home,
   LogOut,
   Menu,
+  MessageCircle,
   Palette,
   Plus,
   Search,
@@ -23,6 +24,8 @@ import {
   useConnectionsRealtime,
   usePresenceHeartbeat,
 } from '../../features/connections/useConnectionsRealtime';
+import { useDirectConversations } from '../../features/directMessages/directMessages.queries';
+import { useDirectListRealtime } from '../../features/directMessages/useDirectMessagesRealtime';
 import { ProfileAvatar } from '../../features/profile/components/ProfileAvatar';
 import { useCurrentProfile } from '../../features/profile/profile.queries';
 import { ServerIcon } from '../../features/servers/components/ServerIcon';
@@ -72,6 +75,12 @@ const channelLinks = [
   },
   {
     end: false,
+    icon: MessageCircle,
+    label: 'Mensagens',
+    to: '/app/mensagens',
+  },
+  {
+    end: false,
     icon: Users,
     label: 'Conexões',
     to: '/app/conexoes',
@@ -103,7 +112,9 @@ export function AppShell() {
   const serverPermissionsQuery = useMyServerPermissions(selectedServerId, appDataEnabled);
   const serverUnreadQuery = useServerUnreadCounts(selectedServerId, appDataEnabled);
   const notificationsQuery = useConnectionNotifications(appDataEnabled);
+  const directConversationsQuery = useDirectConversations(appDataEnabled);
   useConnectionsRealtime(user?.id ?? null);
+  useDirectListRealtime(user?.id ?? null);
   usePresenceHeartbeat(user?.id ?? null);
   useServersRealtime(user?.id ?? null, selectedServerId);
   const currentServer =
@@ -122,6 +133,10 @@ export function AppShell() {
     hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageRoles);
   const unreadNotifications =
     notificationsQuery.data?.filter((notification) => !notification.read_at).length ?? 0;
+  const unreadDirectMessages = (directConversationsQuery.data ?? []).reduce(
+    (total, conversation) => total + conversation.unread_count,
+    0,
+  );
   const displayName =
     profileQuery.data?.display_name ??
     (typeof user?.user_metadata.display_name === 'string'
@@ -173,41 +188,47 @@ export function AppShell() {
             icon: UserRound,
             title: 'Convite',
           }
-        : location.pathname.startsWith('/app/conexoes')
+        : location.pathname.startsWith('/app/mensagens')
           ? {
-              description: 'Amigos, pedidos e pessoas para conhecer',
-              icon: Users,
-              title: 'Conexões',
+              description: 'Conversas individuais protegidas',
+              icon: MessageCircle,
+              title: 'Mensagens privadas',
             }
-          : location.pathname.startsWith('/app/pessoas/')
+          : location.pathname.startsWith('/app/conexoes')
             ? {
-                description: 'Perfil público e informações compartilhadas',
-                icon: UserRound,
-                title: 'Perfil',
+                description: 'Amigos, pedidos e pessoas para conhecer',
+                icon: Users,
+                title: 'Conexões',
               }
-            : location.pathname.startsWith('/app/perfil/editar')
+            : location.pathname.startsWith('/app/pessoas/')
               ? {
-                  description: 'Avatar, interesses, privacidade e música',
-                  icon: Settings,
-                  title: 'Editar perfil',
+                  description: 'Perfil público e informações compartilhadas',
+                  icon: UserRound,
+                  title: 'Perfil',
                 }
-              : location.pathname.startsWith('/app/perfil')
+              : location.pathname.startsWith('/app/perfil/editar')
                 ? {
-                    description: 'Sua identidade e as escolhas que você decidiu compartilhar',
-                    icon: UserRound,
-                    title: 'Meu perfil',
+                    description: 'Avatar, interesses, privacidade e música',
+                    icon: Settings,
+                    title: 'Editar perfil',
                   }
-                : location.pathname.startsWith('/app/conta')
+                : location.pathname.startsWith('/app/perfil')
                   ? {
-                      description: 'Sessão, senha e exclusão da conta',
-                      icon: Settings,
-                      title: 'Conta e segurança',
+                      description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+                      icon: UserRound,
+                      title: 'Meu perfil',
                     }
-                  : {
-                      description: 'Seu ponto de partida no Crypt',
-                      icon: Home,
-                      title: 'Início',
-                    };
+                  : location.pathname.startsWith('/app/conta')
+                    ? {
+                        description: 'Sessão, senha e exclusão da conta',
+                        icon: Settings,
+                        title: 'Conta e segurança',
+                      }
+                    : {
+                        description: 'Seu ponto de partida no Crypt',
+                        icon: Home,
+                        title: 'Início',
+                      };
   const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
@@ -375,7 +396,12 @@ export function AppShell() {
                   to={channel.to}
                 >
                   <Icon aria-hidden="true" size={17} />
-                  <span>{channel.label}</span>
+                  <span className="min-w-0 flex-1">{channel.label}</span>
+                  {channel.to === '/app/mensagens' && unreadDirectMessages ? (
+                    <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">
+                      {unreadDirectMessages > 99 ? '99+' : unreadDirectMessages}
+                    </span>
+                  ) : null}
                 </NavLink>
               );
             })}
@@ -557,7 +583,7 @@ export function AppShell() {
 
         <nav
           aria-label="Navegação principal"
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-white/10 bg-crypt-deep/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-white/10 bg-crypt-deep/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden"
         >
           <NavLink
             className={({ isActive }) =>
@@ -583,6 +609,23 @@ export function AppShell() {
           >
             <Home aria-hidden="true" size={19} />
             Início
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              classNames(
+                'relative grid min-h-12 place-items-center gap-0.5 rounded-xl text-[0.65rem] font-medium',
+                isActive ? 'text-violet-200' : 'text-crypt-subtle',
+              )
+            }
+            to="/app/mensagens"
+          >
+            <MessageCircle aria-hidden="true" size={19} />
+            Mensagens
+            {unreadDirectMessages ? (
+              <span className="absolute right-2 top-0 grid min-w-5 place-items-center rounded-full bg-violet-500 px-1 text-[0.58rem] text-white">
+                {unreadDirectMessages > 99 ? '99+' : unreadDirectMessages}
+              </span>
+            ) : null}
           </NavLink>
           <NavLink
             className={({ isActive }) =>

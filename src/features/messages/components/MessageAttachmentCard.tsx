@@ -2,8 +2,14 @@ import { Download, FileText } from 'lucide-react';
 import { useAttachmentSignedUrl } from '../messages.queries';
 import type { MessageAttachment } from '../messages.types';
 
-export function MessageAttachmentCard({ attachment }: { attachment: MessageAttachment }) {
-  const signedUrlQuery = useAttachmentSignedUrl(attachment.storage_path);
+export function MessageAttachmentCard({
+  attachment,
+  bucket,
+}: {
+  attachment: MessageAttachment;
+  bucket?: string;
+}) {
+  const signedUrlQuery = useAttachmentSignedUrl(attachment.storage_path, bucket);
   const isImage = attachment.mime_type.startsWith('image/');
 
   if (signedUrlQuery.isPending) {
