@@ -7,6 +7,7 @@ describe('schemas do espaço do servidor', () => {
     expect(
       channelSchema.parse({
         categoryId: null,
+        channelType: 'text',
         icon: '🎮',
         isReadOnly: false,
         name: '  Games e Resenha 🎮  ',
@@ -35,6 +36,7 @@ describe('schemas do espaço do servidor', () => {
     expect(
       channelSchema.safeParse({
         categoryId: null,
+        channelType: 'text',
         icon: '#',
         isReadOnly: false,
         name: 'Geral',

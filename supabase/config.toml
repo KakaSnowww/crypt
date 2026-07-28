@@ -20,3 +20,6 @@ max_frequency = "1m"
 
 [functions.delete-account]
 verify_jwt = false
+
+[functions.livekit-token]
+verify_jwt = false

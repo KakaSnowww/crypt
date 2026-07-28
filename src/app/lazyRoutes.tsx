@@ -121,6 +121,11 @@ export const ServerModerationRoute = lazy(async () => {
   return { default: route.ServerModerationRoute };
 });
 
+export const VoiceRoomRoute = lazy(async () => {
+  const route = await import('../routes/VoiceRoomRoute');
+  return { default: route.VoiceRoomRoute };
+});
+
 export function LazyRoute({ children }: { children: ReactNode }) {
   return (
     <Suspense

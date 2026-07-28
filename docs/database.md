@@ -1,4 +1,4 @@
-# Banco de dados — Fases 3 a 10
+# Banco de dados — Fases 3 a 11
 
 ## Migrations
 
@@ -15,6 +15,8 @@
 | 9     | `20260726230000_phase9_direct_messages.sql`            | DMs, privacidade, anexos e leitura          |
 | 10    | `20260726233000_phase9_direct_attachments_rls_fix.sql` | Correção de leitura dos anexos privados     |
 | 11    | `20260727010000_phase10_moderation_settings.sql`       | Moderação, denúncias e auditoria            |
+| 12    | `20260727030000_phase11_voice_video.sql`               | Canais de voz, vídeo e acesso ao LiveKit    |
+| 13    | `20260728010000_phase11_voice_presence.sql`            | Presença global em canais de voz            |
 
 As migrations são aplicadas somente pela CLI:
 

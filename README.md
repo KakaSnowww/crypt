@@ -3,9 +3,19 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 10
+## Estado atual — Fase 11
 
-Além das fases anteriores, a Fase 10 adiciona:
+Além das fases anteriores, a Fase 11 adiciona:
+
+- canais de voz e vídeo;
+- áudio, câmera e compartilhamento de tela com LiveKit;
+- seleção de dispositivos e reconexão;
+- presença consultada diretamente no LiveKit, inclusive para quem ainda não entrou;
+- modo de áudio natural e enquadramento de câmera inteiro ou preenchido;
+- Edge Function protegida para tokens temporários;
+- validação de associação e permissões antes de entrar na sala;
+
+A Fase 10 adicionou:
 
 - expulsões e banimentos protegidos por hierarquia;
 - remoção de ban sem restaurar associação automaticamente;
@@ -42,8 +52,8 @@ As Fases 7–8 já oferecem:
 - até três anexos privados por mensagem, com 5 MB por arquivo;
 - limpeza de anexos ao excluir mensagem, servidor ou conta;
 - RLS, RPCs protegidas e isolamento de canais por permissão;
-- 62 verificações pgTAP das Fases 7–8, 44 da Fase 9, 42 da Fase 10 e 55 testes de
-  interface e domínio.
+- 62 verificações pgTAP das Fases 7–8, 44 da Fase 9, 42 da Fase 10, 26 da Fase
+  11 e 56 testes de interface e domínio.
 
 ## Tecnologias
 
@@ -102,7 +112,9 @@ As migrations novas são:
 3. `20260726210000_phase78_role_hierarchy_order.sql`;
 4. `20260726230000_phase9_direct_messages.sql`;
 5. `20260726233000_phase9_direct_attachments_rls_fix.sql`;
-6. `20260727010000_phase10_moderation_settings.sql`.
+6. `20260727010000_phase10_moderation_settings.sql`;
+7. `20260727030000_phase11_voice_video.sql`;
+8. `20260728010000_phase11_voice_presence.sql`.
 
 Elas criam tabelas, funções, índices, buckets, policies, publicação Realtime e a movimentação segura
 da hierarquia de cargos. Não crie esses recursos manualmente no painel.
@@ -214,4 +226,4 @@ RSC, que não são usadas neste aplicativo SPA. Não execute `npm audit fix --fo
 
 ## Próxima fase
 
-A Fase 11 implementará voz e vídeo com LiveKit e emissão protegida de tokens.
+A Fase 12 implementará notificações internas, web, Windows e Android.

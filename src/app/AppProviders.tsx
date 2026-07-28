@@ -3,6 +3,7 @@ import { useState, type PropsWithChildren } from 'react';
 import { ToastProvider } from '../components/common/ToastProvider';
 import { AuthContext, type AuthContextValue } from '../features/auth/AuthContext';
 import { AuthProvider } from '../features/auth/AuthProvider';
+import { VoiceCallProvider } from '../features/voice/VoiceCallProvider';
 
 type AppProvidersProps = PropsWithChildren<{
   authValue?: AuthContextValue;
@@ -22,9 +23,13 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
   );
 
   const authContent = authValue ? (
-    <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={authValue}>
+      <VoiceCallProvider>{children}</VoiceCallProvider>
+    </AuthContext.Provider>
   ) : (
-    <AuthProvider>{children}</AuthProvider>
+    <AuthProvider>
+      <VoiceCallProvider>{children}</VoiceCallProvider>
+    </AuthProvider>
   );
 
   return (

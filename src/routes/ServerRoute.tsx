@@ -272,7 +272,11 @@ export function ServerRoute() {
                 <Button
                   className="mt-4"
                   onClick={() =>
-                    void navigate(`/app/servidores/${serverId}/canais/${firstChannel.channel_id}`)
+                    void navigate(
+                      firstChannel.channel_type === 'voice' || firstChannel.channel_type === 'video'
+                        ? `/app/servidores/${serverId}/chamadas/${firstChannel.channel_id}`
+                        : `/app/servidores/${serverId}/canais/${firstChannel.channel_id}`,
+                    )
                   }
                 >
                   Abrir {firstChannel.channel_name}

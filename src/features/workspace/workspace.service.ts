@@ -113,6 +113,19 @@ export function deleteCategory(categoryId: string) {
 }
 
 export function createChannel(serverId: string, input: ChannelInput) {
+  if (input.channelType !== 'text') {
+    return rpc(
+      getSupabaseClient().rpc('create_server_media_channel', {
+        channel_icon: input.icon || null,
+        channel_name: input.name.trim(),
+        channel_topic: input.topic || null,
+        media_channel_type: input.channelType,
+        target_category_id: input.categoryId,
+        target_server_id: serverId,
+      }),
+    );
+  }
+
   return rpc(
     getSupabaseClient().rpc('create_server_channel', {
       channel_icon: input.icon || null,

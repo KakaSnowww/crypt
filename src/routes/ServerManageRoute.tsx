@@ -45,6 +45,7 @@ type ManageTab = 'channels' | 'members' | 'overrides' | 'roles';
 
 const emptyChannel: ChannelInput = {
   categoryId: null,
+  channelType: 'text',
   icon: '💬',
   isReadOnly: false,
   name: '',
@@ -251,6 +252,7 @@ function ChannelsManager({
   function editChannel(selected: ServerChannel) {
     setChannel({
       categoryId: selected.category_id,
+      channelType: selected.channel_type as ChannelInput['channelType'],
       icon: selected.channel_icon ?? '',
       isReadOnly: selected.is_read_only,
       name: selected.channel_name,
@@ -289,6 +291,30 @@ function ChannelsManager({
         <section className="panel p-5">
           <h2 className="font-semibold text-white">Nova categoria</h2>
           <div className="mt-4 grid gap-3">
+            <label className="grid gap-2 text-sm font-medium text-white">
+              Tipo
+              <select
+                className="min-h-11 rounded-2xl border border-white/10 bg-crypt-elevated px-3 text-sm"
+                disabled={Boolean(editingChannelId)}
+                onChange={(event) =>
+                  setChannel((value) => ({
+                    ...value,
+                    channelType: event.target.value as ChannelInput['channelType'],
+                    icon:
+                      event.target.value === 'voice'
+                        ? '🔊'
+                        : event.target.value === 'video'
+                          ? '📹'
+                          : '💬',
+                  }))
+                }
+                value={channel.channelType}
+              >
+                <option value="text">Texto</option>
+                <option value="voice">Voz</option>
+                <option value="video">Vídeo</option>
+              </select>
+            </label>
             <Input
               label="Nome"
               onChange={(event) => setCategoryName(event.target.value)}
@@ -346,6 +372,7 @@ function ChannelsManager({
               value={channel.topic}
             />
             <Input
+              disabled={channel.channelType !== 'text'}
               label="Modo lento (segundos)"
               min={0}
               max={21_600}
@@ -361,6 +388,7 @@ function ChannelsManager({
             <label className="flex items-center gap-3 text-sm text-crypt-muted">
               <input
                 checked={channel.isReadOnly}
+                disabled={channel.channelType !== 'text'}
                 onChange={(event) =>
                   setChannel((value) => ({ ...value, isReadOnly: event.target.checked }))
                 }

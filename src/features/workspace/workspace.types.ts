@@ -11,6 +11,7 @@ export type ChannelUnread = Functions['get_server_unread_counts']['Returns'][num
 
 export type ChannelInput = {
   categoryId: null | string;
+  channelType: 'text' | 'video' | 'voice';
   icon: string;
   isReadOnly: boolean;
   name: string;

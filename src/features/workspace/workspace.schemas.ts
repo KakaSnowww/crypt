@@ -11,6 +11,7 @@ export const categorySchema = z
 
 export const channelSchema = z.object({
   categoryId: z.string().uuid().nullable(),
+  channelType: z.enum(['text', 'voice', 'video']),
   icon: z.string().trim().max(16, 'Use um emoji ou ícone curto.'),
   isReadOnly: z.boolean(),
   name: z

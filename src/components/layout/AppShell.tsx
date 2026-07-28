@@ -2,6 +2,7 @@ import {
   Bell,
   Compass,
   Hash,
+  Headphones,
   Home,
   LogOut,
   Menu,
@@ -15,7 +16,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../common/ToastContext';
 import { useAuth } from '../../features/auth/useAuth';
@@ -35,6 +36,9 @@ import {
   useServerOverview,
 } from '../../features/servers/servers.queries';
 import { useServersRealtime } from '../../features/servers/useServersRealtime';
+import { VoiceCallPanel, VoiceChannelPresence } from '../../features/voice/VoiceCallPanel';
+import { useServerVoicePresence } from '../../features/voice/voice.queries';
+import type { VoiceChannelPresence as VoicePresenceEntry } from '../../features/voice/voice.types';
 import { hasPermission, serverPermission } from '../../features/workspace/workspace.permissions';
 import { ServerMemberGroups } from '../../features/workspace/components/ServerMemberGroups';
 import {
@@ -97,9 +101,11 @@ export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const [membersOpen, setMembersOpen] = useState(false);
+  const voicePresenceErrorRef = useRef<null | string>(null);
   const { addToast } = useToast();
   const { signOut, user } = useAuth();
   const selectedServerId = getServerIdFromPath(location.pathname);
+  const isVoiceRoute = location.pathname.includes('/chamadas/');
   const appDataEnabled = isSupabaseConfigured() && import.meta.env.MODE !== 'test';
   const profileQuery = useCurrentProfile(user?.id ?? null, appDataEnabled);
   const serversQuery = useMyServers(appDataEnabled);
@@ -111,12 +117,36 @@ export function AppShell() {
   const serverMemberRolesQuery = useServerMemberRoles(selectedServerId, appDataEnabled);
   const serverPermissionsQuery = useMyServerPermissions(selectedServerId, appDataEnabled);
   const serverUnreadQuery = useServerUnreadCounts(selectedServerId, appDataEnabled);
+  const voiceChannelIds = (serverChannelsQuery.data ?? [])
+    .filter((channel) => channel.channel_type === 'voice' || channel.channel_type === 'video')
+    .map((channel) => channel.channel_id);
+  const voicePresenceQuery = useServerVoicePresence(
+    selectedServerId,
+    voiceChannelIds,
+    appDataEnabled,
+  );
   const notificationsQuery = useConnectionNotifications(appDataEnabled);
   const directConversationsQuery = useDirectConversations(appDataEnabled);
   useConnectionsRealtime(user?.id ?? null);
   useDirectListRealtime(user?.id ?? null);
   usePresenceHeartbeat(user?.id ?? null);
   useServersRealtime(user?.id ?? null, selectedServerId);
+
+  useEffect(() => {
+    if (!voicePresenceQuery.error) {
+      voicePresenceErrorRef.current = null;
+      return;
+    }
+
+    if (voicePresenceErrorRef.current === voicePresenceQuery.error.message) return;
+    voicePresenceErrorRef.current = voicePresenceQuery.error.message;
+
+    addToast({
+      message: voicePresenceQuery.error.message,
+      title: 'Não foi possível ler a presença das chamadas',
+      tone: 'error',
+    });
+  }, [addToast, voicePresenceQuery.error]);
   const currentServer =
     serverOverviewQuery.data ??
     serversQuery.data?.find((server) => server.server_id === selectedServerId);
@@ -147,35 +177,44 @@ export function AppShell() {
     (typeof user?.user_metadata.handle === 'string' ? user.user_metadata.handle : undefined);
   const identityLabel = handle ? `@${handle}` : user?.email;
   const pageHeader = location.pathname.startsWith('/app/servidores/')
-    ? location.pathname.includes('/canais/')
+    ? location.pathname.includes('/chamadas/')
       ? {
-          description:
-            serverChannels.find(
-              (channel) => channel.channel_id === getChannelIdFromPath(location.pathname),
-            )?.topic ?? 'Conversa em tempo real',
-          icon: Hash,
+          description: 'Áudio, vídeo e compartilhamento em tempo real',
+          icon: Headphones,
           title:
             serverChannels.find(
               (channel) => channel.channel_id === getChannelIdFromPath(location.pathname),
-            )?.channel_name ?? 'Canal',
+            )?.channel_name ?? 'Chamada',
         }
-      : location.pathname.endsWith('/gerenciar')
+      : location.pathname.includes('/canais/')
         ? {
-            description: 'Categorias, canais, cargos e permissões',
-            icon: Settings,
-            title: 'Organizar servidor',
+            description:
+              serverChannels.find(
+                (channel) => channel.channel_id === getChannelIdFromPath(location.pathname),
+              )?.topic ?? 'Conversa em tempo real',
+            icon: Hash,
+            title:
+              serverChannels.find(
+                (channel) => channel.channel_id === getChannelIdFromPath(location.pathname),
+              )?.channel_name ?? 'Canal',
           }
-        : location.pathname.endsWith('/configuracoes')
+        : location.pathname.endsWith('/gerenciar')
           ? {
-              description: 'Identidade, propriedade e exclusão segura',
+              description: 'Categorias, canais, cargos e permissões',
               icon: Settings,
-              title: 'Configurações do servidor',
+              title: 'Organizar servidor',
             }
-          : {
-              description: 'Canais, membros e convites',
-              icon: ServerGlyph,
-              title: currentServer?.server_name ?? 'Servidor',
-            }
+          : location.pathname.endsWith('/configuracoes')
+            ? {
+                description: 'Identidade, propriedade e exclusão segura',
+                icon: Settings,
+                title: 'Configurações do servidor',
+              }
+            : {
+                description: 'Canais, membros e convites',
+                icon: ServerGlyph,
+                title: currentServer?.server_name ?? 'Servidor',
+              }
     : location.pathname.startsWith('/app/servidores')
       ? {
           description: 'Crie ou entre em comunidades privadas',
@@ -242,7 +281,12 @@ export function AppShell() {
   }
 
   return (
-    <div className="min-h-dvh bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17rem_minmax(0,1fr)] 2xl:grid-cols-[4.5rem_17rem_minmax(0,1fr)_15rem]">
+    <div
+      className={classNames(
+        'min-h-dvh bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17rem_minmax(0,1fr)]',
+        !isVoiceRoute && '2xl:grid-cols-[4.5rem_17rem_minmax(0,1fr)_15rem]',
+      )}
+    >
       <aside
         aria-label="Seus espaços"
         className="hidden border-r border-white/5 bg-crypt-deep px-2 py-4 lg:flex lg:min-h-dvh lg:flex-col lg:items-center"
@@ -367,6 +411,7 @@ export function AppShell() {
                 channels={serverChannels}
                 serverId={selectedServerId}
                 unread={serverUnread}
+                voicePresence={voicePresenceQuery.data ?? []}
               />
             </>
           ) : null}
@@ -418,6 +463,8 @@ export function AppShell() {
             Descobrir pessoas
           </NavLink>
         </nav>
+
+        <VoiceCallPanel />
 
         <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-3">
           <ProfileAvatar
@@ -484,13 +531,15 @@ export function AppShell() {
                 <span className="absolute right-1.5 top-1.5 size-2.5 rounded-full border-2 border-crypt-background bg-violet-400" />
               ) : null}
             </NavLink>
-            <IconButton
-              aria-expanded={membersOpen}
-              className="hidden sm:inline-flex 2xl:hidden"
-              icon={<Users aria-hidden="true" size={18} />}
-              label="Mostrar membros"
-              onClick={() => setMembersOpen((open) => !open)}
-            />
+            {!isVoiceRoute ? (
+              <IconButton
+                aria-expanded={membersOpen}
+                className="hidden sm:inline-flex 2xl:hidden"
+                icon={<Users aria-hidden="true" size={18} />}
+                label="Mostrar membros"
+                onClick={() => setMembersOpen((open) => !open)}
+              />
+            ) : null}
           </div>
         </header>
 
@@ -521,7 +570,11 @@ export function AppShell() {
                   )
                 }
                 key={channel.channel_id}
-                to={`/app/servidores/${selectedServerId}/canais/${channel.channel_id}`}
+                to={
+                  channel.channel_type === 'voice' || channel.channel_type === 'video'
+                    ? `/app/servidores/${selectedServerId}/chamadas/${channel.channel_id}`
+                    : `/app/servidores/${selectedServerId}/canais/${channel.channel_id}`
+                }
               >
                 <span>{channel.channel_icon ?? '#'}</span>
                 <span className="truncate">{channel.channel_name}</span>
@@ -656,7 +709,10 @@ export function AppShell() {
 
       <aside
         aria-label={currentServer ? `Membros de ${currentServer.server_name}` : 'Painel contextual'}
-        className="hidden border-l border-white/5 bg-crypt-sidebar px-4 py-5 2xl:block"
+        className={classNames(
+          'hidden border-l border-white/5 bg-crypt-sidebar px-4 py-5',
+          !isVoiceRoute && '2xl:block',
+        )}
       >
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
           {currentServer ? `Membros — ${serverMembers.length}` : 'Servidores'}
@@ -682,7 +738,7 @@ function getServerIdFromPath(pathname: string) {
 }
 
 function getChannelIdFromPath(pathname: string) {
-  return pathname.match(/\/canais\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? null;
+  return pathname.match(/\/(?:canais|chamadas)\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? null;
 }
 
 function ChannelNavigation({
@@ -690,11 +746,13 @@ function ChannelNavigation({
   channels,
   serverId,
   unread,
+  voicePresence,
 }: {
   categories: ServerCategory[];
   channels: ServerChannel[];
   serverId: string;
   unread: ChannelUnread[];
+  voicePresence: VoicePresenceEntry[];
 }) {
   const groups: Array<{ id: string; label: string; values: ServerChannel[] }> = [
     {
@@ -721,36 +779,49 @@ function ChannelNavigation({
               const unreadState = unread.find((item) => item.channel_id === channel.channel_id);
 
               return (
-                <NavLink
-                  className={({ isActive }) =>
-                    classNames(
-                      'flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-sm transition',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
-                      isActive
-                        ? 'bg-white/[0.09] font-medium text-white'
-                        : unreadState?.unread_count
-                          ? 'font-medium text-white hover:bg-white/[0.05]'
-                          : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
-                    )
-                  }
-                  key={channel.channel_id}
-                  to={`/app/servidores/${serverId}/canais/${channel.channel_id}`}
-                >
-                  <span aria-hidden="true" className="w-5 shrink-0 text-center">
-                    {channel.channel_icon ?? '#'}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">{channel.channel_name}</span>
-                  {unreadState?.mention_count ? (
-                    <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-bold text-white">
-                      {Math.min(unreadState.mention_count, 99)}
+                <div key={channel.channel_id}>
+                  <NavLink
+                    className={({ isActive }) =>
+                      classNames(
+                        'flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-sm transition',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
+                        isActive
+                          ? 'bg-white/[0.09] font-medium text-white'
+                          : unreadState?.unread_count
+                            ? 'font-medium text-white hover:bg-white/[0.05]'
+                            : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
+                      )
+                    }
+                    to={
+                      channel.channel_type === 'voice' || channel.channel_type === 'video'
+                        ? `/app/servidores/${serverId}/chamadas/${channel.channel_id}`
+                        : `/app/servidores/${serverId}/canais/${channel.channel_id}`
+                    }
+                  >
+                    <span aria-hidden="true" className="w-5 shrink-0 text-center">
+                      {channel.channel_icon ?? '#'}
                     </span>
-                  ) : unreadState?.unread_count ? (
-                    <span
-                      aria-label={`${unreadState.unread_count} mensagens não lidas`}
-                      className="size-2 rounded-full bg-white"
+                    <span className="min-w-0 flex-1 truncate">{channel.channel_name}</span>
+                    {unreadState?.mention_count ? (
+                      <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-bold text-white">
+                        {Math.min(unreadState.mention_count, 99)}
+                      </span>
+                    ) : unreadState?.unread_count ? (
+                      <span
+                        aria-label={`${unreadState.unread_count} mensagens não lidas`}
+                        className="size-2 rounded-full bg-white"
+                      />
+                    ) : null}
+                  </NavLink>
+                  {channel.channel_type === 'voice' || channel.channel_type === 'video' ? (
+                    <VoiceChannelPresence
+                      channelId={channel.channel_id}
+                      members={voicePresence.filter(
+                        (presence) => presence.channel_id === channel.channel_id,
+                      )}
                     />
                   ) : null}
-                </NavLink>
+                </div>
               );
             })}
           </div>

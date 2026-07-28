@@ -240,4 +240,8 @@ interrompida.
 - [ ] Hierarquia impede moderação de cargo igual ou superior.
 - [ ] Membro comum não abre denúncias ou auditoria pela URL direta.
 - [ ] Cliente não insere, edita ou apaga registros de auditoria.
+- [ ] API Secret do LiveKit existe somente nos segredos da Edge Function.
+- [ ] Conta externa não recebe token de uma sala.
+- [ ] Canal negado não recebe token mesmo por URL direta.
+- [ ] Identidade e permissão do token vêm do banco, não do corpo da requisição.
 - [ ] Testes pgTAP passam com três usuários.

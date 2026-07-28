@@ -30,6 +30,7 @@ import {
   ServerRoute,
   ServersRoute,
   ServerSettingsRoute,
+  VoiceRoomRoute,
 } from './lazyRoutes';
 
 export const appRoutes: RouteObject[] = [
@@ -206,6 +207,14 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ChannelRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'servidores/:serverId/chamadas/:channelId',
+        element: (
+          <LazyRoute>
+            <VoiceRoomRoute />
           </LazyRoute>
         ),
       },

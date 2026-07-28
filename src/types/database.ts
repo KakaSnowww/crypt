@@ -74,6 +74,17 @@ export type Database = {
         };
         Returns: string;
       };
+      create_server_media_channel: {
+        Args: {
+          channel_icon?: null | string;
+          channel_name: string;
+          channel_topic?: null | string;
+          media_channel_type: string;
+          target_category_id?: null | string;
+          target_server_id: string;
+        };
+        Returns: string;
+      };
       create_server_role: {
         Args: {
           role_color: string;
@@ -354,6 +365,7 @@ export type Database = {
           channel_id: string;
           channel_name: string;
           channel_position: number;
+          channel_type: string;
           created_at: string;
           effective_permissions: number;
           is_read_only: boolean;
@@ -365,6 +377,33 @@ export type Database = {
       get_server_member_roles: {
         Args: { target_server_id: string };
         Returns: Array<{ profile_id: string; role_ids: string[] }>;
+      };
+      get_voice_channel_access: {
+        Args: { target_channel_id: string };
+        Returns: Array<{
+          avatar_path: null | string;
+          can_publish: boolean;
+          channel_id: string;
+          channel_name: string;
+          channel_type: string;
+          display_name: string;
+          handle: string;
+          profile_id: string;
+          server_id: string;
+          server_name: string;
+        }>;
+      };
+      get_server_voice_channel_presence: {
+        Args: { target_server_id: string };
+        Returns: Array<{
+          avatar_path: null | string;
+          channel_id: string;
+          display_name: string;
+          handle: string;
+          joined_at: string;
+          microphone_muted: boolean;
+          profile_id: string;
+        }>;
       };
       get_server_audit_logs: {
         Args: { result_limit?: number; target_server_id: string };
@@ -661,6 +700,13 @@ export type Database = {
       };
       set_my_presence: {
         Args: { next_status: string };
+        Returns: undefined;
+      };
+      set_my_voice_channel_presence: {
+        Args: {
+          microphone_is_muted?: boolean;
+          target_channel_id: null | string;
+        };
         Returns: undefined;
       };
       hide_direct_conversation: {
