@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { ProfileAvatar } from '../profile/components/ProfileAvatar';
+import { getProfileMediaUrl } from '../profile/profile.service';
 import { getVoiceParticipantProfile } from './voice.participant';
 import { useVoiceCall } from './useVoiceCall';
 
@@ -171,11 +172,17 @@ function ParticipantCard({
   const hasVideo = Boolean(track.publication && !track.publication.isMuted);
   const profile = getVoiceParticipantProfile(participant);
   const palette = getParticipantPalette(participant.identity);
+  const bannerUrl = getProfileMediaUrl(profile.bannerPath);
 
   return (
     <article
-      className={`voice-participant ${isSpeaking ? 'is-speaking' : ''}`}
-      style={{ '--voice-card-gradient': palette } as CSSProperties}
+      className={`voice-participant profile-effect-${profile.profileEffect} ${isSpeaking ? 'is-speaking' : ''}`}
+      style={
+        {
+          '--voice-card-banner': bannerUrl ? `url("${bannerUrl}")` : 'none',
+          '--voice-card-gradient': palette,
+        } as CSSProperties
+      }
     >
       {hasVideo ? (
         <VideoTrack trackRef={track as TrackReference} />

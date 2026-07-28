@@ -98,6 +98,36 @@ export function useWorkspaceActions(serverId: string) {
       'Hierarquia atualizada',
       'A ordem dos cargos já está valendo.',
     ),
+    reorderCategory: useWorkspaceMutation(
+      async ({ categoryId, steps }: { categoryId: string; steps: number }) => {
+        const direction = steps < 0 ? -1 : 1;
+        for (let index = 0; index < Math.abs(steps); index += 1) {
+          await moveCategory(categoryId, direction);
+        }
+      },
+      'Ordem atualizada',
+      'A categoria foi movida para a nova posição.',
+    ),
+    reorderChannel: useWorkspaceMutation(
+      async ({ channelId, steps }: { channelId: string; steps: number }) => {
+        const direction = steps < 0 ? -1 : 1;
+        for (let index = 0; index < Math.abs(steps); index += 1) {
+          await moveChannel(channelId, direction);
+        }
+      },
+      'Ordem atualizada',
+      'O canal foi movido para a nova posição.',
+    ),
+    reorderRole: useWorkspaceMutation(
+      async ({ roleId, steps }: { roleId: string; steps: number }) => {
+        const direction = steps < 0 ? -1 : 1;
+        for (let index = 0; index < Math.abs(steps); index += 1) {
+          await moveRole(roleId, direction);
+        }
+      },
+      'Hierarquia atualizada',
+      'O cargo foi movido para a nova posição.',
+    ),
     saveOverride: useWorkspaceMutation(
       savePermissionOverride,
       'Permissão específica salva',

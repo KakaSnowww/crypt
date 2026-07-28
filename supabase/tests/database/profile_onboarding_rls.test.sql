@@ -2,13 +2,15 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(33);
+select plan(35);
 
 select has_table('public', 'profile_settings', 'profile_settings existe');
 select has_table('public', 'interest_categories', 'interest_categories existe');
 select has_table('public', 'interests', 'interests existe');
 select has_table('public', 'profile_interests', 'profile_interests existe');
 select has_column('public', 'profiles', 'avatar_path', 'profiles armazena somente o caminho do avatar');
+select has_column('public', 'profiles', 'banner_path', 'profiles armazena o caminho validado do banner');
+select has_column('public', 'profiles', 'profile_effect', 'profiles armazena um efeito visual controlado');
 select hasnt_column('public', 'profiles', 'email', 'o perfil público não contém e-mail');
 select is(
   (select count(*)::integer from public.interest_categories),
@@ -23,11 +25,11 @@ select is(
 select ok(
   (
     select buckets.public
-      and buckets.file_size_limit = 2097152
+      and buckets.file_size_limit = 5242880
     from storage.buckets as buckets
     where buckets.id = 'profile-media'
   ),
-  'o bucket público limita cada avatar a 2 MB'
+  'o bucket público comporta banners de até 5 MB'
 );
 
 insert into auth.users (

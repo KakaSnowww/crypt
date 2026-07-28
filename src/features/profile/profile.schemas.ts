@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ProfileActionError } from './profile.errors';
 
 export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+export const MAX_BANNER_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 const displayNameSchema = z
@@ -90,6 +91,16 @@ export function validateAvatarFile(file: File) {
 
   if (file.size > MAX_AVATAR_BYTES) {
     throw new ProfileActionError('avatar_too_large');
+  }
+}
+
+export function validateBannerFile(file: File) {
+  if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+    throw new ProfileActionError('avatar_invalid');
+  }
+
+  if (file.size > MAX_BANNER_BYTES) {
+    throw new ProfileActionError('banner_too_large');
   }
 }
 

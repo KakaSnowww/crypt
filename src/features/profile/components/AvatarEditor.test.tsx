@@ -22,6 +22,7 @@ vi.mock('../profile.service', async (importOriginal) => {
 
 const profile: Profile = {
   avatar_path: null,
+  banner_path: null,
   bio: null,
   created_at: '2026-07-25T12:00:00.000Z',
   display_name: 'Kaio Snow',
@@ -30,6 +31,7 @@ const profile: Profile = {
   favorite_spotify_url: null,
   handle: 'kaiosnow',
   id: '10000000-0000-0000-0000-000000000001',
+  profile_effect: 'none',
   updated_at: '2026-07-25T12:00:00.000Z',
 };
 

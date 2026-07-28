@@ -116,7 +116,12 @@ Deno.serve(async (request) => {
       return json(origin, 200, {
         room_name: roomName,
         participants: participants.map((participant) => {
-          let metadata: { avatar_path?: unknown; handle?: unknown } = {};
+          let metadata: {
+            avatar_path?: unknown;
+            banner_path?: unknown;
+            handle?: unknown;
+            profile_effect?: unknown;
+          } = {};
           try {
             metadata = JSON.parse(participant.metadata || '{}') as typeof metadata;
           } catch {
@@ -125,12 +130,15 @@ Deno.serve(async (request) => {
 
           return {
             avatar_path: typeof metadata.avatar_path === 'string' ? metadata.avatar_path : null,
+            banner_path: typeof metadata.banner_path === 'string' ? metadata.banner_path : null,
             display_name: participant.name || participant.identity,
             handle: typeof metadata.handle === 'string' ? metadata.handle : null,
             microphone_muted: !participant.tracks.some(
               (track) => track.source === 2 && !track.muted,
             ),
             profile_id: participant.identity,
+            profile_effect:
+              typeof metadata.profile_effect === 'string' ? metadata.profile_effect : 'none',
           };
         }),
       });
@@ -150,12 +158,20 @@ Deno.serve(async (request) => {
     }
   }
 
+  const { data: visualProfile } = await userClient
+    .from('profiles')
+    .select('banner_path, profile_effect')
+    .eq('id', user.id)
+    .maybeSingle();
+
   const token = new AccessToken(livekitApiKey, livekitApiSecret, {
     identity: user.id,
     metadata: JSON.stringify({
       avatar_path: access.avatar_path,
+      banner_path: visualProfile?.banner_path ?? null,
       handle: access.handle,
       profile_id: user.id,
+      profile_effect: visualProfile?.profile_effect ?? 'none',
     }),
     name: access.display_name,
     ttl: '10m',

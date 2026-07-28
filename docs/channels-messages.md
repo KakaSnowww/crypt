@@ -1,5 +1,14 @@
 # Canais, cargos e mensagens — Fases 7 e 8
 
+## Menções
+
+- digitar `@` abre sugestões dos membros do servidor;
+- a busca aceita nome de exibição e identificador;
+- setas alteram a seleção, enquanto `Enter` ou `Tab` confirmam;
+- um `@identificador` completo digitado manualmente também é reconhecido;
+- somente o UUID selecionado ou validado é enviado ao banco;
+- a pessoa mencionada recebe contagem de menção e uma notificação da Fase 12.
+
 ## Entrega unificada
 
 As duas fases compartilham a mesma fronteira de acesso: uma mensagem só existe dentro de um canal e

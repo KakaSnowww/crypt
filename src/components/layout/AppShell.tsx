@@ -20,13 +20,17 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../common/ToastContext';
 import { useAuth } from '../../features/auth/useAuth';
-import { useConnectionNotifications } from '../../features/connections/connections.queries';
 import {
   useConnectionsRealtime,
   usePresenceHeartbeat,
 } from '../../features/connections/useConnectionsRealtime';
 import { useDirectConversations } from '../../features/directMessages/directMessages.queries';
 import { useDirectListRealtime } from '../../features/directMessages/useDirectMessagesRealtime';
+import {
+  useNotificationPreferences,
+  useNotifications,
+} from '../../features/notifications/notifications.queries';
+import { useNotificationsRealtime } from '../../features/notifications/useNotificationsRealtime';
 import { ProfileAvatar } from '../../features/profile/components/ProfileAvatar';
 import { useCurrentProfile } from '../../features/profile/profile.queries';
 import { ServerIcon } from '../../features/servers/components/ServerIcon';
@@ -85,6 +89,12 @@ const channelLinks = [
   },
   {
     end: false,
+    icon: Bell,
+    label: 'Notificações',
+    to: '/app/notificacoes',
+  },
+  {
+    end: false,
     icon: Users,
     label: 'Conexões',
     to: '/app/conexoes',
@@ -100,6 +110,7 @@ const channelLinks = [
 export function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [globalMenuOpen, setGlobalMenuOpen] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const voicePresenceErrorRef = useRef<null | string>(null);
   const { addToast } = useToast();
@@ -125,9 +136,11 @@ export function AppShell() {
     voiceChannelIds,
     appDataEnabled,
   );
-  const notificationsQuery = useConnectionNotifications(appDataEnabled);
+  const notificationsQuery = useNotifications(appDataEnabled);
+  const notificationPreferencesQuery = useNotificationPreferences(appDataEnabled);
   const directConversationsQuery = useDirectConversations(appDataEnabled);
   useConnectionsRealtime(user?.id ?? null);
+  useNotificationsRealtime(user?.id ?? null, notificationPreferencesQuery.data);
   useDirectListRealtime(user?.id ?? null);
   usePresenceHeartbeat(user?.id ?? null);
   useServersRealtime(user?.id ?? null, selectedServerId);
@@ -227,47 +240,53 @@ export function AppShell() {
             icon: UserRound,
             title: 'Convite',
           }
-        : location.pathname.startsWith('/app/mensagens')
+        : location.pathname.startsWith('/app/notificacoes')
           ? {
-              description: 'Conversas individuais protegidas',
-              icon: MessageCircle,
-              title: 'Mensagens privadas',
+              description: 'Mensagens, menções, amizades e moderação',
+              icon: Bell,
+              title: 'Notificações',
             }
-          : location.pathname.startsWith('/app/conexoes')
+          : location.pathname.startsWith('/app/mensagens')
             ? {
-                description: 'Amigos, pedidos e pessoas para conhecer',
-                icon: Users,
-                title: 'Conexões',
+                description: 'Conversas individuais protegidas',
+                icon: MessageCircle,
+                title: 'Mensagens privadas',
               }
-            : location.pathname.startsWith('/app/pessoas/')
+            : location.pathname.startsWith('/app/conexoes')
               ? {
-                  description: 'Perfil público e informações compartilhadas',
-                  icon: UserRound,
-                  title: 'Perfil',
+                  description: 'Amigos, pedidos e pessoas para conhecer',
+                  icon: Users,
+                  title: 'Conexões',
                 }
-              : location.pathname.startsWith('/app/perfil/editar')
+              : location.pathname.startsWith('/app/pessoas/')
                 ? {
-                    description: 'Avatar, interesses, privacidade e música',
-                    icon: Settings,
-                    title: 'Editar perfil',
+                    description: 'Perfil público e informações compartilhadas',
+                    icon: UserRound,
+                    title: 'Perfil',
                   }
-                : location.pathname.startsWith('/app/perfil')
+                : location.pathname.startsWith('/app/perfil/editar')
                   ? {
-                      description: 'Sua identidade e as escolhas que você decidiu compartilhar',
-                      icon: UserRound,
-                      title: 'Meu perfil',
+                      description: 'Avatar, interesses, privacidade e música',
+                      icon: Settings,
+                      title: 'Editar perfil',
                     }
-                  : location.pathname.startsWith('/app/conta')
+                  : location.pathname.startsWith('/app/perfil')
                     ? {
-                        description: 'Sessão, senha e exclusão da conta',
-                        icon: Settings,
-                        title: 'Conta e segurança',
+                        description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+                        icon: UserRound,
+                        title: 'Meu perfil',
                       }
-                    : {
-                        description: 'Seu ponto de partida no Crypt',
-                        icon: Home,
-                        title: 'Início',
-                      };
+                    : location.pathname.startsWith('/app/conta')
+                      ? {
+                          description: 'Sessão, senha e exclusão da conta',
+                          icon: Settings,
+                          title: 'Conta e segurança',
+                        }
+                      : {
+                          description: 'Seu ponto de partida no Crypt',
+                          icon: Home,
+                          title: 'Início',
+                        };
   const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
@@ -326,13 +345,19 @@ export function AppShell() {
           </NavLink>
         </div>
         <div className="mt-auto">
-          <NavLink
-            aria-label="Editar perfil"
+          <button
+            aria-expanded={currentServer ? globalMenuOpen : undefined}
+            aria-label={currentServer ? 'Abrir menu do Crypt' : 'Editar perfil'}
             className="grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-            to="/app/perfil/editar"
+            onClick={() =>
+              currentServer
+                ? setGlobalMenuOpen((open) => !open)
+                : void navigate('/app/perfil/editar')
+            }
+            type="button"
           >
             <Settings aria-hidden="true" size={18} />
-          </NavLink>
+          </button>
         </div>
       </aside>
 
@@ -416,52 +441,65 @@ export function AppShell() {
             </>
           ) : null}
 
-          <p
-            className={`${currentServer ? 'mt-7' : ''} px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle`}
-          >
-            Crypt
-          </p>
-          <div className="mt-2 grid gap-1">
-            {channelLinks.map((channel) => {
-              const Icon = channel.icon;
+          {!currentServer || globalMenuOpen ? (
+            <div
+              className={classNames(
+                currentServer &&
+                  'mt-6 rounded-2xl border border-violet-400/15 bg-violet-500/[0.055] p-2',
+              )}
+            >
+              <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
+                {currentServer ? 'Menu do Crypt' : 'Crypt'}
+              </p>
+              <div className="mt-2 grid gap-1">
+                {channelLinks.map((channel) => {
+                  const Icon = channel.icon;
 
-              return (
-                <NavLink
-                  className={({ isActive }) =>
-                    classNames(
-                      'flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
-                      isActive
-                        ? 'bg-white/[0.09] font-medium text-white'
-                        : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
-                    )
-                  }
-                  end={channel.end}
-                  key={channel.to}
-                  to={channel.to}
-                >
-                  <Icon aria-hidden="true" size={17} />
-                  <span className="min-w-0 flex-1">{channel.label}</span>
-                  {channel.to === '/app/mensagens' && unreadDirectMessages ? (
-                    <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">
-                      {unreadDirectMessages > 99 ? '99+' : unreadDirectMessages}
-                    </span>
-                  ) : null}
-                </NavLink>
-              );
-            })}
-          </div>
-
-          <p className="mt-7 px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-            Descoberta
-          </p>
-          <NavLink
-            className="mt-2 flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-            to="/app/conexoes?aba=discover"
-          >
-            <Compass aria-hidden="true" size={17} />
-            Descobrir pessoas
-          </NavLink>
+                  return (
+                    <NavLink
+                      className={({ isActive }) =>
+                        classNames(
+                          'flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition',
+                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
+                          isActive
+                            ? 'bg-white/[0.09] font-medium text-white'
+                            : 'text-crypt-muted hover:bg-white/[0.05] hover:text-white',
+                        )
+                      }
+                      end={channel.end}
+                      key={channel.to}
+                      onClick={() => setGlobalMenuOpen(false)}
+                      to={channel.to}
+                    >
+                      <Icon aria-hidden="true" size={17} />
+                      <span className="min-w-0 flex-1">{channel.label}</span>
+                      {channel.to === '/app/mensagens' && unreadDirectMessages ? (
+                        <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">
+                          {unreadDirectMessages > 99 ? '99+' : unreadDirectMessages}
+                        </span>
+                      ) : null}
+                      {channel.to === '/app/notificacoes' && unreadNotifications ? (
+                        <span className="grid min-w-5 place-items-center rounded-full bg-violet-500 px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">
+                          {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                        </span>
+                      ) : null}
+                    </NavLink>
+                  );
+                })}
+              </div>
+              <p className="mt-5 px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
+                Descoberta
+              </p>
+              <NavLink
+                className="mt-2 flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm text-crypt-muted transition hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+                onClick={() => setGlobalMenuOpen(false)}
+                to="/app/conexoes?aba=discover"
+              >
+                <Compass aria-hidden="true" size={17} />
+                Descobrir pessoas
+              </NavLink>
+            </div>
+          ) : null}
         </nav>
 
         <VoiceCallPanel />
@@ -524,7 +562,7 @@ export function AppShell() {
                   : 'Notificações'
               }
               className="relative grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
-              to="/app/conexoes?aba=notifications"
+              to="/app/notificacoes"
             >
               <Bell aria-hidden="true" size={18} />
               {unreadNotifications ? (

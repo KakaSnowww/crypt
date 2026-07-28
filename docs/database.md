@@ -1,4 +1,4 @@
-# Banco de dados — Fases 3 a 11
+# Banco de dados — Fases 3 a 12
 
 ## Migrations
 
@@ -17,12 +17,24 @@
 | 11    | `20260727010000_phase10_moderation_settings.sql`       | Moderação, denúncias e auditoria            |
 | 12    | `20260727030000_phase11_voice_video.sql`               | Canais de voz, vídeo e acesso ao LiveKit    |
 | 13    | `20260728010000_phase11_voice_presence.sql`            | Presença global em canais de voz            |
+| 14    | `20260728180000_phase12_notifications.sql`             | Central, preferências e eventos privados    |
 
 As migrations são aplicadas somente pela CLI:
 
 ```powershell
 npm run supabase:db:push
 ```
+
+## Fase 12 — notificações
+
+- `notification_preferences`: preferências por perfil para avisos internos, sistema, som e
+  categorias;
+- `user_notifications`: central privada com tipo, conteúdo, destino, leitura e deduplicação;
+- triggers internos transformam amizade, DM, menção e denúncia em eventos;
+- `get_my_notifications` pagina e filtra somente os eventos da sessão;
+- `save_my_notification_preferences`, `mark_notification_read` e
+  `mark_all_notifications_read` realizam escritas protegidas;
+- `user_notifications` participa do Realtime com RLS por destinatário.
 
 ## `public.profiles`
 
@@ -230,6 +242,13 @@ resolução ocorre nesta ordem:
 
 Proprietário e `Administrador` recebem a máscara completa. `get_server_channels`,
 `can_view_channel` e `can_send_message` usam o acesso efetivo.
+
+## Visuais do perfil
+
+`profiles.banner_path` aponta para uma imagem horizontal no bucket `profile-media` e possui
+constraint de pasta própria. `profiles.profile_effect` é limitado a uma lista pequena de efeitos
+CSS suportados. O bucket passa a aceitar até 5 MB para comportar banners; o limite de avatar
+continua sendo validado no cliente em 2 MB.
 
 ## Mensagens de canal
 

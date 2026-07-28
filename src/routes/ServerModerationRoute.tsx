@@ -328,7 +328,7 @@ function SettingsForm({
       />
       <Toggle
         checked={notifications}
-        description="Reserva a preferência para notificações administrativas da Fase 12."
+        description="Envia novas denúncias à central dos moderadores autorizados."
         disabled={!isOwner}
         label="Notificar moderadores"
         onChange={setNotifications}

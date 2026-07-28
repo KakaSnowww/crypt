@@ -1,6 +1,7 @@
 export type ProfileErrorCode =
   | 'avatar_invalid'
   | 'avatar_too_large'
+  | 'banner_too_large'
   | 'configuration'
   | 'network'
   | 'spotify_invalid'
@@ -9,6 +10,7 @@ export type ProfileErrorCode =
 const messages: Record<ProfileErrorCode, string> = {
   avatar_invalid: 'Escolha uma imagem JPG, PNG ou WebP válida.',
   avatar_too_large: 'O avatar deve possuir no máximo 2 MB.',
+  banner_too_large: 'O banner deve possuir no máximo 5 MB.',
   configuration: 'A estrutura da Fase 4 ainda não foi aplicada ao Supabase.',
   network: 'Não foi possível acessar o serviço agora. Verifique sua conexão.',
   spotify_invalid: 'Cole um link válido de uma faixa do Spotify.',

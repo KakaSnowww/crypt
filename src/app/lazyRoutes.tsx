@@ -66,6 +66,11 @@ export const NotFoundRoute = lazy(async () => {
   return { default: route.NotFoundRoute };
 });
 
+export const NotificationsRoute = lazy(async () => {
+  const route = await import('../routes/NotificationsRoute');
+  return { default: route.NotificationsRoute };
+});
+
 export const ProfileRoute = lazy(async () => {
   const route = await import('../routes/ProfileRoute');
   return { default: route.ProfileRoute };

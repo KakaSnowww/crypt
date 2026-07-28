@@ -1,7 +1,6 @@
 import {
-  ArrowDown,
-  ArrowUp,
   FolderPlus,
+  GripVertical,
   Hash,
   Pencil,
   Plus,
@@ -10,7 +9,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -66,6 +65,58 @@ const defaultRole: RoleInput = {
     serverPermission.attachFiles |
     serverPermission.createInvites,
 };
+
+function beginPointerSort(
+  event: ReactPointerEvent,
+  sourceId: string,
+  onDrop: (targetId: string) => void,
+) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+  event.preventDefault();
+  const source = event.currentTarget.closest<HTMLElement>('[data-sort-id]');
+  source?.classList.add('opacity-60', 'ring-2', 'ring-violet-400/50');
+
+  const finish = (pointerEvent: PointerEvent) => {
+    const target = document
+      .elementFromPoint(pointerEvent.clientX, pointerEvent.clientY)
+      ?.closest<HTMLElement>('[data-sort-id]');
+    source?.classList.remove('opacity-60', 'ring-2', 'ring-violet-400/50');
+    document.removeEventListener('pointerup', finish);
+    document.removeEventListener('pointercancel', cancel);
+    if (target?.dataset.sortId && target.dataset.sortId !== sourceId) {
+      onDrop(target.dataset.sortId);
+    }
+  };
+  const cancel = () => {
+    source?.classList.remove('opacity-60', 'ring-2', 'ring-violet-400/50');
+    document.removeEventListener('pointerup', finish);
+    document.removeEventListener('pointercancel', cancel);
+  };
+  document.addEventListener('pointerup', finish, { once: true });
+  document.addEventListener('pointercancel', cancel, { once: true });
+}
+
+function DragHandle({
+  id,
+  label,
+  onDrop,
+}: {
+  id: string;
+  label: string;
+  onDrop: (targetId: string) => void;
+}) {
+  return (
+    <button
+      aria-label={label}
+      className="touch-none cursor-grab rounded-lg p-1.5 text-crypt-subtle hover:bg-white/10 hover:text-white active:cursor-grabbing"
+      onPointerDown={(event) => beginPointerSort(event, id, onDrop)}
+      title={label}
+      type="button"
+    >
+      <GripVertical size={16} />
+    </button>
+  );
+}
 
 export function ServerManageRoute() {
   const { serverId = '' } = useParams();
@@ -267,7 +318,8 @@ function ChannelsManager({
       <section className="panel p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-white">Estrutura visível</h2>
         <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-          Nomes aceitam espaços, maiúsculas, acentos e emojis. O ícone é um campo separado.
+          Segure a alça pontilhada e arraste para reordenar com mouse ou toque. Nomes aceitam
+          espaços, acentos e emojis.
         </p>
 
         <CategoryBlock
@@ -283,6 +335,18 @@ function ChannelsManager({
             channels={channels.filter((item) => item.category_id === category.category_id)}
             key={category.category_id}
             onEdit={editChannel}
+            onReorderCategory={(targetId) => {
+              const from = (categories ?? []).findIndex(
+                (item) => item.category_id === category.category_id,
+              );
+              const to = (categories ?? []).findIndex((item) => item.category_id === targetId);
+              if (from >= 0 && to >= 0) {
+                actions.reorderCategory.mutate({
+                  categoryId: category.category_id,
+                  steps: to - from,
+                });
+              }
+            }}
           />
         ))}
       </section>
@@ -427,36 +491,30 @@ function CategoryBlock({
   category,
   channels,
   onEdit,
+  onReorderCategory,
 }: {
   actions: ReturnType<typeof useWorkspaceActions>;
   category: NonNullable<ReturnType<typeof useServerCategories>['data']>[number] | null;
   channels: ServerChannel[];
   onEdit: (channel: ServerChannel) => void;
+  onReorderCategory?: (targetId: string) => void;
 }) {
   return (
-    <div className="mt-5 rounded-2xl border border-white/8 bg-white/[0.025] p-3">
+    <div
+      className="mt-5 rounded-2xl border border-white/8 bg-white/[0.025] p-3 transition"
+      data-sort-id={category?.category_id}
+    >
       <div className="flex items-center gap-2 px-2 py-1">
         <h3 className="min-w-0 flex-1 truncate text-xs font-semibold uppercase tracking-[0.14em] text-crypt-muted">
           {category?.category_name ?? 'Sem categoria'}
         </h3>
         {category ? (
           <>
-            <MiniButton
-              label="Subir categoria"
-              onClick={() =>
-                actions.moveCategory.mutate({ categoryId: category.category_id, direction: -1 })
-              }
-            >
-              <ArrowUp size={14} />
-            </MiniButton>
-            <MiniButton
-              label="Descer categoria"
-              onClick={() =>
-                actions.moveCategory.mutate({ categoryId: category.category_id, direction: 1 })
-              }
-            >
-              <ArrowDown size={14} />
-            </MiniButton>
+            <DragHandle
+              id={category.category_id}
+              label={`Arrastar categoria ${category.category_name}`}
+              onDrop={(targetId) => onReorderCategory?.(targetId)}
+            />
             <MiniButton
               label="Renomear categoria"
               onClick={() => {
@@ -484,8 +542,23 @@ function CategoryBlock({
           channels.map((channel) => (
             <div
               className="flex min-h-11 items-center gap-2 rounded-xl bg-white/[0.035] px-3"
+              data-sort-id={channel.channel_id}
               key={channel.channel_id}
             >
+              <DragHandle
+                id={channel.channel_id}
+                label={`Arrastar canal ${channel.channel_name}`}
+                onDrop={(targetId) => {
+                  const from = channels.findIndex((item) => item.channel_id === channel.channel_id);
+                  const to = channels.findIndex((item) => item.channel_id === targetId);
+                  if (from >= 0 && to >= 0) {
+                    actions.reorderChannel.mutate({
+                      channelId: channel.channel_id,
+                      steps: to - from,
+                    });
+                  }
+                }}
+              />
               <span>{channel.channel_icon ?? '#'}</span>
               <span className="min-w-0 flex-1 truncate text-sm text-white">
                 {channel.channel_name}
@@ -495,22 +568,6 @@ function CategoryBlock({
               ) : null}
               <MiniButton label="Editar canal" onClick={() => onEdit(channel)}>
                 <Pencil size={14} />
-              </MiniButton>
-              <MiniButton
-                label="Subir canal"
-                onClick={() =>
-                  actions.moveChannel.mutate({ channelId: channel.channel_id, direction: -1 })
-                }
-              >
-                <ArrowUp size={14} />
-              </MiniButton>
-              <MiniButton
-                label="Descer canal"
-                onClick={() =>
-                  actions.moveChannel.mutate({ channelId: channel.channel_id, direction: 1 })
-                }
-              >
-                <ArrowDown size={14} />
               </MiniButton>
               <MiniButton
                 label="Excluir canal"
@@ -569,14 +626,36 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
       <section className="panel p-4">
         <h2 className="px-2 font-semibold text-white">Cargos</h2>
         <p className="mt-1 px-2 text-xs leading-5 text-crypt-subtle">
-          Cargos mais acima têm prioridade de cor, agrupamento e gerenciamento.
+          Cargos mais acima têm prioridade. Segure a alça e arraste até a posição desejada.
         </p>
         <div className="mt-3 grid gap-2">
           {roles.map((item) => (
             <div
               className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-3 text-left hover:bg-white/[0.06]"
+              data-sort-id={item.role_id}
               key={item.role_id}
             >
+              {!item.is_system && !item.is_default ? (
+                <DragHandle
+                  id={item.role_id}
+                  label={`Arrastar ${item.role_name} na hierarquia`}
+                  onDrop={(targetId) => {
+                    const movableRoles = roles.filter(
+                      (roleItem) => !roleItem.is_system && !roleItem.is_default,
+                    );
+                    const from = movableRoles.findIndex(
+                      (roleItem) => roleItem.role_id === item.role_id,
+                    );
+                    const to = movableRoles.findIndex((roleItem) => roleItem.role_id === targetId);
+                    if (from >= 0 && to >= 0) {
+                      actions.reorderRole.mutate({
+                        roleId: item.role_id,
+                        steps: to - from,
+                      });
+                    }
+                  }}
+                />
+              ) : null}
               <button
                 className="flex min-w-0 flex-1 items-center gap-3 text-left"
                 onClick={() => {
@@ -594,22 +673,6 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
                 <span className="min-w-0 flex-1 truncate text-sm text-white">{item.role_name}</span>
                 <span className="text-[0.65rem] text-crypt-subtle">{item.member_count}</span>
               </button>
-              {!item.is_system && !item.is_default ? (
-                <span className="flex shrink-0 gap-1">
-                  <MiniButton
-                    label={`Subir ${item.role_name} na hierarquia`}
-                    onClick={() => actions.moveRole.mutate({ direction: -1, roleId: item.role_id })}
-                  >
-                    <ArrowUp size={14} />
-                  </MiniButton>
-                  <MiniButton
-                    label={`Descer ${item.role_name} na hierarquia`}
-                    onClick={() => actions.moveRole.mutate({ direction: 1, roleId: item.role_id })}
-                  >
-                    <ArrowDown size={14} />
-                  </MiniButton>
-                </span>
-              ) : null}
             </div>
           ))}
           <Button

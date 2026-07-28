@@ -1,4 +1,4 @@
-# Segurança — Fases 3 a 8
+# Segurança — Fases 3 a 12
 
 ## Fronteiras de confiança
 
@@ -7,6 +7,15 @@ Storage, funções SQL e Edge Functions validam novamente identidade, propriedad
 
 Secret key, `service_role`, senha do banco e credenciais futuras do LiveKit nunca entram em
 `.env.local`, Git ou bundle do Vite.
+
+## Notificações
+
+- notificações são criadas apenas por triggers e rotinas internas do banco;
+- clientes autenticados não recebem permissão de `insert`, `update` ou `delete`;
+- a policy de leitura exige `recipient_id = auth.uid()`;
+- RPCs de leitura e marcação utilizam sempre a identidade da sessão;
+- destinos aceitos são limitados à árvore interna `/app`;
+- o Service Worker não contém chaves, tokens ou informações privadas persistidas.
 
 ## Autenticação e rotas
 
@@ -182,6 +191,13 @@ que o UUID do autor no caminho seja o da sessão. A interface recebe apenas URLs
 O Crypt aceita somente uma URL de faixa em `open.spotify.com`, remove parâmetros de compartilhamento
 e reduz o link ao ID validado da faixa. O iframe é construído diretamente a partir desse ID e usa o
 player oficial. O Crypt não baixa, copia, transforma nem hospeda áudio.
+
+## Banner e efeitos
+
+O banner usa o mesmo bucket público do avatar, mas a policy de escrita continua exigindo a pasta do
+usuário autenticado. Uma constraint na tabela impede salvar caminho de outra conta ou nome fora do
+formato `banner-{uuid}`. Efeitos são identificadores fechados e renderização CSS; não aceitam HTML,
+JavaScript ou URLs.
 
 ## Exclusão de conta
 

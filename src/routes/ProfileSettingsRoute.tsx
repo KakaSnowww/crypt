@@ -7,6 +7,7 @@ import { AvatarEditor } from '../features/profile/components/AvatarEditor';
 import { InterestEditor } from '../features/profile/components/InterestEditor';
 import { PrivacySettingsForm } from '../features/profile/components/PrivacySettingsForm';
 import { ProfileDetailsForm } from '../features/profile/components/ProfileDetailsForm';
+import { ProfileVisualEditor } from '../features/profile/components/ProfileVisualEditor';
 import { SpotifyTrackEditor } from '../features/profile/components/SpotifyTrackEditor';
 import {
   useCurrentProfile,
@@ -123,6 +124,25 @@ export function ProfileSettingsRoute() {
         </div>
         <div className="mt-6">
           <AvatarEditor profile={profile} />
+        </div>
+      </section>
+
+      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="visual-title">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
+            <Sparkles aria-hidden="true" size={19} />
+          </span>
+          <div>
+            <h2 className="font-semibold text-white" id="visual-title">
+              Banner e efeitos
+            </h2>
+            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+              Personalize seu perfil e o ambiente do seu cartão nas chamadas.
+            </p>
+          </div>
+        </div>
+        <div className="mt-6">
+          <ProfileVisualEditor profile={profile} />
         </div>
       </section>
 

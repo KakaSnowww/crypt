@@ -5,6 +5,8 @@ import { Spinner } from '../components/common/Spinner';
 import { useAuth } from '../features/auth/useAuth';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { SpotifyEmbed } from '../features/profile/components/SpotifyEmbed';
+import { getProfileMediaUrl } from '../features/profile/profile.service';
+import { classNames } from '../lib/classNames';
 import {
   useCurrentProfile,
   useInterestCatalog,
@@ -60,11 +62,18 @@ export function ProfileRoute() {
   const joinedAt = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'long',
   }).format(new Date(profile.created_at));
+  const bannerUrl = getProfileMediaUrl(profile.banner_path);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       <section className="overflow-hidden rounded-[2rem] border border-white/[0.08] bg-crypt-panel shadow-2xl shadow-black/20">
-        <div className="relative h-36 overflow-hidden bg-gradient-to-br from-violet-700 via-indigo-700 to-blue-700 sm:h-44">
+        <div
+          className={classNames(
+            'profile-visual-preview relative h-36 overflow-hidden bg-gradient-to-br from-violet-700 via-indigo-700 to-blue-700 sm:h-44',
+            `profile-effect-${profile.profile_effect}`,
+          )}
+          style={bannerUrl ? { backgroundImage: `url("${bannerUrl}")` } : undefined}
+        >
           <div className="absolute -right-16 -top-20 size-64 rounded-full bg-fuchsia-400/20 blur-3xl" />
           <div className="absolute -bottom-24 left-1/3 size-56 rounded-full bg-cyan-400/20 blur-3xl" />
         </div>

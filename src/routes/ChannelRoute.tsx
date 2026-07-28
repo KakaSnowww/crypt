@@ -16,6 +16,12 @@ import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
 import { useAuth } from '../features/auth/useAuth';
 import { MessageAttachmentCard } from '../features/messages/components/MessageAttachmentCard';
+import {
+  collectMessageMentionIds,
+  filterMentionMembers,
+  findActiveMention,
+  insertMemberMention,
+} from '../features/messages/message.mentions';
 import { useChannelMessages } from '../features/messages/messages.queries';
 import { markChannelRead } from '../features/messages/messages.service';
 import {
@@ -43,9 +49,13 @@ export function ChannelRoute() {
   const messagesQuery = useChannelMessages(channelId);
   const actions = useMessageActions(serverId, channelId);
   const [content, setContent] = useState('');
+  const [caretPosition, setCaretPosition] = useState(0);
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionMenuDismissed, setMentionMenuDismissed] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [reply, setReply] = useState<ChannelMessageRow | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const channel = channelsQuery.data?.find((item) => item.channel_id === channelId);
   const displayName = profileQuery.data?.display_name ?? 'Pessoa do Crypt';
@@ -61,6 +71,13 @@ export function ChannelRoute() {
   );
   const latestMessage = messages.at(-1);
   const latestMessageId = latestMessage?.message_id;
+  const activeMention = findActiveMention(content, caretPosition);
+  const mentionSuggestions = mentionMenuDismissed
+    ? []
+    : filterMentionMembers(
+        (membersQuery.data ?? []).filter((member) => member.profile_id !== user?.id),
+        activeMention,
+      );
 
   useEffect(() => {
     if (!latestMessageId) {
@@ -110,27 +127,16 @@ export function ChannelRoute() {
     !channel.is_read_only &&
     hasPermission(channel.effective_permissions, serverPermission.sendMessages);
 
-  function collectMentionIds(nextContent: string) {
-    const normalized = nextContent.toLocaleLowerCase('pt-BR');
-    const profileIds = (membersQuery.data ?? [])
-      .filter((member) => normalized.includes(`@${member.handle.toLocaleLowerCase('pt-BR')}`))
-      .map((member) => member.profile_id);
-    const channelIds = (channelsQuery.data ?? [])
-      .filter((item) => normalized.includes(`#${item.channel_name.toLocaleLowerCase('pt-BR')}`))
-      .map((item) => item.channel_id);
-
-    return {
-      channelIds: [...new Set(channelIds)].slice(0, 20),
-      profileIds: [...new Set(profileIds)].slice(0, 20),
-    };
-  }
-
   async function submitMessage() {
     if (!user) {
       return;
     }
 
-    const mentions = collectMentionIds(content);
+    const mentions = collectMessageMentionIds(
+      content,
+      membersQuery.data ?? [],
+      channelsQuery.data ?? [],
+    );
     const succeeded = await actions.send
       .mutateAsync({
         channelId,
@@ -151,6 +157,21 @@ export function ChannelRoute() {
       setReply(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  }
+
+  function chooseMention(handle: string) {
+    if (!activeMention) return;
+
+    const next = insertMemberMention(content, activeMention, handle);
+    setContent(next.content);
+    setCaretPosition(next.caretPosition);
+    setMentionIndex(0);
+    setMentionMenuDismissed(true);
+
+    window.requestAnimationFrame(() => {
+      textAreaRef.current?.focus();
+      textAreaRef.current?.setSelectionRange(next.caretPosition, next.caretPosition);
+    });
   }
 
   return (
@@ -254,51 +275,135 @@ export function ChannelRoute() {
           ) : null}
 
           {canSend ? (
-            <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-crypt-elevated/85 p-2 focus-within:border-violet-400/50">
-              <input
-                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain"
-                className="hidden"
-                multiple
-                onChange={(event) => setFiles(Array.from(event.target.files ?? []).slice(0, 3))}
-                ref={fileInputRef}
-                type="file"
-              />
-              <button
-                aria-label="Adicionar anexos"
-                className="grid size-10 shrink-0 place-items-center rounded-xl text-crypt-muted hover:bg-white/[0.07] hover:text-white"
-                onClick={() => fileInputRef.current?.click()}
-                type="button"
-              >
-                <FilePlus2 size={19} />
-              </button>
-              <textarea
-                aria-label={`Mensagem para ${channel.channel_name}`}
-                className="max-h-40 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-6 text-white outline-none placeholder:text-crypt-subtle"
-                maxLength={2_000}
-                onChange={(event) => {
-                  setContent(event.target.value);
-                  announceTyping();
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    void submitMessage();
-                  }
-                }}
-                placeholder={`Conversar em ${channel.channel_name}`}
-                rows={1}
-                value={content}
-              />
-              <Button
-                aria-label="Enviar mensagem"
-                className="size-10 shrink-0 px-0"
-                disabled={!content.trim() && files.length === 0}
-                loading={actions.send.isPending}
-                onClick={() => void submitMessage()}
-              >
-                <Send aria-hidden="true" size={17} />
-                <span className="sr-only">Enviar</span>
-              </Button>
+            <div className="relative">
+              {mentionSuggestions.length ? (
+                <div
+                  aria-label="Sugestões de membros"
+                  className="absolute bottom-[calc(100%+0.5rem)] left-0 z-30 w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-crypt-elevated p-1.5 shadow-2xl"
+                  role="listbox"
+                >
+                  <p className="px-3 py-2 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-crypt-subtle">
+                    Mencionar membro
+                  </p>
+                  {mentionSuggestions.map((member, index) => (
+                    <button
+                      aria-selected={
+                        index === Math.min(mentionIndex, mentionSuggestions.length - 1)
+                      }
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                        index === Math.min(mentionIndex, mentionSuggestions.length - 1)
+                          ? 'bg-violet-500/15 text-white'
+                          : 'text-crypt-muted hover:bg-white/[0.06] hover:text-white'
+                      }`}
+                      key={member.profile_id}
+                      onMouseDown={(event) => {
+                        event.preventDefault();
+                        chooseMention(member.handle);
+                      }}
+                      role="option"
+                      type="button"
+                    >
+                      <ProfileAvatar
+                        avatarPath={member.avatar_path}
+                        displayName={member.display_name}
+                        size="sm"
+                      />
+                      <span className="min-w-0">
+                        <strong className="block truncate text-sm">{member.display_name}</strong>
+                        <span className="block truncate text-xs text-crypt-subtle">
+                          @{member.handle}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                  <p className="px-3 py-2 text-[0.66rem] text-crypt-subtle">
+                    ↑↓ escolhe · Enter ou Tab confirma
+                  </p>
+                </div>
+              ) : null}
+              <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-crypt-elevated/85 p-2 focus-within:border-violet-400/50">
+                <input
+                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain"
+                  className="hidden"
+                  multiple
+                  onChange={(event) => setFiles(Array.from(event.target.files ?? []).slice(0, 3))}
+                  ref={fileInputRef}
+                  type="file"
+                />
+                <button
+                  aria-label="Adicionar anexos"
+                  className="grid size-10 shrink-0 place-items-center rounded-xl text-crypt-muted hover:bg-white/[0.07] hover:text-white"
+                  onClick={() => fileInputRef.current?.click()}
+                  type="button"
+                >
+                  <FilePlus2 size={19} />
+                </button>
+                <textarea
+                  aria-label={`Mensagem para ${channel.channel_name}`}
+                  className="max-h-40 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-6 text-white outline-none placeholder:text-crypt-subtle"
+                  maxLength={2_000}
+                  onChange={(event) => {
+                    setContent(event.target.value);
+                    setCaretPosition(event.target.selectionStart);
+                    setMentionIndex(0);
+                    setMentionMenuDismissed(false);
+                    announceTyping();
+                  }}
+                  onKeyDown={(event) => {
+                    if (mentionSuggestions.length && event.key === 'ArrowDown') {
+                      event.preventDefault();
+                      setMentionIndex((current) => (current + 1) % mentionSuggestions.length);
+                      return;
+                    }
+
+                    if (mentionSuggestions.length && event.key === 'ArrowUp') {
+                      event.preventDefault();
+                      setMentionIndex(
+                        (current) =>
+                          (current - 1 + mentionSuggestions.length) % mentionSuggestions.length,
+                      );
+                      return;
+                    }
+
+                    if (
+                      mentionSuggestions.length &&
+                      (event.key === 'Tab' || (event.key === 'Enter' && !event.shiftKey))
+                    ) {
+                      event.preventDefault();
+                      const selected =
+                        mentionSuggestions[Math.min(mentionIndex, mentionSuggestions.length - 1)];
+                      if (selected) chooseMention(selected.handle);
+                      return;
+                    }
+
+                    if (event.key === 'Escape' && mentionSuggestions.length) {
+                      event.preventDefault();
+                      setMentionMenuDismissed(true);
+                      return;
+                    }
+
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                      event.preventDefault();
+                      void submitMessage();
+                    }
+                  }}
+                  onSelect={(event) => setCaretPosition(event.currentTarget.selectionStart)}
+                  placeholder={`Conversar em ${channel.channel_name}`}
+                  ref={textAreaRef}
+                  rows={1}
+                  value={content}
+                />
+                <Button
+                  aria-label="Enviar mensagem"
+                  className="size-10 shrink-0 px-0"
+                  disabled={!content.trim() && files.length === 0}
+                  loading={actions.send.isPending}
+                  onClick={() => void submitMessage()}
+                >
+                  <Send aria-hidden="true" size={17} />
+                  <span className="sr-only">Enviar</span>
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-amber-400/15 bg-amber-500/5 p-3 text-center text-sm text-amber-100">

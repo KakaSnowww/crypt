@@ -1,8 +1,9 @@
 import { LiveKitRoom, RoomAudioRenderer, StartAudio } from '@livekit/components-react';
-import { AudioPresets, ConnectionState, Room, ScreenSharePresets } from 'livekit-client';
-import { useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { AudioPresets, ConnectionState, Room, RoomEvent, ScreenSharePresets } from 'livekit-client';
+import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { useToast } from '../../components/common/ToastContext';
 import { useAuth } from '../auth/useAuth';
+import { playCryptSound } from '../../lib/sounds';
 import { createVoiceConnection } from './voice.service';
 import type { VoiceConnection } from './voice.types';
 import { VoiceCallContext } from './VoiceCallContext';
@@ -16,6 +17,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
+  const intentionalLeaveRef = useRef(false);
+  const joinedRoomRef = useRef(false);
   const [room] = useState(
     () =>
       new Room({
@@ -41,6 +44,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   );
 
   const leave = useCallback(async () => {
+    intentionalLeaveRef.current = true;
+    if (room.state !== ConnectionState.Disconnected) playCryptSound('call-leave');
     await room.disconnect();
     setConnection(null);
     setChannelId(null);
@@ -59,6 +64,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       setIsConnecting(true);
       try {
         if (room.state !== ConnectionState.Disconnected) {
+          intentionalLeaveRef.current = true;
+          playCryptSound('call-leave');
           await room.disconnect();
         }
         const nextConnection = await createVoiceConnection(channelId);
@@ -86,6 +93,34 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   }, [connection, room, user]);
 
   useEffect(() => () => void room.disconnect(), [room]);
+
+  useEffect(() => {
+    const handleConnected = () => {
+      intentionalLeaveRef.current = false;
+      joinedRoomRef.current = true;
+      playCryptSound('call-join');
+    };
+    const handleParticipantConnected = () => {
+      if (joinedRoomRef.current && !intentionalLeaveRef.current) playCryptSound('call-join');
+    };
+    const handleParticipantDisconnected = () => {
+      if (joinedRoomRef.current && !intentionalLeaveRef.current) playCryptSound('call-leave');
+    };
+    const handleDisconnected = () => {
+      joinedRoomRef.current = false;
+    };
+    room.on(RoomEvent.Connected, handleConnected);
+    room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
+    room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+    room.on(RoomEvent.Disconnected, handleDisconnected);
+
+    return () => {
+      room.off(RoomEvent.Connected, handleConnected);
+      room.off(RoomEvent.ParticipantConnected, handleParticipantConnected);
+      room.off(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+      room.off(RoomEvent.Disconnected, handleDisconnected);
+    };
+  }, [room]);
 
   const value = useMemo(
     () => ({ channelId, connection, error, isConnecting, isExpanded, join, leave, setExpanded }),

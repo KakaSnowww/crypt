@@ -3,7 +3,18 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 11
+## Estado atual — Fase 12
+
+A Fase 12 adiciona:
+
+- central privada e unificada de notificações;
+- amizade, mensagens privadas, menções e moderação;
+- contador de não lidas e atualização em tempo real;
+- preferências individuais por categoria;
+- avisos internos, som e alertas do sistema;
+- base compatível com navegador, Windows e Android;
+- Service Worker preparado para publicação e push em segundo plano;
+- RLS, RPCs protegidas e testes de isolamento;
 
 Além das fases anteriores, a Fase 11 adiciona:
 
@@ -114,7 +125,9 @@ As migrations novas são:
 5. `20260726233000_phase9_direct_attachments_rls_fix.sql`;
 6. `20260727010000_phase10_moderation_settings.sql`;
 7. `20260727030000_phase11_voice_video.sql`;
-8. `20260728010000_phase11_voice_presence.sql`.
+8. `20260728010000_phase11_voice_presence.sql`;
+9. `20260728180000_phase12_notifications.sql`;
+10. `20260728230000_phase125_profile_visuals.sql`.
 
 Elas criam tabelas, funções, índices, buckets, policies, publicação Realtime e a movimentação segura
 da hierarquia de cargos. Não crie esses recursos manualmente no painel.
@@ -148,6 +161,7 @@ Rotas principais:
 - `/app/conexoes`
 - `/app/mensagens`
 - `/app/mensagens/{uuid-da-conversa}`
+- `/app/notificacoes`
 - `/app/pessoas/@identificador`
 - `/app/perfil`, `/app/perfil/editar`, `/app/conta`
 
@@ -175,6 +189,7 @@ src/
 │   ├── auth/
 │   ├── connections/
 │   ├── messages/
+│   ├── notifications/
 │   ├── onboarding/
 │   ├── profile/
 │   ├── servers/
@@ -211,6 +226,8 @@ Consulte:
 - [docs/servers-members.md](docs/servers-members.md)
 - [docs/channels-messages.md](docs/channels-messages.md)
 - [docs/direct-messages.md](docs/direct-messages.md)
+- [docs/notifications.md](docs/notifications.md)
+- [docs/profile-visuals-sounds.md](docs/profile-visuals-sounds.md)
 
 ### Nota da auditoria
 
@@ -220,10 +237,10 @@ RSC, que não são usadas neste aplicativo SPA. Não execute `npm audit fix --fo
 ## Limitações atuais
 
 - o envio padrão de e-mails do Supabase é apropriado apenas para testes;
-- presença depende de a aplicação permanecer aberta;
+- alertas do sistema em segundo plano exigem publicação HTTPS e serão ativados com a PWA;
 - busca global no histórico ainda não foi adicionada;
-- moderação completa, publicação web, Windows e Android ficam para fases posteriores.
+- publicação web e executáveis Windows e Android ficam para as próximas fases.
 
 ## Próxima fase
 
-A Fase 12 implementará notificações internas, web, Windows e Android.
+A Fase 13 criará o aplicativo Windows com Tauri, ícones, permissões e instalador.

@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { ProfileActionError } from './profile.errors';
 import {
   MAX_AVATAR_BYTES,
+  MAX_BANNER_BYTES,
   parseSpotifyTrackUrl,
   profileDetailsSchema,
   privacySchema,
   validateAvatarFile,
+  validateBannerFile,
 } from './profile.schemas';
 
 describe('validação do perfil', () => {
@@ -55,6 +57,19 @@ describe('validação do perfil', () => {
     expect(() =>
       validateAvatarFile(
         new File([new Uint8Array(MAX_AVATAR_BYTES + 1)], 'avatar.jpg', {
+          type: 'image/jpeg',
+        }),
+      ),
+    ).toThrow(ProfileActionError);
+  });
+
+  it('permite banner seguro de até 5 MB', () => {
+    expect(() =>
+      validateBannerFile(new File(['imagem'], 'banner.webp', { type: 'image/webp' })),
+    ).not.toThrow();
+    expect(() =>
+      validateBannerFile(
+        new File([new Uint8Array(MAX_BANNER_BYTES + 1)], 'banner.jpg', {
           type: 'image/jpeg',
         }),
       ),

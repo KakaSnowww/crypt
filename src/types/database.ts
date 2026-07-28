@@ -250,6 +250,39 @@ export type Database = {
           read_at: null | string;
         }>;
       };
+      get_my_notification_preferences: {
+        Args: NoArgs;
+        Returns: Array<{
+          direct_messages_enabled: boolean;
+          friend_activity_enabled: boolean;
+          in_app_enabled: boolean;
+          mentions_enabled: boolean;
+          moderation_enabled: boolean;
+          sound_enabled: boolean;
+          system_enabled: boolean;
+        }>;
+      };
+      get_my_notifications: {
+        Args: {
+          before_created_at?: null | string;
+          result_limit?: number;
+          unread_only?: boolean;
+        };
+        Returns: Array<{
+          actor_avatar_path: null | string;
+          actor_display_name: null | string;
+          actor_handle: null | string;
+          actor_id: null | string;
+          body: string;
+          created_at: string;
+          notification_id: string;
+          notification_type: string;
+          read_at: null | string;
+          resource_id: null | string;
+          target_path: null | string;
+          title: string;
+        }>;
+      };
       get_my_friends: {
         Args: NoArgs;
         Returns: Array<{
@@ -302,6 +335,7 @@ export type Database = {
         Returns: Array<{
           allow_friend_requests: boolean;
           avatar_path: null | string;
+          banner_path: null | string;
           bio: null | string;
           created_at: string;
           display_name: string;
@@ -311,6 +345,7 @@ export type Database = {
           interest_category_labels: string[];
           interest_labels: string[];
           mutual_friend_count: number;
+          profile_effect: 'aurora' | 'neon' | 'none' | 'pulse';
           profile_id: string;
           relationship_status: string;
         }>;
@@ -556,6 +591,14 @@ export type Database = {
         Args: NoArgs;
         Returns: undefined;
       };
+      mark_all_notifications_read: {
+        Args: NoArgs;
+        Returns: undefined;
+      };
+      mark_notification_read: {
+        Args: { target_notification_id: string };
+        Returns: undefined;
+      };
       kick_server_member: {
         Args: {
           moderation_reason?: null | string;
@@ -585,6 +628,18 @@ export type Database = {
       };
       move_server_role: {
         Args: { direction: number; target_role_id: string };
+        Returns: undefined;
+      };
+      save_my_notification_preferences: {
+        Args: {
+          enable_direct_messages: boolean;
+          enable_friend_activity: boolean;
+          enable_in_app: boolean;
+          enable_mentions: boolean;
+          enable_moderation: boolean;
+          enable_sound: boolean;
+          enable_system: boolean;
+        };
         Returns: undefined;
       };
       normalize_server_name: {
@@ -1091,6 +1146,7 @@ export type Database = {
       profiles: {
         Insert: {
           avatar_path?: null | string;
+          banner_path?: null | string;
           bio?: null | string;
           created_at?: string;
           display_name: string;
@@ -1099,6 +1155,7 @@ export type Database = {
           favorite_spotify_url?: null | string;
           handle: string;
           id: string;
+          profile_effect?: 'aurora' | 'neon' | 'none' | 'pulse';
           updated_at?: string;
         };
         Relationships: [
@@ -1112,6 +1169,7 @@ export type Database = {
         ];
         Row: {
           avatar_path: null | string;
+          banner_path: null | string;
           bio: null | string;
           created_at: string;
           display_name: string;
@@ -1120,16 +1178,19 @@ export type Database = {
           favorite_spotify_url: null | string;
           handle: string;
           id: string;
+          profile_effect: 'aurora' | 'neon' | 'none' | 'pulse';
           updated_at: string;
         };
         Update: {
           avatar_path?: null | string;
+          banner_path?: null | string;
           bio?: null | string;
           display_name?: string;
           favorite_spotify_thumbnail_url?: null | string;
           favorite_spotify_title?: null | string;
           favorite_spotify_url?: null | string;
           handle?: string;
+          profile_effect?: 'aurora' | 'neon' | 'none' | 'pulse';
           updated_at?: string;
         };
       };

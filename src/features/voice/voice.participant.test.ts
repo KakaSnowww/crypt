@@ -12,14 +12,21 @@ describe('getVoiceParticipantProfile', () => {
       getVoiceParticipantProfile(
         participant({
           identity: 'profile-id',
-          metadata: JSON.stringify({ avatar_path: 'profile-id/avatar.jpg', handle: 'kaiosnow' }),
+          metadata: JSON.stringify({
+            avatar_path: 'profile-id/avatar.jpg',
+            banner_path: 'profile-id/banner.jpg',
+            handle: 'kaiosnow',
+            profile_effect: 'aurora',
+          }),
           name: 'Kaio Snow',
         }),
       ),
     ).toEqual({
       avatarPath: 'profile-id/avatar.jpg',
+      bannerPath: 'profile-id/banner.jpg',
       displayName: 'Kaio Snow',
       handle: 'kaiosnow',
+      profileEffect: 'aurora',
     });
   });
 
@@ -30,8 +37,10 @@ describe('getVoiceParticipantProfile', () => {
       ),
     ).toEqual({
       avatarPath: null,
+      bannerPath: null,
       displayName: 'profile-id',
       handle: null,
+      profileEffect: 'none',
     });
   });
 });

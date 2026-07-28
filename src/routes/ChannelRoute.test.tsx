@@ -55,6 +55,16 @@ vi.mock('../features/servers/servers.queries', () => ({
         presence_status: 'online',
         profile_id: authenticatedAuthValue.user!.id,
       },
+      {
+        avatar_path: null,
+        display_name: 'Kaio Teste',
+        handle: 'kaioteste',
+        is_online: true,
+        is_owner: false,
+        joined_at: '2026-07-26T01:10:00.000Z',
+        presence_status: 'online',
+        profile_id: '50000000-0000-0000-0000-000000000002',
+      },
     ],
     isPending: false,
   }),
@@ -118,7 +128,7 @@ vi.mock('../features/messages/useMessageActions', () => ({
 }));
 
 describe('ChannelRoute', () => {
-  it('mostra o histórico e envia uma nova mensagem', async () => {
+  it('sugere um membro, insere a menção e envia seu id', async () => {
     const user = userEvent.setup();
 
     render(
@@ -135,14 +145,18 @@ describe('ChannelRoute', () => {
     expect(screen.getByText('Bem-vindo ao canal!')).toBeVisible();
 
     const composer = screen.getByRole('textbox', { name: 'Mensagem para Conversa Geral' });
-    await user.type(composer, 'Olá @kaiosnow');
+    await user.type(composer, 'Olá @ka');
+    expect(screen.getByRole('option', { name: /Kaio Teste/ })).toBeVisible();
+
+    await user.keyboard('{Enter}');
+    expect(composer).toHaveValue('Olá @kaioteste ');
     await user.click(screen.getByRole('button', { name: 'Enviar mensagem' }));
 
     expect(sendMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         channelId,
-        content: 'Olá @kaiosnow',
-        profileMentionIds: [authenticatedAuthValue.user!.id],
+        content: 'Olá @kaioteste ',
+        profileMentionIds: ['50000000-0000-0000-0000-000000000002'],
         serverId,
       }),
     );

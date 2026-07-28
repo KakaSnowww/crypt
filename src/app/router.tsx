@@ -18,6 +18,7 @@ import {
   LazyRoute,
   LoginRoute,
   NotFoundRoute,
+  NotificationsRoute,
   OnboardingRoute,
   ProfileRoute,
   ProfileSettingsRoute,
@@ -151,6 +152,14 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <DirectConversationRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'notificacoes',
+        element: (
+          <LazyRoute>
+            <NotificationsRoute />
           </LazyRoute>
         ),
       },

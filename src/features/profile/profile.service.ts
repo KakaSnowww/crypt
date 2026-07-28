@@ -4,6 +4,7 @@ import { ProfileActionError, toProfileActionError } from './profile.errors';
 import {
   parseSpotifyTrackUrl,
   validateAvatarFile,
+  validateBannerFile,
   type PrivacyFormValues,
   type ProfileDetailsValues,
 } from './profile.schemas';
@@ -216,6 +217,38 @@ export async function uploadAvatar(userId: string, file: File, previousPath: nul
 
 export async function removeAvatar(userId: string, previousPath: string) {
   const profile = await updateProfileRow(userId, { avatar_path: null });
+  await getSupabaseClient().storage.from(PROFILE_MEDIA_BUCKET).remove([previousPath]);
+  return profile;
+}
+
+export async function uploadBanner(userId: string, file: File, previousPath: null | string) {
+  validateBannerFile(file);
+
+  const client = getSupabaseClient();
+  const extension = extensionForMimeType(file.type);
+  const path = `${userId}/banner-${crypto.randomUUID()}.${extension}`;
+  const { error: uploadError } = await client.storage
+    .from(PROFILE_MEDIA_BUCKET)
+    .upload(path, file, {
+      cacheControl: '3600',
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (uploadError) throw toProfileActionError(uploadError);
+
+  try {
+    const profile = await updateProfileRow(userId, { banner_path: path });
+    if (previousPath) await client.storage.from(PROFILE_MEDIA_BUCKET).remove([previousPath]);
+    return profile;
+  } catch (error) {
+    await client.storage.from(PROFILE_MEDIA_BUCKET).remove([path]);
+    throw error;
+  }
+}
+
+export async function removeBanner(userId: string, previousPath: string) {
+  const profile = await updateProfileRow(userId, { banner_path: null });
   await getSupabaseClient().storage.from(PROFILE_MEDIA_BUCKET).remove([previousPath]);
   return profile;
 }

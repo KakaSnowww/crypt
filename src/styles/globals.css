@@ -159,3 +159,58 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes crypt-aurora {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes crypt-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgb(167 139 250 / 0.16),
+      0 0 0 rgb(139 92 246 / 0);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgb(96 165 250 / 0.36),
+      0 0 26px rgb(109 40 217 / 0.25);
+  }
+}
+
+.profile-visual-preview {
+  background-color: #17213a;
+  background-position: center;
+  background-size: cover;
+}
+
+.profile-effect-aurora::after {
+  animation: crypt-aurora 7s ease infinite;
+  background: linear-gradient(
+    115deg,
+    rgb(124 58 237 / 0.28),
+    rgb(37 99 235 / 0.15),
+    rgb(217 70 239 / 0.25)
+  );
+  background-size: 220% 220%;
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.profile-effect-neon {
+  box-shadow:
+    inset 0 0 0 1px rgb(34 211 238 / 0.45),
+    0 0 24px rgb(139 92 246 / 0.24);
+}
+
+.profile-effect-pulse {
+  animation: crypt-pulse 2.7s ease-in-out infinite;
+}
