@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.2.3': {
+    highlights: [
+      {
+        description:
+          'A versão 0.2.2 agora detecta esta atualização e exibe o atalho ao lado da pesquisa e das notificações.',
+        title: 'Botão testado em atualização real',
+      },
+      {
+        description:
+          'A reprodução de som no Electron foi reforçada para funcionar mesmo quando a atualização é encontrada logo após abrir o Crypt.',
+        title: 'Aviso sonoro mais confiável',
+      },
+      {
+        description:
+          'Se o Windows impedir o primeiro toque, o Crypt libera uma nova tentativa em vez de marcar o aviso como reproduzido.',
+        title: 'Tentativa segura do som5',
+      },
+      {
+        description:
+          'O popup confirma que a instalação terminou e registra as mudanças desta versão.',
+        title: 'Novidades da versão 0.2.3',
+      },
+    ],
+    summary:
+      'Esta atualização permite validar o botão, o som5.mp3 e o popup no fluxo automático completo.',
+    title: 'Atualizações mais visíveis e audíveis',
+    version: '0.2.3',
+  },
   '0.2.2': {
     highlights: [
       {

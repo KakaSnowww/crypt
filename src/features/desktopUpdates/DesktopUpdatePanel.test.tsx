@@ -10,7 +10,7 @@ describe('DesktopUpdatePanel', () => {
   it('mostra a versão também quando o Crypt está aberto no navegador', () => {
     render(<DesktopUpdatePanel />);
 
-    expect(screen.getByText(/Versão atual: 0\.2\.2/)).toBeInTheDocument();
+    expect(screen.getByText(/Versão atual: 0\.2\.3/)).toBeInTheDocument();
     expect(screen.getByText(/Você está usando o Crypt pelo navegador/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Verificar agora' })).not.toBeInTheDocument();
   });
@@ -21,8 +21,8 @@ describe('DesktopUpdatePanel', () => {
 
     render(<DesktopUpdatePanel />);
 
-    expect(await screen.findByText('Versão 0.2.3 pronta para instalar.')).toBeInTheDocument();
-    screen.getByRole('button', { name: 'Reiniciar e instalar 0.2.3' }).click();
+    expect(await screen.findByText('Versão 0.2.4 pronta para instalar.')).toBeInTheDocument();
+    screen.getByRole('button', { name: 'Reiniciar e instalar 0.2.4' }).click();
     expect(restartAndInstall).toHaveBeenCalledOnce();
   });
 });
@@ -31,9 +31,9 @@ function createDesktopBridge(
   restartAndInstall: () => Promise<boolean>,
 ): NonNullable<Window['cryptDesktop']> {
   const state: CryptDesktopUpdateState = {
-    currentVersion: '0.2.0',
+    currentVersion: '0.2.3',
     state: 'ready',
-    version: '0.2.3',
+    version: '0.2.4',
   };
 
   return {

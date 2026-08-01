@@ -10,14 +10,19 @@ const soundPaths: Record<CryptSound, string> = {
 
 const audioCache = new Map<CryptSound, HTMLAudioElement>();
 
-export function playCryptSound(sound: CryptSound) {
-  if (typeof Audio === 'undefined') return;
+export async function playCryptSound(sound: CryptSound) {
+  if (typeof Audio === 'undefined') return false;
 
   const audio = audioCache.get(sound) ?? new Audio(soundPaths[sound]);
   audio.preload = 'auto';
   audio.currentTime = 0;
   audioCache.set(sound, audio);
-  void audio.play().catch(() => {
+
+  try {
+    await audio.play();
+    return true;
+  } catch {
     // Navegadores podem bloquear áudio antes da primeira interação.
-  });
+    return false;
+  }
 }

@@ -152,7 +152,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
 
   const leave = useCallback(async () => {
     intentionalLeaveRef.current = true;
-    if (room.state !== ConnectionState.Disconnected) playCryptSound('call-leave');
+    if (room.state !== ConnectionState.Disconnected) void playCryptSound('call-leave');
     await stopScreenShare();
     await stopAndroidCallService();
     await room.disconnect();
@@ -174,7 +174,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       try {
         if (room.state !== ConnectionState.Disconnected) {
           intentionalLeaveRef.current = true;
-          playCryptSound('call-leave');
+          void playCryptSound('call-leave');
           await stopScreenShare();
           await room.disconnect();
         }
@@ -215,7 +215,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     const handleConnected = () => {
       intentionalLeaveRef.current = false;
       joinedRoomRef.current = true;
-      playCryptSound('call-join');
+      void playCryptSound('call-join');
       if (isAndroidRuntime() && connection) {
         void startAndroidCallService(connection.channel_name, connection.server_name).catch(
           (caughtError) => {
@@ -233,11 +233,11 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     };
     const handleParticipantConnected = (participant: RemoteParticipant) => {
       if (isAndroidScreenShareCompanion(participant.identity, participant.metadata)) return;
-      if (joinedRoomRef.current && !intentionalLeaveRef.current) playCryptSound('call-join');
+      if (joinedRoomRef.current && !intentionalLeaveRef.current) void playCryptSound('call-join');
     };
     const handleParticipantDisconnected = (participant: RemoteParticipant) => {
       if (isAndroidScreenShareCompanion(participant.identity, participant.metadata)) return;
-      if (joinedRoomRef.current && !intentionalLeaveRef.current) playCryptSound('call-leave');
+      if (joinedRoomRef.current && !intentionalLeaveRef.current) void playCryptSound('call-leave');
     };
     const handleDisconnected = () => {
       joinedRoomRef.current = false;

@@ -37,6 +37,8 @@ let tray: Tray | null = null;
 let isQuitting = false;
 let saveWindowTimer: NodeJS.Timeout | null = null;
 
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
 protocol.registerSchemesAsPrivileged([
   {
     privileges: {

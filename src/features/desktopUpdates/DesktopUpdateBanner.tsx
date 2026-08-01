@@ -18,8 +18,13 @@ export function DesktopUpdateBanner() {
     });
 
     if (window.localStorage.getItem(updateSoundStorageKey) === state.version) return;
-    playCryptSound('update');
     window.localStorage.setItem(updateSoundStorageKey, state.version);
+
+    void playCryptSound('update').then((played) => {
+      if (!played && window.localStorage.getItem(updateSoundStorageKey) === state.version) {
+        window.localStorage.removeItem(updateSoundStorageKey);
+      }
+    });
   }, [state]);
 
   if (!state || !['available', 'downloading', 'ready'].includes(state.state)) return null;

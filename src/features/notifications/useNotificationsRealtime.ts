@@ -48,12 +48,12 @@ export function useNotificationsRealtime(
 
           if (preferences?.sound_enabled) {
             if (notification.notification_type === 'friend_request') {
-              playCryptSound('friend-request');
+              void playCryptSound('friend-request');
             } else if (
               notification.notification_type === 'direct_message' ||
               notification.notification_type === 'channel_mention'
             ) {
-              playCryptSound('message');
+              void playCryptSound('message');
             }
           }
         },
