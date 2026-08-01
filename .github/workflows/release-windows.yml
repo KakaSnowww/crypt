@@ -76,7 +76,44 @@ jobs:
             throw "A tag deve ser v$packageVersion, mas foi ${{ github.ref_name }}."
           }
 
-      - name: Criar Release e metadados de atualização
-        run: npm run desktop:release
+      - name: Criar instalador e metadados de atualização
+        run: npm run desktop:build
+
+      - name: Publicar e verificar arquivos da Release
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $repository = $env:GITHUB_REPOSITORY
+          $assets = @(
+            "release/Crypt-Setup-$version.exe",
+            "release/Crypt-Setup-$version.exe.blockmap",
+            "release/latest.yml"
+          )
+
+          foreach ($asset in $assets) {
+            if (-not (Test-Path $asset)) {
+              throw "O build não gerou o arquivo obrigatório: $asset"
+            }
+          }
+
+          gh release view $tag --repo $repository *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --repo $repository --title "Crypt $tag" --generate-notes
+          }
+
+          $PSNativeCommandUseErrorActionPreference = $true
+          gh release upload $tag @assets --repo $repository --clobber
+
+          $publishedNames = @(
+            gh release view $tag --repo $repository --json assets --jq '.assets[].name'
+          )
+
+          foreach ($asset in $assets) {
+            $assetName = Split-Path $asset -Leaf
+            if ($publishedNames -notcontains $assetName) {
+              throw "A Release não contém o arquivo obrigatório: $assetName"
+            }
+          }
