@@ -27,7 +27,28 @@ O workflow `.github/workflows/release-windows.yml` executa:
 O token temporário `GITHUB_TOKEN` é fornecido pelo próprio GitHub Actions. Não adicione token
 pessoal ao projeto, ao ZIP ou às variáveis do frontend.
 
-## Como publicar a versão 0.2.0
+### Visibilidade necessária para o atualizador
+
+O workflow consegue criar uma Release em um repositório privado, mas o aplicativo instalado não
+recebe o `GITHUB_TOKEN`. Por isso, o provedor GitHub do `electron-updater` só consegue consultar
+`latest.yml` e baixar a atualização quando a Release estiver acessível publicamente.
+
+Para a atualização automática funcionar no estado atual, torne `KakaSnowww/crypt` público antes
+de publicar a `v0.2.1`. Se o código precisar continuar privado, não coloque token do GitHub dentro
+do aplicativo: instale a `0.2.1` manualmente e configure depois um repositório público separado ou
+outro armazenamento público apenas para os artefatos de atualização.
+
+O build de produção também exige estes Secrets em **Settings → Secrets and variables → Actions**:
+
+- `VITE_SUPABASE_URL`;
+- `VITE_SUPABASE_PUBLISHABLE_KEY`;
+- `VITE_LIVEKIT_URL`.
+
+Sem qualquer um deles, o workflow falha antes de gerar um instalador incompleto. A integração de
+presença no Discord usa a variável pública `DISCORD_APPLICATION_ID`, documentada em
+[discord-presence.md](discord-presence.md).
+
+## Como publicar a versão 0.2.1
 
 Depois de validar e enviar o código para `main`:
 
@@ -35,10 +56,10 @@ Depois de validar e enviar o código para `main`:
 cd C:\Users\Snow\Documents\Crypt
 git status
 git add .
-git commit -m "feat: implementa releases e atualizacao automatica"
+git commit -m "fix: configura build de producao e presenca do Discord"
 git push
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.2.1
+git push origin v0.2.1
 ```
 
 O envio da tag inicia o workflow. Na página **Actions**, aguarde `Publicar aplicativo Windows`.
@@ -49,21 +70,20 @@ Depois, confira a página **Releases**: ela deve conter pelo menos o instalador 
 
 Uma atualização só pode ser confirmada entre duas versões publicadas:
 
-1. publique e instale a versão `0.2.0`;
-2. aumente `package.json` para `0.2.1` e mantenha Android/Tauri sincronizados;
-3. publique a tag `v0.2.1`;
-4. abra a versão `0.2.0` instalada;
-5. aguarde a verificação inicial ou acesse **Conta e segurança → Verificar agora**;
-6. acompanhe o download;
-7. clique em **Reiniciar e instalar**;
-8. confirme que **Versão instalada** mostra `0.2.1`.
+1. instale a versão `0.2.0`;
+2. publique a tag `v0.2.1` com os Secrets configurados;
+3. mantenha a versão `0.2.0` aberta ou abra novamente pelo atalho;
+4. aguarde a verificação inicial ou acesse **Conta e segurança → Verificar agora**;
+5. acompanhe o download;
+6. clique em **Reiniciar e instalar**;
+7. confirme que **Versão instalada** mostra `0.2.1`.
 
 Releases em rascunho não são oferecidas pelo atualizador. O instalador e `latest.yml` precisam vir
 do mesmo workflow para que o hash seja correspondente.
 
 ## Android
 
-O Android foi sincronizado como versão `0.2.0` e `versionCode 2`. Enquanto o APK for distribuído
+O Android foi sincronizado como versão `0.2.1` e `versionCode 3`. Enquanto o APK for distribuído
 fora da Play Store, novas instalações serão manuais. Quando o aplicativo entrar na Play Store, a
 atualização automática será controlada pela própria loja, sem conceder ao Crypt permissão para
 instalar pacotes desconhecidos.

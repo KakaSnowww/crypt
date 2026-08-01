@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -127,6 +127,7 @@
       }
     ],
     "win": {
+      "executableName": "CryptMessenger",
       "icon": "src-tauri/icons/icon.ico",
       "target": [
         "nsis"

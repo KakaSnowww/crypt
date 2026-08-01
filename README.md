@@ -46,7 +46,8 @@ A Fase 14.1 adiciona a base Android:
 
 A Fase 15 prepara distribuição e atualização:
 
-- versão pública inicial `0.2.0`;
+- versão pública corretiva `0.2.1`, com configuração segura do build de produção;
+- executável exclusivo e Rich Presence própria para impedir associação a outro jogo no Discord;
 - publicação automatizada do instalador NSIS pelo GitHub Actions;
 - metadados `latest.yml` e validação de integridade;
 - verificação no início e a cada quatro horas;

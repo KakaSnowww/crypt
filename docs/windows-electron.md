@@ -83,7 +83,7 @@ npm run desktop:build
 O instalador será criado em:
 
 ```text
-release\Crypt-Setup-0.2.0.exe
+release\Crypt-Setup-0.2.1.exe
 ```
 
 Para publicar o instalador junto dos metadados de atualização, use o workflow documentado em

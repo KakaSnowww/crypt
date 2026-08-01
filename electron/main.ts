@@ -23,6 +23,7 @@ import {
   type CryptWindowState,
 } from './windowState.js';
 import { registerDesktopUpdaterIpc, startDesktopUpdater } from './desktopUpdater.js';
+import { startDiscordPresence, stopDiscordPresence } from './discordPresence.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectDirectory = path.resolve(currentDirectory, '..');
@@ -70,6 +71,7 @@ if (!hasSingleInstanceLock) {
   });
 
   void app.whenReady().then(async () => {
+    app.setAppUserModelId('com.kakasnowww.crypt');
     Menu.setApplicationMenu(null);
     registerCryptProtocol();
     configureApplicationProtocol();
@@ -79,6 +81,7 @@ if (!hasSingleInstanceLock) {
     await createMainWindow();
     createTray();
     startDesktopUpdater();
+    startDiscordPresence();
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) void createMainWindow();
@@ -88,6 +91,7 @@ if (!hasSingleInstanceLock) {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  stopDiscordPresence();
   persistMainWindowState();
 });
 

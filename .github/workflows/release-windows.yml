@@ -14,6 +14,10 @@ jobs:
     name: Validar e publicar NSIS
     runs-on: windows-latest
     timeout-minutes: 45
+    env:
+      VITE_LIVEKIT_URL: ${{ secrets.VITE_LIVEKIT_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
 
     steps:
       - name: Baixar código
@@ -24,6 +28,33 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+
+      - name: Validar configuração de produção
+        shell: pwsh
+        env:
+          DISCORD_APPLICATION_ID: ${{ vars.DISCORD_APPLICATION_ID }}
+        run: |
+          $requiredVariables = @(
+            "VITE_SUPABASE_URL",
+            "VITE_SUPABASE_PUBLISHABLE_KEY",
+            "VITE_LIVEKIT_URL"
+          )
+
+          foreach ($variable in $requiredVariables) {
+            $value = [Environment]::GetEnvironmentVariable($variable)
+            if ([string]::IsNullOrWhiteSpace($value)) {
+              throw "Configure o secret $variable em Settings > Secrets and variables > Actions."
+            }
+          }
+
+          if ($env:DISCORD_APPLICATION_ID -notmatch '^\d{17,20}$') {
+            throw "Configure a variable DISCORD_APPLICATION_ID em Settings > Secrets and variables > Actions > Variables."
+          }
+
+          $configPath = "electron/discordConfig.ts"
+          $config = Get-Content $configPath -Raw
+          $config = $config.Replace("__CRYPT_DISCORD_APPLICATION_ID__", $env:DISCORD_APPLICATION_ID)
+          Set-Content -Path $configPath -Value $config -Encoding utf8
 
       - name: Instalar dependências reproduzíveis
         run: npm ci
