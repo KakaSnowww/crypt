@@ -18,7 +18,7 @@
     "android:run": "npm run android:sync && cap run android",
     "android:sync": "npm run build && cap sync android",
     "build": "tsc -b && vite build",
-    "desktop:build": "npm run build && npm run desktop:compile && electron-builder --win nsis",
+    "desktop:build": "npm run build && npm run desktop:compile && electron-builder --win nsis --publish never",
     "desktop:check": "npm run desktop:compile",
     "desktop:compile": "tsc -p tsconfig.electron.json",
     "desktop:dev": "npm run desktop:compile && concurrently --kill-others \"vite\" \"wait-on http://127.0.0.1:5173 && cross-env CRYPT_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
