@@ -16,23 +16,21 @@ describe('PostUpdateWhatsNew', () => {
 
     render(<PostUpdateWhatsNew />);
 
+    expect(screen.getByRole('dialog', { name: 'Áudio corrigido no Windows' })).toBeInTheDocument();
     expect(
-      screen.getByRole('dialog', { name: 'Som de atualização confirmado' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('O Crypt foi atualizado para a versão 0.2.4. Veja o que ficou diferente.'),
+      screen.getByText('O Crypt foi atualizado para a versão 0.2.5. Veja o que ficou diferente.'),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Começar a usar' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem(seenReleaseStorageKey)).toBe('0.2.4');
+    expect(window.localStorage.getItem(seenReleaseStorageKey)).toBe('0.2.5');
   });
 });
 
 function createDesktopBridge(): NonNullable<Window['cryptDesktop']> {
   const state: CryptDesktopUpdateState = {
-    currentVersion: '0.2.4',
+    currentVersion: '0.2.5',
     state: 'idle',
   };
 

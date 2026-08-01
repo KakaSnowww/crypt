@@ -22,12 +22,12 @@ import {
   saveWindowState,
   type CryptWindowState,
 } from './windowState.js';
+import { applicationScheme, applicationSchemePrivileges } from './applicationProtocol.js';
 import { registerDesktopUpdaterIpc, startDesktopUpdater } from './desktopUpdater.js';
 import { startDiscordPresence, stopDiscordPresence } from './discordPresence.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectDirectory = path.resolve(currentDirectory, '..');
-const applicationScheme = 'crypt-app';
 const developmentServerUrl = process.env.CRYPT_DEV_SERVER_URL;
 
 let mainWindow: BrowserWindow | null = null;
@@ -41,12 +41,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 protocol.registerSchemesAsPrivileged([
   {
-    privileges: {
-      allowServiceWorkers: true,
-      secure: true,
-      standard: true,
-      supportFetchAPI: true,
-    },
+    privileges: applicationSchemePrivileges,
     scheme: applicationScheme,
   },
 ]);

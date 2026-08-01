@@ -49,7 +49,7 @@ Sem qualquer um deles, o workflow falha antes de gerar um instalador incompleto.
 presença no Discord usa a variável pública `DISCORD_APPLICATION_ID`, documentada em
 [discord-presence.md](discord-presence.md).
 
-## Como publicar a versão 0.2.4
+## Como publicar a versão 0.2.5
 
 Depois de validar e enviar o código para `main`:
 
@@ -59,8 +59,8 @@ git status
 git add .
 git commit -m "feat: melhora experiencia de atualizacao do aplicativo"
 git push
-git tag v0.2.4
-git push origin v0.2.4
+git tag v0.2.5
+git push origin v0.2.5
 ```
 
 Antes do commit, confirme com `Get-ChildItem .\public\som*.mp3` que os cinco sons estão presentes.
@@ -77,21 +77,21 @@ Depois, confira a página **Releases**: ela deve conter pelo menos o instalador 
 
 Uma atualização só pode ser confirmada entre duas versões publicadas:
 
-1. mantenha a versão `0.2.3` instalada;
-2. publique a tag `v0.2.4` com os Secrets configurados;
-3. abra novamente a versão `0.2.3` pelo atalho;
+1. mantenha a versão `0.2.4` instalada;
+2. publique a tag `v0.2.5` com os Secrets configurados;
+3. abra novamente a versão `0.2.4` pelo atalho;
 4. aguarde a verificação inicial ou acesse **Conta e segurança → Verificar agora**;
 5. confirme que o `som5.mp3` toca e que o botão aparece no cabeçalho;
 6. acompanhe o download;
 7. clique em **Reiniciar e instalar**;
-8. confirme que **Versão instalada** mostra `0.2.4` e que o popup de novidades aparece.
+8. confirme que **Versão instalada** mostra `0.2.5` e que o popup de novidades aparece.
 
 Releases em rascunho não são oferecidas pelo atualizador. O instalador e `latest.yml` precisam vir
 do mesmo workflow para que o hash seja correspondente.
 
 ## Android
 
-O Android foi sincronizado como versão `0.2.4` e `versionCode 6`. Enquanto o APK for distribuído
+O Android foi sincronizado como versão `0.2.5` e `versionCode 7`. Enquanto o APK for distribuído
 fora da Play Store, novas instalações serão manuais. Quando o aplicativo entrar na Play Store, a
 atualização automática será controlada pela própria loja, sem conceder ao Crypt permissão para
 instalar pacotes desconhecidos.

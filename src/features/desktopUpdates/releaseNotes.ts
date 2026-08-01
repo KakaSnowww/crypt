@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.2.5': {
+    highlights: [
+      {
+        description:
+          'O protocolo interno crypt-app agora declara suporte a streaming de mídia, como exigido pelo Electron.',
+        title: 'Áudio liberado no aplicativo instalado',
+      },
+      {
+        description:
+          'O som5.mp3 pode ser carregado pelo elemento de áudio sem ser interrompido antes de chegar ao mixer do Windows.',
+        title: 'Reprodução no executável',
+      },
+      {
+        description:
+          'Um teste automatizado protege a configuração stream: true contra alterações futuras.',
+        title: 'Proteção contra regressão',
+      },
+      {
+        description:
+          'O botão de teste continua disponível em Conta e segurança para validar a saída de som instalada.',
+        title: 'Diagnóstico acessível',
+      },
+    ],
+    summary:
+      'Esta versão corrige o carregamento de áudio no protocolo utilizado pelo Crypt instalado.',
+    title: 'Áudio corrigido no Windows',
+    version: '0.2.5',
+  },
   '0.2.4': {
     highlights: [
       {
