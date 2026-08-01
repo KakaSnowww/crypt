@@ -54,7 +54,9 @@ jobs:
           $configPath = "electron/discordConfig.ts"
           $config = Get-Content $configPath -Raw
           $config = $config.Replace("__CRYPT_DISCORD_APPLICATION_ID__", $env:DISCORD_APPLICATION_ID)
-          Set-Content -Path $configPath -Value $config -Encoding utf8
+          $resolvedConfigPath = (Resolve-Path $configPath).Path
+          $utf8WithoutBom = [System.Text.UTF8Encoding]::new($false)
+          [System.IO.File]::WriteAllText($resolvedConfigPath, $config, $utf8WithoutBom)
 
       - name: Instalar dependências reproduzíveis
         run: npm ci
