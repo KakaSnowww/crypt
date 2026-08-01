@@ -18,6 +18,7 @@ describe('rotas do Crypt', () => {
       'href',
       '/app/servidores',
     );
+    expect(document.body).toHaveClass('app-shell-active');
   });
 
   it('protege a área privada quando não existe sessão', async () => {

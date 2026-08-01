@@ -18,11 +18,12 @@ import type { VoiceChannelPresence as VoicePresenceEntry } from './voice.types';
 
 export function VoiceCallPanel() {
   const navigate = useNavigate();
-  const { channelId, connection, leave, setExpanded } = useVoiceCall();
+  const { channelId, connection, isNativeScreenSharing, leave, setExpanded } = useVoiceCall();
   const connectionState = useConnectionState();
   const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant();
   const screenPublication = localParticipant.getTrackPublication(Track.Source.ScreenShare);
-  const isScreenSharing = Boolean(screenPublication && !screenPublication.isMuted);
+  const isScreenSharing =
+    isNativeScreenSharing || Boolean(screenPublication && !screenPublication.isMuted);
 
   if (!connection) return null;
 

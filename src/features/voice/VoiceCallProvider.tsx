@@ -1,10 +1,35 @@
 import { LiveKitRoom, RoomAudioRenderer, StartAudio } from '@livekit/components-react';
-import { AudioPresets, ConnectionState, Room, RoomEvent, ScreenSharePresets } from 'livekit-client';
+import {
+  AudioPresets,
+  ConnectionState,
+  Room,
+  RoomEvent,
+  ScreenSharePresets,
+  Track,
+  type RemoteParticipant,
+} from 'livekit-client';
 import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { useToast } from '../../components/common/ToastContext';
 import { useAuth } from '../auth/useAuth';
 import { playCryptSound } from '../../lib/sounds';
-import { createVoiceConnection } from './voice.service';
+import { isAndroidRuntime, isElectronRuntime } from '../../lib/platform';
+import {
+  getAndroidCallState,
+  listAndroidAudioOutputs,
+  listenToAndroidCallState,
+  setAndroidAudioOutput,
+  startAndroidCallService,
+  startAndroidScreenShare,
+  stopAndroidCallService,
+  stopAndroidScreenShare,
+} from './androidCall';
+import { isAndroidScreenShareCompanion } from './androidCompanion';
+import {
+  clearNativeCaptureSource,
+  selectNativeCaptureSource,
+  type NativeScreenShareOptions,
+} from './nativeScreenShare';
+import { createAndroidScreenShareConnection, createVoiceConnection } from './voice.service';
 import type { VoiceConnection } from './voice.types';
 import { VoiceCallContext } from './VoiceCallContext';
 import './voice.css';
@@ -17,6 +42,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
+  const [isNativeScreenSharing, setNativeScreenSharing] = useState(false);
   const intentionalLeaveRef = useRef(false);
   const joinedRoomRef = useRef(false);
   const [room] = useState(
@@ -30,7 +56,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           noiseSuppression: false,
           sampleRate: 48_000,
         },
-        disconnectOnPageLeave: true,
+        disconnectOnPageLeave: !isAndroidRuntime(),
         dynacast: true,
         publishDefaults: {
           audioPreset: AudioPresets.music,
@@ -38,20 +64,103 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           dtx: false,
           forceStereo: false,
           red: true,
-          screenShareEncoding: ScreenSharePresets.h1080fps15.encoding,
+          screenShareEncoding: ScreenSharePresets.h1080fps30.encoding,
         },
       }),
+  );
+
+  const stopScreenShare = useCallback(async () => {
+    if (isAndroidRuntime()) {
+      await stopAndroidScreenShare();
+      return;
+    }
+    const publication = room.localParticipant.getTrackPublication(Track.Source.ScreenShare);
+    if (publication && !publication.isMuted) {
+      await room.localParticipant.setScreenShareEnabled(false);
+    }
+    if (isElectronRuntime()) await clearNativeCaptureSource().catch(() => undefined);
+  }, [room]);
+
+  const startScreenShare = useCallback(
+    async (options?: NativeScreenShareOptions) => {
+      await stopScreenShare();
+      const preset =
+        options?.quality === 'balanced'
+          ? ScreenSharePresets.h720fps30
+          : ScreenSharePresets.h1080fps30;
+      const includeSystemAudio = options?.includeSystemAudio ?? true;
+
+      if (isAndroidRuntime()) {
+        if (!channelId) throw new Error('Entre em uma chamada antes de compartilhar a tela.');
+        const nativeConnection = await createAndroidScreenShareConnection(channelId);
+        const nextState = await startAndroidScreenShare({
+          quality: options?.quality ?? 'balanced',
+          serverUrl: nativeConnection.server_url,
+          token: nativeConnection.participant_token,
+        });
+        setNativeScreenSharing(nextState.screenSharing);
+        return;
+      }
+
+      if (!isElectronRuntime()) {
+        await room.localParticipant.setScreenShareEnabled(
+          true,
+          {
+            audio: includeSystemAudio,
+            contentHint: 'detail',
+            resolution: preset.resolution,
+            selfBrowserSurface: 'exclude',
+            surfaceSwitching: 'include',
+            systemAudio: includeSystemAudio ? 'include' : 'exclude',
+          },
+          {
+            degradationPreference: 'maintain-resolution',
+            screenShareEncoding: preset.encoding,
+            simulcast: true,
+          },
+        );
+        return;
+      }
+
+      if (!options?.source) {
+        throw new Error('Escolha uma tela ou janela para iniciar a transmissão.');
+      }
+
+      await selectNativeCaptureSource(options.source);
+      try {
+        await room.localParticipant.setScreenShareEnabled(
+          true,
+          {
+            audio: includeSystemAudio,
+            contentHint: 'detail',
+            resolution: preset.resolution,
+            systemAudio: includeSystemAudio ? 'include' : 'exclude',
+          },
+          {
+            degradationPreference: 'maintain-resolution',
+            screenShareEncoding: preset.encoding,
+            simulcast: true,
+          },
+        );
+      } catch (error) {
+        await clearNativeCaptureSource().catch(() => undefined);
+        throw error;
+      }
+    },
+    [channelId, room, stopScreenShare],
   );
 
   const leave = useCallback(async () => {
     intentionalLeaveRef.current = true;
     if (room.state !== ConnectionState.Disconnected) playCryptSound('call-leave');
+    await stopScreenShare();
+    await stopAndroidCallService();
     await room.disconnect();
     setConnection(null);
     setChannelId(null);
     setExpanded(false);
     setError(null);
-  }, [room]);
+  }, [room, stopScreenShare]);
 
   const join = useCallback(
     async (channelId: string) => {
@@ -66,6 +175,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         if (room.state !== ConnectionState.Disconnected) {
           intentionalLeaveRef.current = true;
           playCryptSound('call-leave');
+          await stopScreenShare();
           await room.disconnect();
         }
         const nextConnection = await createVoiceConnection(channelId);
@@ -83,27 +193,50 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         setIsConnecting(false);
       }
     },
-    [addToast, connection, room],
+    [addToast, connection, room, stopScreenShare],
   );
 
   useEffect(() => {
     if (!user && connection) {
-      void room.disconnect();
+      void stopScreenShare().finally(() => room.disconnect());
     }
-  }, [connection, room, user]);
+  }, [connection, room, stopScreenShare, user]);
 
-  useEffect(() => () => void room.disconnect(), [room]);
+  useEffect(
+    () => () => {
+      void stopScreenShare()
+        .then(stopAndroidCallService)
+        .finally(() => room.disconnect());
+    },
+    [room, stopScreenShare],
+  );
 
   useEffect(() => {
     const handleConnected = () => {
       intentionalLeaveRef.current = false;
       joinedRoomRef.current = true;
       playCryptSound('call-join');
+      if (isAndroidRuntime() && connection) {
+        void startAndroidCallService(connection.channel_name, connection.server_name).catch(
+          (caughtError) => {
+            addToast({
+              message:
+                caughtError instanceof Error
+                  ? caughtError.message
+                  : 'Não foi possível manter a chamada em segundo plano.',
+              title: 'Chamada no Android',
+              tone: 'error',
+            });
+          },
+        );
+      }
     };
-    const handleParticipantConnected = () => {
+    const handleParticipantConnected = (participant: RemoteParticipant) => {
+      if (isAndroidScreenShareCompanion(participant.identity, participant.metadata)) return;
       if (joinedRoomRef.current && !intentionalLeaveRef.current) playCryptSound('call-join');
     };
-    const handleParticipantDisconnected = () => {
+    const handleParticipantDisconnected = (participant: RemoteParticipant) => {
+      if (isAndroidScreenShareCompanion(participant.identity, participant.metadata)) return;
       if (joinedRoomRef.current && !intentionalLeaveRef.current) playCryptSound('call-leave');
     };
     const handleDisconnected = () => {
@@ -120,11 +253,58 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       room.off(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
       room.off(RoomEvent.Disconnected, handleDisconnected);
     };
-  }, [room]);
+  }, [addToast, connection, room]);
+
+  useEffect(() => {
+    if (!isAndroidRuntime()) return;
+    let active = true;
+    let handle: { remove: () => Promise<void> } | undefined;
+
+    void getAndroidCallState()
+      .then((state) => {
+        if (active) setNativeScreenSharing(state.screenSharing);
+      })
+      .catch(() => undefined);
+    void listenToAndroidCallState((state) => {
+      if (active) setNativeScreenSharing(state.screenSharing);
+    }).then((nextHandle) => {
+      handle = nextHandle;
+    });
+
+    return () => {
+      active = false;
+      void handle?.remove();
+    };
+  }, []);
 
   const value = useMemo(
-    () => ({ channelId, connection, error, isConnecting, isExpanded, join, leave, setExpanded }),
-    [channelId, connection, error, isConnecting, isExpanded, join, leave],
+    () => ({
+      channelId,
+      connection,
+      error,
+      isConnecting,
+      isExpanded,
+      isNativeScreenSharing,
+      join,
+      leave,
+      listAndroidAudioOutputs,
+      setExpanded,
+      setAndroidAudioOutput,
+      startScreenShare,
+      stopScreenShare,
+    }),
+    [
+      channelId,
+      connection,
+      error,
+      isConnecting,
+      isExpanded,
+      isNativeScreenSharing,
+      join,
+      leave,
+      startScreenShare,
+      stopScreenShare,
+    ],
   );
 
   return (

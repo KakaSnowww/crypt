@@ -1,0 +1,46 @@
+name: Publicar aplicativo Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    name: Validar e publicar NSIS
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Instalar dependências reproduzíveis
+        run: npm ci
+
+      - name: Validar frontend e Electron
+        run: npm run validate:desktop
+
+      - name: Conferir versão da tag
+        if: github.event_name == 'push'
+        shell: pwsh
+        run: |
+          $packageVersion = (Get-Content package.json | ConvertFrom-Json).version
+          if ("${{ github.ref_name }}" -ne "v$packageVersion") {
+            throw "A tag deve ser v$packageVersion, mas foi ${{ github.ref_name }}."
+          }
+
+      - name: Criar Release e metadados de atualização
+        run: npm run desktop:release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

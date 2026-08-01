@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Crypt</string>
+    <string name="title_activity_main">Crypt</string>
+    <string name="package_name">com.kakasnowww.crypt</string>
+    <string name="custom_url_scheme">com.kakasnowww.crypt</string>
+    <string name="call_notification_channel">Chamadas do Crypt</string>
+    <string name="call_notification_description">Mantém chamadas de voz ativas em segundo plano.</string>
+    <string name="screen_share_notification_channel">Transmissão de tela</string>
+    <string name="screen_share_notification_description">Mostra quando o Crypt está transmitindo sua tela.</string>
+</resources>

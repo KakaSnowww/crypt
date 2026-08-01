@@ -271,7 +271,7 @@ function NotificationPreferencesForm({
       setFeedback('Permissão concedida. Salve as preferências para concluir.');
     } else if (nextPermission === 'denied') {
       update('system_enabled', false);
-      setFeedback('A permissão foi bloqueada nas configurações do navegador.');
+      setFeedback('A permissão foi bloqueada nas configurações do dispositivo.');
     } else {
       setFeedback('Este navegador não oferece notificações do sistema neste ambiente.');
     }
@@ -312,7 +312,7 @@ function NotificationPreferencesForm({
             {!supported
               ? 'Indisponível neste ambiente'
               : permission === 'denied'
-                ? 'Bloqueada pelo navegador'
+                ? 'Bloqueada no dispositivo'
                 : permission === 'granted'
                   ? 'Pronta para uso'
                   : 'Aguardando sua autorização'}

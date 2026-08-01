@@ -1,5 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { getSupabaseClient } from '../../lib/supabase/client';
+import { isNativeRuntime } from '../../lib/platform';
 import { AuthActionError, toAuthActionError } from './auth.errors';
 import {
   normalizeHandle,
@@ -20,7 +21,9 @@ function isFunctionResponse(value: unknown): value is { error: unknown } {
 }
 
 function buildCallbackUrl(nextPath: '/app' | '/redefinir-senha') {
-  const callbackUrl = new URL('/auth/callback', window.location.origin);
+  const callbackUrl = isNativeRuntime()
+    ? new URL('crypt://auth/callback')
+    : new URL('/auth/callback', window.location.origin);
   callbackUrl.searchParams.set('next', nextPath);
   return callbackUrl.toString();
 }

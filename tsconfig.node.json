@@ -17,5 +17,5 @@
     "noUncheckedSideEffectImports": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts"]
+  "include": ["capacitor.config.ts", "vite.config.ts"]
 }

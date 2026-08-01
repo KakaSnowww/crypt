@@ -175,8 +175,8 @@ export function ChannelRoute() {
   }
 
   return (
-    <main className="flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col">
-      <section className="border-b border-white/5 px-4 py-4 sm:px-6">
+    <main className="chat-layout flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+      <section className="chat-fixed shrink-0 border-b border-white/5 px-4 py-4 sm:px-6">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-lg text-violet-200">
             {channel.channel_icon ?? <Hash size={18} />}
@@ -197,7 +197,7 @@ export function ChannelRoute() {
 
       <section
         aria-label={`Mensagens de ${channel.channel_name}`}
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6"
+        className="chat-scroll min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6"
       >
         {messagesQuery.hasNextPage ? (
           <div className="mb-5 text-center">
@@ -239,7 +239,7 @@ export function ChannelRoute() {
         <div ref={messageEndRef} />
       </section>
 
-      <section className="border-t border-white/5 bg-crypt-background/95 px-3 py-3 sm:px-6">
+      <section className="chat-fixed shrink-0 border-t border-white/5 bg-crypt-background/95 px-3 py-3 sm:px-6">
         <div className="mx-auto w-full max-w-5xl">
           {reply ? (
             <div className="mb-2 flex items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2 text-xs text-crypt-muted">

@@ -1,9 +1,11 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  base: './',
   build: {
+    chunkSizeWarningLimit: 600,
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -17,6 +19,11 @@ export default defineConfig({
               name: 'react-vendor',
               priority: 20,
               test: /node_modules[\\/](react|react-dom|react-router|@tanstack)/,
+            },
+            {
+              name: 'livekit-vendor',
+              priority: 15,
+              test: /node_modules[\\/](@livekit|livekit-client)/,
             },
             {
               name: 'forms-vendor',
@@ -33,10 +40,15 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
     port: 5173,
+    watch: {
+      ignored: ['**/dist-electron/**', '**/release/**', '**/src-tauri/**'],
+    },
   },
   test: {
     environment: 'jsdom',
+    exclude: [...configDefaults.exclude, '**/dist-electron/**', '**/release/**'],
     globals: true,
+    maxWorkers: 4,
     setupFiles: './src/test/setup.ts',
   },
 });

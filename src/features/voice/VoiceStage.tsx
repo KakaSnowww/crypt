@@ -8,9 +8,10 @@ import {
   useTracks,
 } from '@livekit/components-react';
 import type { TrackReference, TrackReferenceOrPlaceholder } from '@livekit/components-core';
-import { ConnectionState, ScreenSharePresets, Track, type Participant } from 'livekit-client';
+import { ConnectionState, Track, type Participant } from 'livekit-client';
 import {
   ChevronDown,
+  FlipHorizontal2,
   Mic,
   MicOff,
   MonitorUp,
@@ -21,24 +22,43 @@ import {
   Video,
   VideoOff,
 } from 'lucide-react';
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { useToast } from '../../components/common/ToastContext';
 import { ProfileAvatar } from '../profile/components/ProfileAvatar';
 import { getProfileMediaUrl } from '../profile/profile.service';
+import { isAndroidRuntime, isElectronRuntime } from '../../lib/platform';
+import type { AndroidAudioOutput } from './androidCall';
+import { isAndroidScreenShareCompanion } from './androidCompanion';
+import { AndroidScreenShareModal } from './AndroidScreenShareModal';
+import { NativeScreenShareModal } from './NativeScreenShareModal';
+import type { NativeScreenShareOptions } from './nativeScreenShare';
 import { getVoiceParticipantProfile } from './voice.participant';
 import { useVoiceCall } from './useVoiceCall';
 
 export function VoiceStage() {
-  const { connection, leave } = useVoiceCall();
-  const participants = useParticipants();
-  const cameraTracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]);
+  const { connection, isNativeScreenSharing, leave, startScreenShare, stopScreenShare } =
+    useVoiceCall();
+  const { addToast } = useToast();
+  const participants = useParticipants().filter(
+    (participant) => !isAndroidScreenShareCompanion(participant.identity, participant.metadata),
+  );
+  const cameraTracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]).filter(
+    (track) =>
+      !isAndroidScreenShareCompanion(track.participant.identity, track.participant.metadata),
+  );
   const screenTracks = useTracks([Track.Source.ScreenShare]);
   const connectionState = useConnectionState();
   const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant();
   const [showDevices, setShowDevices] = useState(false);
+  const [showNativeSharePicker, setShowNativeSharePicker] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<'environment' | 'user'>('user');
   const [cameraFit, setCameraFit] = useState<'contain' | 'cover'>('contain');
   const [busy, setBusy] = useState<string | null>(null);
+  const desktopRuntime = isElectronRuntime();
+  const androidRuntime = isAndroidRuntime();
   const screenPublication = localParticipant.getTrackPublication(Track.Source.ScreenShare);
-  const isScreenSharing = Boolean(screenPublication && !screenPublication.isMuted);
+  const isScreenSharing =
+    isNativeScreenSharing || Boolean(screenPublication && !screenPublication.isMuted);
 
   if (!connection) return null;
 
@@ -46,9 +66,23 @@ export function VoiceStage() {
     setBusy(name);
     try {
       await action();
+    } catch (caughtError) {
+      addToast({
+        message:
+          caughtError instanceof Error
+            ? caughtError.message
+            : 'Não foi possível concluir a alteração na chamada.',
+        title: `Falha em ${name}`,
+        tone: 'error',
+      });
     } finally {
       setBusy(null);
     }
+  };
+
+  const startNativeShare = async (options: NativeScreenShareOptions) => {
+    await run('compartilhamento', () => startScreenShare(options));
+    setShowNativeSharePicker(false);
   };
 
   return (
@@ -125,21 +159,33 @@ export function VoiceStage() {
         >
           {isCameraEnabled ? <Video /> : <VideoOff />}
         </CallControl>
+        {androidRuntime && isCameraEnabled ? (
+          <CallControl
+            label="Virar câmera"
+            onClick={() =>
+              void run('câmera', async () => {
+                const publication = localParticipant.getTrackPublication(Track.Source.Camera);
+                const nextFacing = cameraFacing === 'user' ? 'environment' : 'user';
+                await publication?.videoTrack?.restartTrack({ facingMode: nextFacing });
+                setCameraFacing(nextFacing);
+              })
+            }
+          >
+            <FlipHorizontal2 />
+          </CallControl>
+        ) : null}
         <CallControl
           active={isScreenSharing}
           label={isScreenSharing ? 'Parar transmissão' : 'Compartilhar tela'}
-          onClick={() =>
-            void run('compartilhamento', () =>
-              localParticipant.setScreenShareEnabled(!isScreenSharing, {
-                audio: true,
-                contentHint: 'detail',
-                resolution: ScreenSharePresets.h1080fps15.resolution,
-                selfBrowserSurface: 'exclude',
-                surfaceSwitching: 'include',
-                systemAudio: 'include',
-              }),
-            )
-          }
+          onClick={() => {
+            if (isScreenSharing) {
+              void run('compartilhamento', stopScreenShare);
+            } else if (desktopRuntime || androidRuntime) {
+              setShowNativeSharePicker(true);
+            } else {
+              void run('compartilhamento', () => startScreenShare());
+            }
+          }}
         >
           <MonitorUp />
         </CallControl>
@@ -157,6 +203,23 @@ export function VoiceStage() {
           {busy ? `Alterando ${busy}` : ''}
         </span>
       </footer>
+
+      {desktopRuntime && showNativeSharePicker ? (
+        <NativeScreenShareModal
+          busy={busy === 'compartilhamento'}
+          onOpenChange={setShowNativeSharePicker}
+          onShare={startNativeShare}
+          open
+        />
+      ) : null}
+      {androidRuntime && showNativeSharePicker ? (
+        <AndroidScreenShareModal
+          busy={busy === 'compartilhamento'}
+          onOpenChange={setShowNativeSharePicker}
+          onShare={startNativeShare}
+          open
+        />
+      ) : null}
     </div>
   );
 }
@@ -220,6 +283,62 @@ function getParticipantPalette(identity: string) {
 }
 
 function DeviceSettings() {
+  if (isAndroidRuntime()) return <AndroidDeviceSettings />;
+  return <BrowserDeviceSettings />;
+}
+
+function AndroidDeviceSettings() {
+  const { listAndroidAudioOutputs, setAndroidAudioOutput } = useVoiceCall();
+  const [outputs, setOutputs] = useState<AndroidAudioOutput[]>([]);
+  const [selected, setSelected] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    void listAndroidAudioOutputs()
+      .then((nextOutputs) => {
+        if (!active) return;
+        setOutputs(nextOutputs);
+        setSelected((current) => current || nextOutputs[0]?.id || '');
+      })
+      .catch(() => {
+        if (active) setOutputs([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [listAndroidAudioOutputs]);
+
+  return (
+    <section className="voice-devices" aria-label="Configurações de áudio e vídeo">
+      <label>
+        <span>Saída de áudio</span>
+        <div>
+          <select
+            onChange={(event) => {
+              const value = event.target.value;
+              setSelected(value);
+              void setAndroidAudioOutput(value);
+            }}
+            value={selected}
+          >
+            {outputs.map((output) => (
+              <option key={output.id} value={output.id}>
+                {output.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown aria-hidden="true" />
+        </div>
+      </label>
+      <p>
+        O Android alterna entre auricular, alto-falante, fone com fio e Bluetooth. O áudio usa 48
+        kHz e permanece ativo ao minimizar o Crypt.
+      </p>
+    </section>
+  );
+}
+
+function BrowserDeviceSettings() {
   const microphone = useMediaDeviceSelect({ kind: 'audioinput' });
   const speaker = useMediaDeviceSelect({ kind: 'audiooutput' });
   const camera = useMediaDeviceSelect({ kind: 'videoinput' });
@@ -264,12 +383,14 @@ function CallControl({
   active,
   children,
   danger,
+  disabled,
   label,
   onClick,
 }: {
   active?: boolean;
   children: ReactNode;
   danger?: boolean;
+  disabled?: boolean;
   label: string;
   onClick: () => void;
 }) {
@@ -277,6 +398,7 @@ function CallControl({
     <button
       aria-label={label}
       className={`${active ? 'is-active' : ''} ${danger ? 'is-danger' : ''}`}
+      disabled={disabled}
       onClick={onClick}
       title={label}
       type="button"

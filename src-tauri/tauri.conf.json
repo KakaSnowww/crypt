@@ -1,0 +1,74 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Crypt",
+  "version": "0.2.0",
+  "identifier": "com.kakasnowww.crypt",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Crypt",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 960,
+        "minHeight": 640,
+        "center": true,
+        "focus": true,
+        "resizable": true,
+        "fullscreen": false,
+        "maximized": false
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self' customprotocol: asset:",
+        "connect-src": "ipc: http://ipc.localhost https: wss:",
+        "font-src": "'self' data:",
+        "frame-src": "https://open.spotify.com",
+        "img-src": "'self' asset: data: blob: https:",
+        "media-src": "'self' asset: blob: https:",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
+        "worker-src": "'self' blob:"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "category": "SocialNetworking",
+    "copyright": "© 2026 Kaio Snow",
+    "longDescription": "Crypt é um aplicativo de comunidades, mensagens e chamadas em tempo real.",
+    "publisher": "Kaio Snow",
+    "shortDescription": "Comunidades, mensagens e chamadas.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["PortugueseBR"]
+      }
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["crypt"]
+      }
+    }
+  }
+}

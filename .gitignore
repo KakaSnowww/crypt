@@ -1,6 +1,8 @@
 # Dependências e builds
 node_modules/
 dist/
+dist-electron/
+release/
 coverage/
 
 # Variáveis de ambiente
@@ -22,8 +24,9 @@ supabase/.temp/
 .DS_Store
 Thumbs.db
 
-# Tauri e Android, utilizados em fases posteriores
+# Artefatos legados e Android
 src-tauri/target/
+src-tauri/gen/
 android/.gradle/
 android/local.properties
 android/app/build/

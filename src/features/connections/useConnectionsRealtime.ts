@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useToast } from '../../components/common/ToastContext';
+import { isAndroidRuntime } from '../../lib/platform';
 import { getSupabaseClient, isSupabaseConfigured } from '../../lib/supabase/client';
 import { connectionKeys } from './connections.queries';
 import { setMyPresence } from './connections.service';
@@ -97,6 +98,46 @@ export function usePresenceHeartbeat(userId: null | string) {
   useEffect(() => {
     if (!userId || !isSupabaseConfigured() || import.meta.env.MODE === 'test') {
       return;
+    }
+
+    if (isAndroidRuntime()) {
+      let active = true;
+      let appIsActive = true;
+      let removeAppListener: (() => Promise<void>) | undefined;
+
+      const updateAndroidPresence = () => {
+        void setMyPresence(appIsActive ? 'online' : 'away').catch(() => undefined);
+      };
+
+      void import('@capacitor/app')
+        .then(async ({ App }) => {
+          const state = await App.getState();
+          if (!active) return;
+
+          appIsActive = state.isActive;
+          updateAndroidPresence();
+
+          const listener = await App.addListener('appStateChange', ({ isActive }) => {
+            appIsActive = isActive;
+            updateAndroidPresence();
+          });
+
+          if (!active) {
+            await listener.remove();
+          } else {
+            removeAppListener = () => listener.remove();
+          }
+        })
+        .catch(() => undefined);
+
+      const heartbeat = window.setInterval(updateAndroidPresence, 60_000);
+
+      return () => {
+        active = false;
+        window.clearInterval(heartbeat);
+        void removeAppListener?.();
+        void setMyPresence('offline').catch(() => undefined);
+      };
     }
 
     const updatePresence = () => {

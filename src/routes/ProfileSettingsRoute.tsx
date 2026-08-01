@@ -8,6 +8,7 @@ import { InterestEditor } from '../features/profile/components/InterestEditor';
 import { PrivacySettingsForm } from '../features/profile/components/PrivacySettingsForm';
 import { ProfileDetailsForm } from '../features/profile/components/ProfileDetailsForm';
 import { ProfileVisualEditor } from '../features/profile/components/ProfileVisualEditor';
+import { SettingsNavigation } from '../features/profile/components/SettingsNavigation';
 import { SpotifyTrackEditor } from '../features/profile/components/SpotifyTrackEditor';
 import {
   useCurrentProfile,
@@ -64,6 +65,7 @@ export function ProfileSettingsRoute() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <SettingsNavigation />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Perfil e privacidade</p>

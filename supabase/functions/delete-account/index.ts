@@ -17,7 +17,10 @@ function readKeyDictionary(variableName: string): string[] {
 }
 
 function getAllowedOrigins() {
-  return (Deno.env.get('ALLOWED_ORIGINS') ?? 'http://127.0.0.1:5173,http://localhost:5173')
+  return (
+    Deno.env.get('ALLOWED_ORIGINS') ??
+    'http://127.0.0.1:5173,http://localhost:5173,crypt-app://app,https://crypt.local'
+  )
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);

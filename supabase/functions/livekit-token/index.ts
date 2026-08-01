@@ -14,7 +14,10 @@ function readKeys(name: string) {
 }
 
 function allowedOrigins() {
-  return (Deno.env.get('ALLOWED_ORIGINS') ?? 'http://127.0.0.1:5173,http://localhost:5173')
+  return (
+    Deno.env.get('ALLOWED_ORIGINS') ??
+    'http://127.0.0.1:5173,http://localhost:5173,crypt-app://app,https://crypt.local'
+  )
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -115,32 +118,36 @@ Deno.serve(async (request) => {
       const participants = await roomService.listParticipants(roomName);
       return json(origin, 200, {
         room_name: roomName,
-        participants: participants.map((participant) => {
-          let metadata: {
-            avatar_path?: unknown;
-            banner_path?: unknown;
-            handle?: unknown;
-            profile_effect?: unknown;
-          } = {};
-          try {
-            metadata = JSON.parse(participant.metadata || '{}') as typeof metadata;
-          } catch {
-            metadata = {};
-          }
+        participants: participants
+          .map((participant) => {
+            let metadata: {
+              avatar_path?: unknown;
+              banner_path?: unknown;
+              handle?: unknown;
+              profile_effect?: unknown;
+            } = {};
+            try {
+              metadata = JSON.parse(participant.metadata || '{}') as typeof metadata;
+            } catch {
+              metadata = {};
+            }
 
-          return {
-            avatar_path: typeof metadata.avatar_path === 'string' ? metadata.avatar_path : null,
-            banner_path: typeof metadata.banner_path === 'string' ? metadata.banner_path : null,
-            display_name: participant.name || participant.identity,
-            handle: typeof metadata.handle === 'string' ? metadata.handle : null,
-            microphone_muted: !participant.tracks.some(
-              (track) => track.source === 2 && !track.muted,
-            ),
-            profile_id: participant.identity,
-            profile_effect:
-              typeof metadata.profile_effect === 'string' ? metadata.profile_effect : 'none',
-          };
-        }),
+            return {
+              avatar_path: typeof metadata.avatar_path === 'string' ? metadata.avatar_path : null,
+              banner_path: typeof metadata.banner_path === 'string' ? metadata.banner_path : null,
+              display_name: participant.name || participant.identity,
+              handle: typeof metadata.handle === 'string' ? metadata.handle : null,
+              microphone_muted: !participant.tracks.some(
+                (track) => track.source === 2 && !track.muted,
+              ),
+              profile_id: participant.identity,
+              profile_effect:
+                typeof metadata.profile_effect === 'string' ? metadata.profile_effect : 'none',
+              companion_of:
+                typeof metadata.companion_of === 'string' ? metadata.companion_of : null,
+            };
+          })
+          .filter((participant) => !participant.companion_of),
       });
     } catch (presenceError) {
       const presenceMessage =
@@ -164,22 +171,24 @@ Deno.serve(async (request) => {
     .eq('id', user.id)
     .maybeSingle();
 
+  const isAndroidScreenShare = body.action === 'android_screen_share';
   const token = new AccessToken(livekitApiKey, livekitApiSecret, {
-    identity: user.id,
+    identity: isAndroidScreenShare ? `${user.id}:android-screen` : user.id,
     metadata: JSON.stringify({
       avatar_path: access.avatar_path,
       banner_path: visualProfile?.banner_path ?? null,
+      companion_of: isAndroidScreenShare ? user.id : null,
       handle: access.handle,
       profile_id: user.id,
       profile_effect: visualProfile?.profile_effect ?? 'none',
     }),
     name: access.display_name,
-    ttl: '10m',
+    ttl: isAndroidScreenShare ? '2h' : '10m',
   });
   token.addGrant({
     canPublish: access.can_publish,
-    canPublishData: access.can_publish,
-    canSubscribe: true,
+    canPublishData: isAndroidScreenShare ? false : access.can_publish,
+    canSubscribe: !isAndroidScreenShare,
     room: roomName,
     roomJoin: true,
   });

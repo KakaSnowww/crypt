@@ -3,7 +3,73 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 12
+## Estado atual — Fase 14.3–14.4
+
+As Fases 14.3 e 14.4 foram unificadas e entregam chamadas e transmissão nativa no Android:
+
+- chamada mantida em segundo plano por serviço com notificação persistente;
+- retorno à chamada ao tocar na notificação;
+- rotas para auricular, alto-falante, fone com fio e Bluetooth;
+- câmera frontal/traseira sem sair da sala;
+- navegação e minimização sem desconectar;
+- compartilhamento por `MediaProjection`, sem seletor do navegador;
+- publicação 720p/1080p pelo SDK Android do LiveKit;
+- participante auxiliar oculto da contagem, presença e sons;
+- encerramento sincronizado pelo Crypt ou pelo sistema Android.
+
+A Fase 14.2 integra recursos próprios do celular:
+
+- alertas Android pela central nativa de notificações;
+- permissão de notificações solicitada somente por ação explícita;
+- canal `Alertas do Crypt` com ícone monocromático, luz e vibração;
+- abertura segura do conteúdo ao tocar no alerta;
+- seletor nativo para compartilhar convites com outros aplicativos;
+- links `crypt://invite/{código}` entre Android e Windows;
+- feedback tátil discreto depois do compartilhamento;
+- detecção nativa de Wi-Fi, dados móveis e perda de conexão;
+- aviso offline e reconexão automática do TanStack Query;
+- presença online/ausente sincronizada com o primeiro e segundo plano do Android.
+
+A Fase 14.1 adiciona a base Android:
+
+- Capacitor 8 com projeto nativo versionado em `android/`;
+- identificador `com.kakasnowww.crypt`;
+- Android 7/API 24 como mínimo e API 36 como alvo;
+- mesma interface, autenticação, Supabase e Realtime do Windows;
+- retorno de autenticação por `crypt://auth/callback`;
+- botão físico voltar integrado ao histórico;
+- minimização segura quando não existe histórico;
+- barra de status escura, splash e ícones do Crypt;
+- área segura e teclado preparados para telas pequenas;
+- permissões mínimas de câmera e microfone declaradas;
+- scripts para sincronizar, abrir, executar e gerar APK de teste.
+
+A Fase 15 prepara distribuição e atualização:
+
+- versão pública inicial `0.2.0`;
+- publicação automatizada do instalador NSIS pelo GitHub Actions;
+- metadados `latest.yml` e validação de integridade;
+- verificação no início e a cada quatro horas;
+- download em segundo plano com progresso visível;
+- instalação somente depois de confirmar a reinicialização;
+- atualização desativada de forma segura no modo de desenvolvimento.
+
+A Fase 13.3 estabilizou o aplicativo Windows em Electron:
+
+- seletor próprio de monitor ou janela;
+- miniaturas e atualização das fontes disponíveis;
+- captura direta do Chromium entregue ao LiveKit como `MediaStreamTrack`;
+- perfis Equilibrado em 720p/30 FPS e Alta qualidade em 1080p/30 FPS;
+- áudio do sistema opcional via loopback no Windows;
+- nenhuma conversão para JPEG, base64, IPC de quadros ou canvas;
+- sem o seletor padrão do navegador;
+- transmissão persistente ao navegar dentro do Crypt;
+- chamada preservada ao fechar a janela para a bandeja;
+- menu da bandeja para abrir ou encerrar completamente o Crypt;
+- tamanho, posição e maximização da janela preservados;
+- encerramento seguro ao sair ou trocar de chamada;
+- shell isolado com `contextIsolation`, sandbox e API mínima no preload;
+- instância única, deep link `crypt://` e instalador NSIS.
 
 A Fase 12 adiciona:
 
@@ -72,6 +138,8 @@ As Fases 7–8 já oferecem:
 - React Router e TanStack Query
 - React Hook Form, Zod e Radix UI
 - Supabase Auth, PostgreSQL, Storage, Realtime, RLS e Edge Functions
+- Electron 42 para o aplicativo Windows
+- Capacitor 8 e projeto Gradle para o aplicativo Android
 - Vitest, Testing Library, pgTAP, ESLint e Prettier
 
 ## Requisitos
@@ -80,6 +148,8 @@ As Fases 7–8 já oferecem:
 - npm 11
 - Git
 - conta gratuita no Supabase
+- Windows 10 ou 11 para executar e empacotar o aplicativo Electron
+- Android Studio 2025.2.1 ou mais novo e SDK 36 para executar o aplicativo Android
 - Docker Desktop somente para executar Supabase local e testes SQL
 
 ## Instalação
@@ -137,7 +207,7 @@ da hierarquia de cargos. Não crie esses recursos manualmente no painel.
 A versão nova de `delete-account` também limpa anexos de mensagens:
 
 ```powershell
-npx supabase secrets set "ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173"
+npx supabase secrets set "ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173,crypt-app://app,https://crypt.local"
 npm run supabase:functions:deploy
 ```
 
@@ -145,6 +215,12 @@ npm run supabase:functions:deploy
 
 ```powershell
 npm run dev
+```
+
+Aplicativo Windows:
+
+```powershell
+npm run desktop:dev
 ```
 
 Rotas principais:
@@ -170,6 +246,15 @@ Rotas principais:
 ```powershell
 npm run validate
 ```
+
+No aplicativo instalado, o Android solicita microfone, câmera, notificações e Bluetooth depois de
+explicar o uso de cada recurso. No desktop, o layout ocupa a janela sem rolar a aplicação inteira:
+em canais e mensagens privadas, somente o histórico central se movimenta; cabeçalho, canais,
+painel de call, membros e caixa de envio permanecem estáticos.
+
+O shell do aplicativo é fixado diretamente ao viewport do Electron. As telas comuns rolam apenas
+dentro da área central; nos chats, essa rolagem externa é desativada e o histórico recebe seu
+próprio contêiner, impedindo que perfil, call, canais ou membros acompanhem as mensagens.
 
 Com Docker Desktop aberto:
 
@@ -228,6 +313,10 @@ Consulte:
 - [docs/direct-messages.md](docs/direct-messages.md)
 - [docs/notifications.md](docs/notifications.md)
 - [docs/profile-visuals-sounds.md](docs/profile-visuals-sounds.md)
+- [docs/windows-electron.md](docs/windows-electron.md)
+- [docs/android.md](docs/android.md)
+- [docs/android-mobile-resources.md](docs/android-mobile-resources.md)
+- [docs/releases-updates.md](docs/releases-updates.md)
 
 ### Nota da auditoria
 
@@ -239,8 +328,14 @@ RSC, que não são usadas neste aplicativo SPA. Não execute `npm audit fix --fo
 - o envio padrão de e-mails do Supabase é apropriado apenas para testes;
 - alertas do sistema em segundo plano exigem publicação HTTPS e serão ativados com a PWA;
 - busca global no histórico ainda não foi adicionada;
-- publicação web e executáveis Windows e Android ficam para as próximas fases.
+- a base Android, chamadas, câmera e transmissão nativa já estão prontas;
+- notificações push com o aplicativo totalmente encerrado entram na próxima fase;
+- distribuição Android pela Play Store ainda depende da conta de publicação;
+- o instalador inicial do Windows não possui assinatura de código.
 
-## Próxima fase
+## Aplicativo Windows
 
-A Fase 13 criará o aplicativo Windows com Tauri, ícones, permissões e instalador.
+A Fase 13.3 usa Electron 42, identidade visual, bandeja, instância única, notificações, protocolo
+`crypt://` e instalador NSIS `.exe`. O compartilhamento selecionado no Crypt é entregue diretamente
+pelo Chromium ao LiveKit, sem recompressão intermediária. Execute `npm run desktop:build` no Windows
+para gerar o instalador.

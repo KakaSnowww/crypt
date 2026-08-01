@@ -1,4 +1,9 @@
 dist
+dist-electron
+release
 coverage
 node_modules
 package-lock.json
+android/app/src/main/assets
+android/**/build
+android/.gradle

@@ -14,6 +14,20 @@ export async function createVoiceConnection(channelId: string): Promise<VoiceCon
   return result.data;
 }
 
+export async function createAndroidScreenShareConnection(
+  channelId: string,
+): Promise<VoiceConnection> {
+  const result = (await getSupabaseClient().functions.invoke('livekit-token', {
+    body: { action: 'android_screen_share', channel_id: channelId },
+  })) as { data: VoiceConnection | null; error: unknown };
+
+  if (result.error || !result.data) {
+    throw await toVoiceError(result.error);
+  }
+
+  return result.data;
+}
+
 export async function setMyVoicePresence(channelId: null | string, microphoneMuted = false) {
   const { error } = await getSupabaseClient().rpc('set_my_voice_channel_presence', {
     microphone_is_muted: microphoneMuted,

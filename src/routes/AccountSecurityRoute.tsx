@@ -18,6 +18,8 @@ import {
 import { deleteAccount, updatePassword } from '../features/auth/auth.service';
 import { AuthFormError } from '../features/auth/components/AuthFormError';
 import { useAuth } from '../features/auth/useAuth';
+import { DesktopUpdatePanel } from '../features/desktopUpdates/DesktopUpdatePanel';
+import { SettingsNavigation } from '../features/profile/components/SettingsNavigation';
 
 export function AccountSecurityRoute() {
   const navigate = useNavigate();
@@ -61,6 +63,7 @@ export function AccountSecurityRoute() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+      <SettingsNavigation />
       <p className="eyebrow">Conta e segurança</p>
       <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Proteja seu acesso</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
@@ -131,6 +134,8 @@ export function AccountSecurityRoute() {
           </Button>
         </form>
       </section>
+
+      <DesktopUpdatePanel />
 
       <section
         className="mt-5 rounded-[1.75rem] border border-red-400/15 bg-red-500/[0.06] p-5 sm:p-7"

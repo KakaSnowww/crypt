@@ -3,6 +3,9 @@ import { useState, type PropsWithChildren } from 'react';
 import { ToastProvider } from '../components/common/ToastProvider';
 import { AuthContext, type AuthContextValue } from '../features/auth/AuthContext';
 import { AuthProvider } from '../features/auth/AuthProvider';
+import { MobileNetworkStatus } from '../features/mobile/MobileNetworkStatus';
+import { AndroidPermissionsPrompt } from '../features/mobile/AndroidPermissionsPrompt';
+import { DesktopUpdateBanner } from '../features/desktopUpdates/DesktopUpdateBanner';
 import { VoiceCallProvider } from '../features/voice/VoiceCallProvider';
 
 type AppProvidersProps = PropsWithChildren<{
@@ -34,7 +37,12 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>{authContent}</ToastProvider>
+      <ToastProvider>
+        <MobileNetworkStatus />
+        <AndroidPermissionsPrompt />
+        <DesktopUpdateBanner />
+        {authContent}
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

@@ -143,6 +143,8 @@ describe('ChannelRoute', () => {
 
     expect(screen.getByRole('heading', { name: 'Conversa Geral' })).toBeVisible();
     expect(screen.getByText('Bem-vindo ao canal!')).toBeVisible();
+    expect(screen.getByRole('main')).toHaveClass('chat-layout');
+    expect(screen.getByLabelText('Mensagens de Conversa Geral')).toHaveClass('chat-scroll');
 
     const composer = screen.getByRole('textbox', { name: 'Mensagem para Conversa Geral' });
     await user.type(composer, 'Olá @ka');

@@ -120,8 +120,8 @@ export function DirectConversationRoute() {
   }
 
   return (
-    <main className="flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col">
-      <section className="border-b border-white/5 px-4 py-3 sm:px-6">
+    <main className="chat-layout flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+      <section className="chat-fixed shrink-0 border-b border-white/5 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
           <ProfileAvatar
             avatarPath={conversation.other_avatar_path}
@@ -147,7 +147,7 @@ export function DirectConversationRoute() {
 
       <section
         aria-label={`Mensagens com ${conversation.other_display_name}`}
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6"
+        className="chat-scroll min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6"
       >
         {messagesQuery.hasNextPage ? (
           <div className="mb-5 text-center">
@@ -189,7 +189,7 @@ export function DirectConversationRoute() {
         <div ref={messageEndRef} />
       </section>
 
-      <section className="border-t border-white/5 bg-crypt-background/95 px-3 py-3 sm:px-6">
+      <section className="chat-fixed shrink-0 border-t border-white/5 bg-crypt-background/95 px-3 py-3 sm:px-6">
         <div className="mx-auto w-full max-w-5xl">
           {conversation.is_blocked ? (
             <div className="flex items-center justify-center gap-2 rounded-2xl border border-red-400/15 bg-red-500/5 p-3 text-sm text-red-100">

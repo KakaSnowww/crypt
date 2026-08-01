@@ -10,6 +10,7 @@ import {
   MessageCircle,
   LayoutList,
   Settings,
+  Share2,
   ShieldCheck,
   UserPlus,
   Users,
@@ -22,6 +23,8 @@ import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
 import { Textarea } from '../components/common/Textarea';
 import { useToast } from '../components/common/ToastContext';
+import { buildServerInviteLink, shareServerInvite } from '../lib/mobileShare';
+import { isAndroidRuntime } from '../lib/platform';
 import { useModerationActions } from '../features/moderation/useModerationActions';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { ServerIcon } from '../features/servers/components/ServerIcon';
@@ -70,6 +73,7 @@ export function ServerRoute() {
   const [reportTarget, setReportTarget] = useState<null | { id: string; name: string }>(null);
   const [reportReason, setReportReason] = useState('harassment');
   const [reportDetails, setReportDetails] = useState('');
+  const androidRuntime = isAndroidRuntime();
 
   if (
     overviewQuery.isPending ||
@@ -107,6 +111,7 @@ export function ServerRoute() {
   }
 
   const bannerUrl = getServerMediaUrl(overview.banner_path);
+  const serverName = overview.server_name;
   const members = membersQuery.data ?? [];
   const invites = invitesQuery.data ?? [];
   const channels = channelsQuery.data ?? [];
@@ -114,7 +119,7 @@ export function ServerRoute() {
     channels.find((channel) => channel.channel_id === overview.default_channel_id) ?? channels[0];
 
   async function copyInvite(code: string) {
-    const url = `${window.location.origin}/app/convite/${code}`;
+    const url = buildServerInviteLink(code);
 
     try {
       await navigator.clipboard.writeText(url);
@@ -132,6 +137,14 @@ export function ServerRoute() {
     }
   }
 
+  async function shareInvite(code: string) {
+    try {
+      await shareServerInvite(code, serverName);
+    } catch {
+      await copyInvite(code);
+    }
+  }
+
   async function handleCreateInvite() {
     actions.createInvite.reset();
     const code = await actions.createInvite
@@ -144,7 +157,11 @@ export function ServerRoute() {
 
     if (code) {
       setCreatedCode(code);
-      await copyInvite(code);
+      if (androidRuntime) {
+        await shareInvite(code);
+      } else {
+        await copyInvite(code);
+      }
     }
   }
 
@@ -334,7 +351,7 @@ export function ServerRoute() {
                 loading={actions.createInvite.isPending}
                 onClick={() => void handleCreateInvite()}
               >
-                Criar e copiar
+                {androidRuntime ? 'Criar e compartilhar' : 'Criar e copiar'}
               </Button>
             </div>
             {actions.createInvite.error ? (
@@ -345,8 +362,18 @@ export function ServerRoute() {
             {createdCode ? (
               <div className="mt-4 flex items-center gap-3 rounded-2xl border border-violet-400/15 bg-violet-500/[0.07] p-3">
                 <code className="min-w-0 flex-1 truncate text-xs text-violet-100">
-                  {window.location.origin}/app/convite/{createdCode}
+                  {buildServerInviteLink(createdCode)}
                 </code>
+                {androidRuntime ? (
+                  <Button
+                    leadingIcon={<Share2 aria-hidden="true" size={14} />}
+                    onClick={() => void shareInvite(createdCode)}
+                    size="sm"
+                    variant="secondary"
+                  >
+                    Compartilhar
+                  </Button>
+                ) : null}
                 <Button
                   leadingIcon={<Copy aria-hidden="true" size={14} />}
                   onClick={() => void copyInvite(createdCode)}
@@ -378,6 +405,16 @@ export function ServerRoute() {
                       </p>
                     </div>
                     <div className="flex gap-2">
+                      {androidRuntime ? (
+                        <Button
+                          leadingIcon={<Share2 aria-hidden="true" size={14} />}
+                          onClick={() => void shareInvite(invite.invite_code)}
+                          size="sm"
+                          variant="secondary"
+                        >
+                          Compartilhar
+                        </Button>
+                      ) : null}
                       <Button
                         leadingIcon={<Copy aria-hidden="true" size={14} />}
                         onClick={() => void copyInvite(invite.invite_code)}

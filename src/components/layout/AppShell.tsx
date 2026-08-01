@@ -5,6 +5,7 @@ import {
   Headphones,
   Home,
   LogOut,
+  Monitor,
   Menu,
   MessageCircle,
   Palette,
@@ -12,6 +13,7 @@ import {
   Search,
   Server as ServerGlyph,
   Settings,
+  ShieldCheck,
   UserRound,
   Users,
   X,
@@ -60,6 +62,7 @@ import type {
 } from '../../features/workspace/workspace.types';
 import { classNames } from '../../lib/classNames';
 import { isSupabaseConfigured } from '../../lib/supabase/client';
+import { isElectronRuntime } from '../../lib/platform';
 import { IconButton } from '../common/IconButton';
 
 const channelLinks = [
@@ -105,6 +108,12 @@ const channelLinks = [
     label: 'Meu perfil',
     to: '/app/perfil',
   },
+  {
+    end: true,
+    icon: ShieldCheck,
+    label: 'Conta e segurança',
+    to: '/app/conta',
+  },
 ] as const;
 
 export function AppShell() {
@@ -117,7 +126,11 @@ export function AppShell() {
   const { signOut, user } = useAuth();
   const selectedServerId = getServerIdFromPath(location.pathname);
   const isVoiceRoute = location.pathname.includes('/chamadas/');
+  const isConversationRoute =
+    location.pathname.includes('/canais/') ||
+    /^\/app\/mensagens\/[0-9a-f-]{36}(?:\/|$)/i.test(location.pathname);
   const appDataEnabled = isSupabaseConfigured() && import.meta.env.MODE !== 'test';
+  const desktopRuntime = isElectronRuntime();
   const profileQuery = useCurrentProfile(user?.id ?? null, appDataEnabled);
   const serversQuery = useMyServers(appDataEnabled);
   const serverOverviewQuery = useServerOverview(selectedServerId, appDataEnabled);
@@ -144,6 +157,14 @@ export function AppShell() {
   useDirectListRealtime(user?.id ?? null);
   usePresenceHeartbeat(user?.id ?? null);
   useServersRealtime(user?.id ?? null, selectedServerId);
+
+  useEffect(() => {
+    document.body.classList.add('app-shell-active');
+
+    return () => {
+      document.body.classList.remove('app-shell-active');
+    };
+  }, []);
 
   useEffect(() => {
     if (!voicePresenceQuery.error) {
@@ -302,13 +323,13 @@ export function AppShell() {
   return (
     <div
       className={classNames(
-        'min-h-dvh bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17rem_minmax(0,1fr)]',
+        'app-shell h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17rem_minmax(0,1fr)]',
         !isVoiceRoute && '2xl:grid-cols-[4.5rem_17rem_minmax(0,1fr)_15rem]',
       )}
     >
       <aside
         aria-label="Seus espaços"
-        className="hidden border-r border-white/5 bg-crypt-deep px-2 py-4 lg:flex lg:min-h-dvh lg:flex-col lg:items-center"
+        className="app-shell__rail hidden border-r border-white/5 bg-crypt-deep px-2 py-4 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:items-center lg:overflow-hidden"
       >
         <NavLink
           aria-label="Início do Crypt"
@@ -347,12 +368,10 @@ export function AppShell() {
         <div className="mt-auto">
           <button
             aria-expanded={currentServer ? globalMenuOpen : undefined}
-            aria-label={currentServer ? 'Abrir menu do Crypt' : 'Editar perfil'}
+            aria-label={currentServer ? 'Abrir menu do Crypt' : 'Abrir configurações da conta'}
             className="grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
             onClick={() =>
-              currentServer
-                ? setGlobalMenuOpen((open) => !open)
-                : void navigate('/app/perfil/editar')
+              currentServer ? setGlobalMenuOpen((open) => !open) : void navigate('/app/conta')
             }
             type="button"
           >
@@ -363,7 +382,7 @@ export function AppShell() {
 
       <aside
         aria-label={currentServer ? `Canais de ${currentServer.server_name}` : 'Navegação do Crypt'}
-        className="hidden border-r border-white/5 bg-crypt-sidebar lg:flex lg:min-h-dvh lg:flex-col"
+        className="app-shell__sidebar hidden border-r border-white/5 bg-crypt-sidebar lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:overflow-hidden"
       >
         <div className="border-b border-white/5 px-4 py-4">
           <p className="text-xs font-medium text-violet-300">
@@ -516,9 +535,9 @@ export function AppShell() {
           </div>
           <div className="ml-auto flex">
             <NavLink
-              aria-label="Editar perfil"
+              aria-label="Abrir conta e segurança"
               className="grid size-8 place-items-center rounded-lg text-crypt-muted hover:bg-white/[0.07] hover:text-white"
-              to="/app/perfil/editar"
+              to="/app/conta"
             >
               <Settings aria-hidden="true" size={16} />
             </NavLink>
@@ -532,8 +551,8 @@ export function AppShell() {
         </div>
       </aside>
 
-      <section className="flex min-h-dvh min-w-0 flex-col">
-        <header className="flex min-h-16 items-center gap-3 border-b border-white/5 bg-crypt-background/90 px-4 backdrop-blur-xl sm:px-5">
+      <section className="app-shell__main flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden">
+        <header className="app-shell__header flex min-h-16 shrink-0 items-center gap-3 border-b border-white/5 bg-crypt-background/90 px-4 backdrop-blur-xl sm:px-5">
           <div className="lg:hidden">
             <IconButton
               icon={<Menu aria-hidden="true" size={20} />}
@@ -550,6 +569,12 @@ export function AppShell() {
               {pageHeader.description}
             </p>
           </div>
+          {desktopRuntime ? (
+            <span className="hidden items-center gap-1.5 rounded-full border border-blue-400/15 bg-blue-500/[0.08] px-2.5 py-1 text-[0.66rem] font-semibold text-blue-200 sm:inline-flex">
+              <Monitor aria-hidden="true" size={12} />
+              Aplicativo Windows
+            </span>
+          ) : null}
           <div className="ml-auto flex items-center gap-1">
             <IconButton
               icon={<Search aria-hidden="true" size={18} />}
@@ -584,7 +609,7 @@ export function AppShell() {
         {currentServer && selectedServerId ? (
           <nav
             aria-label={`Canais móveis de ${currentServer.server_name}`}
-            className="flex gap-2 overflow-x-auto border-b border-white/5 bg-crypt-sidebar/70 px-3 py-2 lg:hidden"
+            className="flex shrink-0 gap-2 overflow-x-auto border-b border-white/5 bg-crypt-sidebar/70 px-3 py-2 lg:hidden"
           >
             <NavLink
               className={({ isActive }) =>
@@ -644,7 +669,14 @@ export function AppShell() {
           </nav>
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto pb-[4.75rem] lg:pb-0">
+        <div
+          className={classNames(
+            'app-shell__content min-h-0 flex-1 pb-[4.75rem] lg:pb-0',
+            isConversationRoute
+              ? 'app-shell__content--conversation overflow-hidden'
+              : 'overflow-y-auto',
+          )}
+        >
           <Outlet />
         </div>
 
@@ -748,8 +780,8 @@ export function AppShell() {
       <aside
         aria-label={currentServer ? `Membros de ${currentServer.server_name}` : 'Painel contextual'}
         className={classNames(
-          'hidden border-l border-white/5 bg-crypt-sidebar px-4 py-5',
-          !isVoiceRoute && '2xl:block',
+          'app-shell__members hidden min-h-0 overflow-y-auto border-l border-white/5 bg-crypt-sidebar px-4 py-5',
+          !isVoiceRoute && '2xl:block 2xl:h-dvh',
         )}
       >
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">

@@ -1,7 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
+import { configureAndroidRuntime, hideAndroidSplashScreen } from './lib/androidRuntime';
+import { configureDesktopDeepLinks } from './lib/desktopDeepLinks';
+import { configureRuntimeDocument } from './lib/platform';
 import './styles/globals.css';
+
+configureRuntimeDocument();
 
 const rootElement = document.getElementById('root');
 
@@ -9,8 +14,15 @@ if (!rootElement) {
   throw new Error('O elemento raiz do Crypt não foi encontrado.');
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+void Promise.all([configureDesktopDeepLinks(), configureAndroidRuntime()])
+  .catch(() => undefined)
+  .finally(() => {
+    createRoot(rootElement).render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
+    window.requestAnimationFrame(() => {
+      void hideAndroidSplashScreen().catch(() => undefined);
+    });
+  });

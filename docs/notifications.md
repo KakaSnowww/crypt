@@ -16,10 +16,13 @@
 O navegador exige autorização explícita da pessoa. Em `localhost`, a permissão pode ser testada
 normalmente. Fora do computador local, o site precisa estar publicado com HTTPS.
 
-Nesta fase, o Crypt apresenta o alerta do sistema quando a aplicação está aberta. Push em segundo
-plano com a aplicação totalmente fechada exige um serviço de entrega, chaves VAPID e publicação
-HTTPS. Essa ativação será feita junto das fases de executáveis e PWA, reutilizando as preferências e
-os eventos já criados.
+No Android, a Fase 14.2 usa a central nativa de notificações. A autorização do Android 13 ou mais
+novo só é solicitada quando a pessoa toca em **Permitir no dispositivo**. O canal
+`Alertas do Crypt` possui ícone próprio e abre diretamente o conteúdo relacionado.
+
+O Crypt apresenta o alerta do sistema enquanto a aplicação está em execução. Push com o aplicativo
+completamente encerrado exige Firebase Cloud Messaging e uma função de entrega autenticada. Essa
+ativação posterior reutilizará as preferências e os eventos já criados.
 
 ## Eventos
 
@@ -50,3 +53,12 @@ os eventos já criados.
 6. Selecione a pessoa com o mouse, `Enter` ou `Tab` e envie a mensagem.
 7. Abra a notificação e confirme a navegação para o conteúdo.
 8. Desative uma categoria, salve e confirme que novos eventos dela deixam de ser gerados.
+
+No Android, faça também:
+
+1. confirme que o pedido de permissão aparece somente depois de tocar no botão;
+2. envie uma DM ou menção pela segunda conta;
+3. confirme o alerta na central do Android;
+4. toque no alerta e confirme a abertura da conversa correta;
+5. desligue Wi-Fi e dados móveis e confirme o aviso offline;
+6. religue a conexão e confirme a atualização automática.

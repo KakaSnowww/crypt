@@ -14,7 +14,9 @@ O frontend nunca conhece `LIVEKIT_API_KEY` nem `LIVEKIT_API_SECRET`. A Edge Func
 3. chama `get_voice_channel_access` usando a sessão real;
 4. confirma tipo, associação e permissão de visualizar o canal;
 5. usa nome e identidade armazenados no banco;
-6. emite um token LiveKit de dez minutos limitado a uma única sala.
+6. emite um token LiveKit limitado a uma única sala;
+7. para a projeção Android, emite um token auxiliar de duas horas que só publica a tela e não
+   assina mídia.
 
 O token permite inscrição em mídia e só permite publicação quando a pessoa possui
 `Enviar mensagens` no canal. A expiração limita novas conexões; a reconexão ativa continua sendo
@@ -35,9 +37,9 @@ tratada pelo SDK.
 - canal de vídeo iniciando com câmera quando permitido;
 - consentimento antes de solicitar dispositivos.
 
-No site, o seletor de compartilhamento é obrigatoriamente controlado pelo navegador. A versão
-Electron usará o capturador nativo do sistema e a versão Android usará a API nativa de projeção de
-tela; a interface do Crypt continuará sendo a responsável por iniciar e encerrar a transmissão.
+No site, o seletor de compartilhamento é obrigatoriamente controlado pelo navegador. O Electron usa
+o capturador nativo do Chromium e o Android usa `MediaProjection` com o SDK Android do LiveKit. A
+interface do Crypt continua responsável por iniciar e encerrar a transmissão.
 
 ## Configuração do LiveKit Cloud
 

@@ -111,7 +111,7 @@
 
 .voice-lobby {
   display: grid;
-  min-height: calc(100vh - 4rem);
+  min-height: 100%;
   place-items: center;
   padding: 1.5rem;
   background: radial-gradient(circle at 50% 24%, rgb(104 72 210 / 24%), transparent 38%), #070911;
@@ -193,7 +193,8 @@
 .voice-stage {
   position: relative;
   display: flex;
-  min-height: calc(100vh - 4rem);
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
   background: radial-gradient(circle at 50% -10%, rgb(94 61 178 / 13%), transparent 36%), #05070c;
@@ -257,6 +258,70 @@
 
 .voice-stage__grid.has-share {
   gap: 0.75rem;
+}
+
+.android-share-picker {
+  display: grid;
+  gap: 1rem;
+}
+
+.android-share-picker__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border: 1px solid rgb(88 211 255 / 20%);
+  border-radius: 0.85rem;
+  background: rgb(24 127 168 / 9%);
+  color: #71d7ff;
+}
+
+.android-share-picker__notice span,
+.android-share-picker fieldset label span {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.android-share-picker__notice strong,
+.android-share-picker fieldset strong {
+  color: #edf7ff;
+  font-size: 0.82rem;
+}
+
+.android-share-picker__notice small,
+.android-share-picker fieldset small,
+.android-share-picker > p {
+  color: #8e9bb5;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.android-share-picker fieldset {
+  display: grid;
+  gap: 0.55rem;
+  border: 0;
+}
+
+.android-share-picker legend {
+  margin-bottom: 0.55rem;
+  color: #c8d0e2;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.android-share-picker fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 3%);
+}
+
+.android-share-picker fieldset label.is-selected {
+  border-color: rgb(125 92 255 / 60%);
+  background: rgb(105 72 229 / 12%);
 }
 
 .voice-stage__share {
@@ -486,6 +551,11 @@
   background: #343a49;
 }
 
+.voice-stage__controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
 .voice-stage__controls button.is-active {
   background: #f0f1f5;
   color: #151821;
@@ -567,6 +637,253 @@
   font-size: 0.63rem;
 }
 
+.native-share-picker {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.native-share-picker__tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 0.8rem;
+  background: rgb(4 7 13 / 46%);
+}
+
+.native-share-picker__tabs > button {
+  display: flex;
+  min-height: 2.35rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.75rem;
+  border-radius: 0.6rem;
+  color: #8f99b0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.native-share-picker__tabs > button:hover,
+.native-share-picker__tabs > button.is-active {
+  background: rgb(126 91 255 / 18%);
+  color: white;
+}
+
+.native-share-picker__tabs > .native-share-picker__refresh {
+  width: 2.35rem;
+  margin-left: auto;
+  justify-content: center;
+  padding: 0;
+}
+
+.native-share-picker__grid {
+  display: grid;
+  max-height: min(24rem, 52dvh);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  overflow-y: auto;
+  padding: 0.1rem;
+}
+
+.native-share-picker__grid > button {
+  min-width: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 4%);
+  text-align: left;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.native-share-picker__grid > button:hover {
+  transform: translateY(-1px);
+  background: rgb(255 255 255 / 7%);
+}
+
+.native-share-picker__grid > button.is-selected {
+  border-color: #805cff;
+  background: rgb(128 92 255 / 12%);
+  box-shadow: 0 0 0 2px rgb(128 92 255 / 13%);
+}
+
+.native-share-picker__thumbnail {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, rgb(114 79 230 / 20%), transparent 42%), #070a11;
+  color: #7e88a0;
+}
+
+.native-share-picker__thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.native-share-picker__thumbnail svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.native-share-picker__grid > button > span:last-child {
+  display: block;
+  padding: 0.6rem 0.65rem 0.7rem;
+}
+
+.native-share-picker__grid strong,
+.native-share-picker__grid small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.native-share-picker__grid strong {
+  color: #f2f4fa;
+  font-size: 0.72rem;
+}
+
+.native-share-picker__grid small {
+  margin-top: 0.15rem;
+  color: #778199;
+  font-size: 0.58rem;
+}
+
+.native-share-picker__empty {
+  display: grid;
+  min-height: 11rem;
+  place-items: center;
+  gap: 0.55rem;
+  border: 1px dashed rgb(255 255 255 / 10%);
+  border-radius: 0.85rem;
+  background: rgb(4 7 13 / 35%);
+  color: #858fa6;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.native-share-picker__error {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgb(255 112 126 / 18%);
+  border-radius: 0.7rem;
+  background: rgb(255 68 87 / 8%);
+  color: #ff9ba5;
+  font-size: 0.7rem;
+}
+
+.native-share-picker__settings {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.85rem;
+  background: rgb(4 7 13 / 38%);
+}
+
+.native-share-picker__settings fieldset {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+}
+
+.native-share-picker__settings legend {
+  margin-bottom: 0.1rem;
+  color: #b9c1d2;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.native-share-picker__quality {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.native-share-picker__quality label {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.65rem;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 0.7rem;
+  background: rgb(255 255 255 / 3%);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.native-share-picker__quality label:hover,
+.native-share-picker__quality label.is-selected {
+  border-color: rgb(128 92 255 / 55%);
+  background: rgb(128 92 255 / 10%);
+}
+
+.native-share-picker__quality input {
+  margin-top: 0.15rem;
+  accent-color: #805cff;
+}
+
+.native-share-picker__quality span,
+.native-share-picker__quality strong,
+.native-share-picker__quality small,
+.native-share-picker__audio span,
+.native-share-picker__audio strong,
+.native-share-picker__audio small {
+  display: block;
+}
+
+.native-share-picker__quality span,
+.native-share-picker__audio span {
+  min-width: 0;
+}
+
+.native-share-picker__quality strong,
+.native-share-picker__audio strong {
+  color: #f0f2f8;
+  font-size: 0.67rem;
+}
+
+.native-share-picker__quality small,
+.native-share-picker__audio small {
+  margin-top: 0.15rem;
+  color: #778199;
+  font-size: 0.57rem;
+  line-height: 1.45;
+}
+
+.native-share-picker__audio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgb(255 255 255 / 6%);
+}
+
+.native-share-picker__audio input {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  accent-color: #805cff;
+}
+
+.native-share-picker__notice {
+  color: #717c94;
+  font-size: 0.62rem;
+  line-height: 1.55;
+}
+
 @keyframes voice-level {
   to {
     height: 100%;
@@ -586,6 +903,14 @@
 }
 
 @media (max-width: 720px) {
+  .native-share-picker__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .native-share-picker__quality {
+    grid-template-columns: 1fr;
+  }
+
   .voice-stage__grid.has-share {
     flex-direction: column;
   }
