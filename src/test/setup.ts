@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { configure } from '@testing-library/dom';
 
-configure({ asyncUtilTimeout: 3_000 });
+configure({ asyncUtilTimeout: 8_000 });
 
 if (!globalThis.ResizeObserver) {
   class ResizeObserverMock {

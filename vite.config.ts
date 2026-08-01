@@ -48,7 +48,9 @@ export default defineConfig({
     environment: 'jsdom',
     exclude: [...configDefaults.exclude, '**/dist-electron/**', '**/release/**'],
     globals: true,
-    maxWorkers: 4,
+    hookTimeout: process.env.CI ? 15_000 : 8_000,
+    maxWorkers: process.env.CI ? 2 : 4,
     setupFiles: './src/test/setup.ts',
+    testTimeout: process.env.CI ? 15_000 : 8_000,
   },
 });
