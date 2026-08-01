@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.2.4': {
+    highlights: [
+      {
+        description:
+          'O som5.mp3 agora faz parte do pacote entregue e pode ser testado antes de publicar uma nova versão.',
+        title: 'Som incluído e verificável',
+      },
+      {
+        description:
+          'Conta e segurança ganhou o botão Testar som de atualização com uma confirmação clara do resultado.',
+        title: 'Teste de áudio nas configurações',
+      },
+      {
+        description:
+          'O endereço do áudio agora é resolvido especificamente para o ambiente atual, inclusive no protocolo do aplicativo instalado.',
+        title: 'Carregamento mais robusto',
+      },
+      {
+        description:
+          'O Electron instalado já inicia com a política de áudio necessária para avisos automáticos.',
+        title: 'Pronto para avisar na abertura',
+      },
+    ],
+    summary:
+      'Esta versão permite confirmar o som localmente e fecha o ciclo de teste da atualização automática.',
+    title: 'Som de atualização confirmado',
+    version: '0.2.4',
+  },
   '0.2.3': {
     highlights: [
       {

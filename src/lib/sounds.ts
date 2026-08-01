@@ -13,16 +13,19 @@ const audioCache = new Map<CryptSound, HTMLAudioElement>();
 export async function playCryptSound(sound: CryptSound) {
   if (typeof Audio === 'undefined') return false;
 
-  const audio = audioCache.get(sound) ?? new Audio(soundPaths[sound]);
-  audio.preload = 'auto';
-  audio.currentTime = 0;
-  audioCache.set(sound, audio);
-
   try {
+    const source = new URL(soundPaths[sound], window.location.href).href;
+    const audio = audioCache.get(sound) ?? new Audio(source);
+    audio.preload = 'auto';
+    audio.muted = false;
+    audio.volume = 1;
+    if (audio.readyState > 0) audio.currentTime = 0;
+    audioCache.set(sound, audio);
+
     await audio.play();
     return true;
-  } catch {
-    // Navegadores podem bloquear áudio antes da primeira interação.
+  } catch (error) {
+    console.warn(`O Crypt não conseguiu reproduzir o som ${sound}.`, error);
     return false;
   }
 }

@@ -1,10 +1,13 @@
-import { CheckCircle2, Download, RefreshCw, Rocket, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, Download, RefreshCw, Rocket, TriangleAlert, Volume2 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '../../components/common/Button';
+import { playCryptSound } from '../../lib/sounds';
 import packageMetadata from '../../../package.json';
 import { useDesktopUpdates } from './useDesktopUpdates';
 
 export function DesktopUpdatePanel() {
   const { check, desktopRuntime, restartAndInstall, state } = useDesktopUpdates();
+  const [soundFeedback, setSoundFeedback] = useState<string | null>(null);
   const visibleState: CryptDesktopUpdateState =
     state ??
     (desktopRuntime
@@ -17,6 +20,16 @@ export function DesktopUpdatePanel() {
         });
   const checking = visibleState.state === 'checking';
   const ready = visibleState.state === 'ready';
+
+  async function handleSoundTest() {
+    setSoundFeedback('Reproduzindo som…');
+    const played = await playCryptSound('update');
+    setSoundFeedback(
+      played
+        ? 'Som de atualização reproduzido.'
+        : 'Não foi possível reproduzir o som. Verifique o volume do Windows.',
+    );
+  }
 
   return (
     <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="desktop-update-title">
@@ -53,7 +66,20 @@ export function DesktopUpdatePanel() {
               Verificar agora
             </Button>
           )}
+          <Button
+            leadingIcon={<Volume2 size={17} />}
+            onClick={() => void handleSoundTest()}
+            variant="secondary"
+          >
+            Testar som de atualização
+          </Button>
         </div>
+      ) : null}
+
+      {desktopRuntime && soundFeedback ? (
+        <p aria-live="polite" className="mt-3 text-xs text-crypt-muted">
+          {soundFeedback}
+        </p>
       ) : null}
     </section>
   );

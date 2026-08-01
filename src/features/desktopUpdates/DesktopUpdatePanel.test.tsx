@@ -1,16 +1,23 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { playCryptSound } from '../../lib/sounds';
 import { DesktopUpdatePanel } from './DesktopUpdatePanel';
+
+vi.mock('../../lib/sounds', () => ({
+  playCryptSound: vi.fn(() => Promise.resolve(true)),
+}));
 
 afterEach(() => {
   delete window.cryptDesktop;
+  vi.clearAllMocks();
 });
 
 describe('DesktopUpdatePanel', () => {
   it('mostra a versão também quando o Crypt está aberto no navegador', () => {
     render(<DesktopUpdatePanel />);
 
-    expect(screen.getByText(/Versão atual: 0\.2\.3/)).toBeInTheDocument();
+    expect(screen.getByText(/Versão atual: 0\.2\.4/)).toBeInTheDocument();
     expect(screen.getByText(/Você está usando o Crypt pelo navegador/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Verificar agora' })).not.toBeInTheDocument();
   });
@@ -21,9 +28,21 @@ describe('DesktopUpdatePanel', () => {
 
     render(<DesktopUpdatePanel />);
 
-    expect(await screen.findByText('Versão 0.2.4 pronta para instalar.')).toBeInTheDocument();
-    screen.getByRole('button', { name: 'Reiniciar e instalar 0.2.4' }).click();
+    expect(await screen.findByText('Versão 0.2.5 pronta para instalar.')).toBeInTheDocument();
+    screen.getByRole('button', { name: 'Reiniciar e instalar 0.2.5' }).click();
     expect(restartAndInstall).toHaveBeenCalledOnce();
+  });
+
+  it('permite testar o som de atualização antes da publicação', async () => {
+    const user = userEvent.setup();
+    window.cryptDesktop = createDesktopBridge(() => Promise.resolve(true));
+
+    render(<DesktopUpdatePanel />);
+
+    await user.click(await screen.findByRole('button', { name: 'Testar som de atualização' }));
+
+    expect(playCryptSound).toHaveBeenCalledWith('update');
+    expect(screen.getByText('Som de atualização reproduzido.')).toBeInTheDocument();
   });
 });
 
@@ -31,9 +50,9 @@ function createDesktopBridge(
   restartAndInstall: () => Promise<boolean>,
 ): NonNullable<Window['cryptDesktop']> {
   const state: CryptDesktopUpdateState = {
-    currentVersion: '0.2.3',
+    currentVersion: '0.2.4',
     state: 'ready',
-    version: '0.2.4',
+    version: '0.2.5',
   };
 
   return {
