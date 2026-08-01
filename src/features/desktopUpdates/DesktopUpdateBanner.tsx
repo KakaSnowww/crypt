@@ -1,9 +1,26 @@
 import { Download, RefreshCw, Rocket } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '../../components/common/Button';
+import { playCryptSound } from '../../lib/sounds';
+import { updateSoundStorageKey, writePendingCryptRelease } from './releaseNotes';
 import { useDesktopUpdates } from './useDesktopUpdates';
 
 export function DesktopUpdateBanner() {
   const { restartAndInstall, state } = useDesktopUpdates();
+
+  useEffect(() => {
+    if (!state?.version || !['available', 'downloading', 'ready'].includes(state.state)) return;
+
+    writePendingCryptRelease(window.localStorage, {
+      releaseName: state.releaseName,
+      releaseNotes: state.releaseNotes,
+      version: state.version,
+    });
+
+    if (window.localStorage.getItem(updateSoundStorageKey) === state.version) return;
+    playCryptSound('update');
+    window.localStorage.setItem(updateSoundStorageKey, state.version);
+  }, [state]);
 
   if (!state || !['available', 'downloading', 'ready'].includes(state.state)) return null;
 

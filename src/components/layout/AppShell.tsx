@@ -28,6 +28,7 @@ import {
 } from '../../features/connections/useConnectionsRealtime';
 import { useDirectConversations } from '../../features/directMessages/directMessages.queries';
 import { useDirectListRealtime } from '../../features/directMessages/useDirectMessagesRealtime';
+import { DesktopUpdateHeaderButton } from '../../features/desktopUpdates/DesktopUpdateHeaderButton';
 import {
   useNotificationPreferences,
   useNotifications,
@@ -580,6 +581,7 @@ export function AppShell() {
               icon={<Search aria-hidden="true" size={18} />}
               label="Pesquisar neste canal"
             />
+            <DesktopUpdateHeaderButton />
             <NavLink
               aria-label={
                 unreadNotifications

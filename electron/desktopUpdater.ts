@@ -7,6 +7,8 @@ export type DesktopUpdateState = {
   currentVersion: string;
   message?: string;
   percent?: number;
+  releaseName?: string;
+  releaseNotes?: string;
   state:
     | 'available'
     | 'checking'
@@ -57,20 +59,22 @@ export function startDesktopUpdater() {
 
   autoUpdater.on('checking-for-update', () => setState({ state: 'checking' }));
   autoUpdater.on('update-available', (info: UpdateInfo) =>
-    setState({ state: 'available', version: info.version }),
+    setState({ ...readReleaseDetails(info), state: 'available', version: info.version }),
   );
   autoUpdater.on('update-not-available', (info: UpdateInfo) =>
-    setState({ state: 'up-to-date', version: info.version }),
+    setState({ ...readReleaseDetails(info), state: 'up-to-date', version: info.version }),
   );
   autoUpdater.on('download-progress', (progress: ProgressInfo) =>
     setState({
       percent: Math.max(0, Math.min(100, Math.round(progress.percent))),
+      releaseName: currentState.releaseName,
+      releaseNotes: currentState.releaseNotes,
       state: 'downloading',
       version: currentState.version,
     }),
   );
   autoUpdater.on('update-downloaded', (info: UpdateInfo) =>
-    setState({ state: 'ready', version: info.version }),
+    setState({ ...readReleaseDetails(info), state: 'ready', version: info.version }),
   );
   autoUpdater.on('error', (error: Error) =>
     setState({
@@ -84,6 +88,24 @@ export function startDesktopUpdater() {
   initialCheck.unref();
   const interval = setInterval(() => void checkForDesktopUpdate(false), updateCheckIntervalMs);
   interval.unref();
+}
+
+function readReleaseDetails(info: UpdateInfo) {
+  return {
+    releaseName: typeof info.releaseName === 'string' ? info.releaseName : undefined,
+    releaseNotes: normalizeReleaseNotes(info.releaseNotes),
+  };
+}
+
+function normalizeReleaseNotes(releaseNotes: UpdateInfo['releaseNotes']) {
+  if (typeof releaseNotes === 'string') return releaseNotes.trim() || undefined;
+  if (!Array.isArray(releaseNotes)) return undefined;
+
+  const notes = releaseNotes
+    .map((entry) => (typeof entry.note === 'string' ? entry.note.trim() : ''))
+    .filter(Boolean)
+    .join('\n\n');
+  return notes || undefined;
 }
 
 async function checkForDesktopUpdate(manual: boolean) {

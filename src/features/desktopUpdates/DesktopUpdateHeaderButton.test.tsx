@@ -1,28 +1,25 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DesktopUpdatePanel } from './DesktopUpdatePanel';
+import { DesktopUpdateHeaderButton } from './DesktopUpdateHeaderButton';
 
 afterEach(() => {
   delete window.cryptDesktop;
 });
 
-describe('DesktopUpdatePanel', () => {
-  it('mostra a versão também quando o Crypt está aberto no navegador', () => {
-    render(<DesktopUpdatePanel />);
-
-    expect(screen.getByText(/Versão atual: 0\.2\.2/)).toBeInTheDocument();
-    expect(screen.getByText(/Você está usando o Crypt pelo navegador/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Verificar agora' })).not.toBeInTheDocument();
-  });
-
-  it('oferece a instalação quando uma atualização está pronta', async () => {
+describe('DesktopUpdateHeaderButton', () => {
+  it('abre os detalhes e instala uma atualização pronta', async () => {
+    const user = userEvent.setup();
     const restartAndInstall = vi.fn(() => Promise.resolve(true));
     window.cryptDesktop = createDesktopBridge(restartAndInstall);
 
-    render(<DesktopUpdatePanel />);
+    render(<DesktopUpdateHeaderButton />);
 
-    expect(await screen.findByText('Versão 0.2.3 pronta para instalar.')).toBeInTheDocument();
-    screen.getByRole('button', { name: 'Reiniciar e instalar 0.2.3' }).click();
+    await user.click(await screen.findByRole('button', { name: 'Instalar atualização 0.2.3' }));
+    expect(screen.getByText('Uma experiência ainda melhor')).toBeInTheDocument();
+    expect(screen.getByText('Botão de atualização no cabeçalho')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Reiniciar e instalar' }));
     expect(restartAndInstall).toHaveBeenCalledOnce();
   });
 });
@@ -31,7 +28,9 @@ function createDesktopBridge(
   restartAndInstall: () => Promise<boolean>,
 ): NonNullable<Window['cryptDesktop']> {
   const state: CryptDesktopUpdateState = {
-    currentVersion: '0.2.0',
+    currentVersion: '0.2.2',
+    releaseName: 'Uma experiência ainda melhor',
+    releaseNotes: '- Botão de atualização no cabeçalho',
     state: 'ready',
     version: '0.2.3',
   };

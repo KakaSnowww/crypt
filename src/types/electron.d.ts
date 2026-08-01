@@ -16,6 +16,8 @@ declare global {
     currentVersion: string;
     message?: string;
     percent?: number;
+    releaseName?: string;
+    releaseNotes?: string;
     state:
       | 'available'
       | 'checking'

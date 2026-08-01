@@ -6,6 +6,7 @@ import { AuthProvider } from '../features/auth/AuthProvider';
 import { MobileNetworkStatus } from '../features/mobile/MobileNetworkStatus';
 import { AndroidPermissionsPrompt } from '../features/mobile/AndroidPermissionsPrompt';
 import { DesktopUpdateBanner } from '../features/desktopUpdates/DesktopUpdateBanner';
+import { PostUpdateWhatsNew } from '../features/desktopUpdates/PostUpdateWhatsNew';
 import { VoiceCallProvider } from '../features/voice/VoiceCallProvider';
 
 type AppProvidersProps = PropsWithChildren<{
@@ -41,6 +42,7 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
         <MobileNetworkStatus />
         <AndroidPermissionsPrompt />
         <DesktopUpdateBanner />
+        <PostUpdateWhatsNew />
         {authContent}
       </ToastProvider>
     </QueryClientProvider>

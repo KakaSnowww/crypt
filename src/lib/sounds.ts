@@ -1,10 +1,11 @@
-export type CryptSound = 'call-join' | 'call-leave' | 'friend-request' | 'message';
+export type CryptSound = 'call-join' | 'call-leave' | 'friend-request' | 'message' | 'update';
 
 const soundPaths: Record<CryptSound, string> = {
   'call-join': '/som2.mp3',
   'call-leave': '/som3.mp3',
   'friend-request': '/som4.mp3',
   message: '/som1.mp3',
+  update: '/som5.mp3',
 };
 
 const audioCache = new Map<CryptSound, HTMLAudioElement>();
