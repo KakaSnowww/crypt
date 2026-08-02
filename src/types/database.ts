@@ -595,6 +595,18 @@ export type Database = {
         Args: NoArgs;
         Returns: undefined;
       };
+      register_my_push_device: {
+        Args: {
+          client_app_version?: null | string;
+          device_identifier: string;
+          device_token: string;
+        };
+        Returns: string;
+      };
+      unregister_my_push_device: {
+        Args: { device_identifier: string };
+        Returns: undefined;
+      };
       mark_notification_read: {
         Args: { target_notification_id: string };
         Returns: undefined;

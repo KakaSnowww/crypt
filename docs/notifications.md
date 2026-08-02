@@ -20,9 +20,10 @@ No Android, a Fase 14.2 usa a central nativa de notificações. A autorização 
 novo só é solicitada quando a pessoa toca em **Permitir no dispositivo**. O canal
 `Alertas do Crypt` possui ícone próprio e abre diretamente o conteúdo relacionado.
 
-O Crypt apresenta o alerta do sistema enquanto a aplicação está em execução. Push com o aplicativo
-completamente encerrado exige Firebase Cloud Messaging e uma função de entrega autenticada. Essa
-ativação posterior reutilizará as preferências e os eventos já criados.
+O Crypt apresenta o alerta do sistema enquanto a aplicação está em execução. No Android, a Fase 16
+usa Firebase Cloud Messaging e uma função de entrega autenticada para avisar mesmo com o aplicativo
+completamente encerrado. Ela reutiliza as preferências e os eventos já criados. No navegador, push
+totalmente fechado continua dependente de publicação HTTPS/PWA.
 
 ## Eventos
 

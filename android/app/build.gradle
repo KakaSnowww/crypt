@@ -8,8 +8,8 @@ android {
         applicationId "com.kakasnowww.crypt"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "0.2.6"
+        versionCode 9
+        versionName "0.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -30,6 +30,16 @@ repositories {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }
+
+def cryptPushSounds = tasks.register('copyCryptPushSounds', Copy) {
+    from('../../public') {
+        include 'som1.mp3', 'som4.mp3'
+    }
+    into(layout.buildDirectory.dir('generated/cryptPushSounds/res/raw'))
+}
+
+android.sourceSets.main.res.srcDir(layout.buildDirectory.dir('generated/cryptPushSounds/res'))
+tasks.named('preBuild').configure { dependsOn cryptPushSounds }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')

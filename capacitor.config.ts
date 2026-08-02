@@ -16,6 +16,9 @@ const config: CapacitorConfig = {
       iconColor: '#7C3AED',
       smallIcon: 'ic_stat_crypt',
     },
+    PushNotifications: {
+      presentationOptions: [],
+    },
     SplashScreen: {
       backgroundColor: '#070b16',
       launchAutoHide: false,

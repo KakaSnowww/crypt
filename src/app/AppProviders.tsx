@@ -8,6 +8,7 @@ import { AndroidPermissionsPrompt } from '../features/mobile/AndroidPermissionsP
 import { DesktopUpdateBanner } from '../features/desktopUpdates/DesktopUpdateBanner';
 import { DesktopStartupSound } from '../features/desktopUpdates/DesktopStartupSound';
 import { PostUpdateWhatsNew } from '../features/desktopUpdates/PostUpdateWhatsNew';
+import { AndroidPushRegistration } from '../features/notifications/AndroidPushRegistration';
 import { VoiceCallProvider } from '../features/voice/VoiceCallProvider';
 
 type AppProvidersProps = PropsWithChildren<{
@@ -29,10 +30,12 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
 
   const authContent = authValue ? (
     <AuthContext.Provider value={authValue}>
+      <AndroidPushRegistration />
       <VoiceCallProvider>{children}</VoiceCallProvider>
     </AuthContext.Provider>
   ) : (
     <AuthProvider>
+      <AndroidPushRegistration />
       <VoiceCallProvider>{children}</VoiceCallProvider>
     </AuthProvider>
   );

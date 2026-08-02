@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.3.0': {
+    highlights: [
+      {
+        description:
+          'Mensagens privadas, menções, amizades e avisos de moderação chegam ao Android mesmo com o Crypt encerrado.',
+        title: 'Push em segundo plano',
+      },
+      {
+        description:
+          'Ao tocar no aviso, o Crypt abre diretamente a conversa, o canal ou a atividade correspondente.',
+        title: 'Abertura no lugar certo',
+      },
+      {
+        description:
+          'Cada instalação registra um token privado e o remove no logout, sem expor destinos entre contas.',
+        title: 'Dispositivos protegidos',
+      },
+      {
+        description:
+          'Preferências existentes continuam controlando categorias, sistema e som, evitando alertas duplicados.',
+        title: 'Suas preferências respeitadas',
+      },
+    ],
+    summary:
+      'A Fase 16 leva a central de notificações do Crypt ao Android por Firebase Cloud Messaging.',
+    title: 'O Crypt avisa mesmo quando está fechado',
+    version: '0.3.0',
+  },
   '0.2.6': {
     highlights: [
       {

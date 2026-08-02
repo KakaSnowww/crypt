@@ -1,23 +1,25 @@
-# Banco de dados — Fases 3 a 12
+# Banco de dados — Fases 3 a 16
 
 ## Migrations
 
-| Ordem | Arquivo                                                | Responsabilidade                            |
-| ----- | ------------------------------------------------------ | ------------------------------------------- |
-| 1     | `20260725143000_phase3_auth_profiles.sql`              | Auth, perfil mínimo e `@`                   |
-| 2     | `20260725200000_phase4_profile_onboarding.sql`         | Perfil, interesses e Storage                |
-| 3     | `20260725223000_phase5_connections.sql`                | Amizades, sugestões, bloqueios e presença   |
-| 4     | `20260726010000_phase6_servers_members.sql`            | Servidores, membros, convites e propriedade |
-| 5     | `20260726033000_phase6_server_media_rls_fix.sql`       | Correção segura de ícones e banners         |
-| 6     | `20260726050000_phase7_channels_roles_permissions.sql` | Canais, cargos e permissões                 |
-| 7     | `20260726060000_phase8_channel_messages.sql`           | Mensagens, anexos, leitura e Realtime       |
-| 8     | `20260726210000_phase78_role_hierarchy_order.sql`      | Ordenação segura da hierarquia de cargos    |
-| 9     | `20260726230000_phase9_direct_messages.sql`            | DMs, privacidade, anexos e leitura          |
-| 10    | `20260726233000_phase9_direct_attachments_rls_fix.sql` | Correção de leitura dos anexos privados     |
-| 11    | `20260727010000_phase10_moderation_settings.sql`       | Moderação, denúncias e auditoria            |
-| 12    | `20260727030000_phase11_voice_video.sql`               | Canais de voz, vídeo e acesso ao LiveKit    |
-| 13    | `20260728010000_phase11_voice_presence.sql`            | Presença global em canais de voz            |
-| 14    | `20260728180000_phase12_notifications.sql`             | Central, preferências e eventos privados    |
+| Ordem | Arquivo                                                 | Responsabilidade                            |
+| ----- | ------------------------------------------------------- | ------------------------------------------- |
+| 1     | `20260725143000_phase3_auth_profiles.sql`               | Auth, perfil mínimo e `@`                   |
+| 2     | `20260725200000_phase4_profile_onboarding.sql`          | Perfil, interesses e Storage                |
+| 3     | `20260725223000_phase5_connections.sql`                 | Amizades, sugestões, bloqueios e presença   |
+| 4     | `20260726010000_phase6_servers_members.sql`             | Servidores, membros, convites e propriedade |
+| 5     | `20260726033000_phase6_server_media_rls_fix.sql`        | Correção segura de ícones e banners         |
+| 6     | `20260726050000_phase7_channels_roles_permissions.sql`  | Canais, cargos e permissões                 |
+| 7     | `20260726060000_phase8_channel_messages.sql`            | Mensagens, anexos, leitura e Realtime       |
+| 8     | `20260726210000_phase78_role_hierarchy_order.sql`       | Ordenação segura da hierarquia de cargos    |
+| 9     | `20260726230000_phase9_direct_messages.sql`             | DMs, privacidade, anexos e leitura          |
+| 10    | `20260726233000_phase9_direct_attachments_rls_fix.sql`  | Correção de leitura dos anexos privados     |
+| 11    | `20260727010000_phase10_moderation_settings.sql`        | Moderação, denúncias e auditoria            |
+| 12    | `20260727030000_phase11_voice_video.sql`                | Canais de voz, vídeo e acesso ao LiveKit    |
+| 13    | `20260728010000_phase11_voice_presence.sql`             | Presença global em canais de voz            |
+| 14    | `20260728180000_phase12_notifications.sql`              | Central, preferências e eventos privados    |
+| 15    | `20260728230000_phase125_profile_visuals.sql`           | Banner, efeitos e sons do perfil            |
+| 16    | `20260802030000_phase16_android_push_notifications.sql` | Dispositivos e auditoria de push Android    |
 
 As migrations são aplicadas somente pela CLI:
 
@@ -35,6 +37,14 @@ npm run supabase:db:push
 - `save_my_notification_preferences`, `mark_notification_read` e
   `mark_all_notifications_read` realizam escritas protegidas;
 - `user_notifications` participa do Realtime com RLS por destinatário.
+
+## Fase 16 — push Android
+
+- `push_devices` guarda tokens FCM por perfil e instalação, sem acesso direto do cliente;
+- `register_my_push_device` transfere tokens renovados com segurança e evita duplicidade;
+- `unregister_my_push_device` remove somente o aparelho da sessão atual;
+- `push_deliveries` torna a entrega idempotente, registra tentativas e invalida tokens recusados;
+- a exclusão da conta remove dispositivos e entregas por `on delete cascade`.
 
 ## `public.profiles`
 

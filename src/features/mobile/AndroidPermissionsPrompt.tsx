@@ -63,6 +63,7 @@ export function AndroidPermissionsPrompt() {
       const nextStatus = await requestAndroidPermissions();
       setStatus(nextStatus);
       setOpen(hasMissingPermissions(nextStatus));
+      window.dispatchEvent(new Event('crypt:android-permissions-changed'));
     } finally {
       setBusy(false);
     }

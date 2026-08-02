@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.2.6",
+  "version": "0.3.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -15,6 +15,7 @@
     "android:build:debug": "npm run android:sync && cd android && gradlew.bat assembleDebug",
     "android:check": "npm run validate && cap doctor android",
     "android:open": "cap open android",
+    "android:push:check": "node scripts/check-android-push-config.mjs",
     "android:run": "npm run android:sync && cap run android",
     "android:sync": "npm run build && cap sync android",
     "build": "tsc -b && vite build",
@@ -30,7 +31,7 @@
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "supabase:db:push": "supabase db push",
-    "supabase:functions:deploy": "supabase functions deploy delete-account --no-verify-jwt && supabase functions deploy livekit-token --no-verify-jwt",
+    "supabase:functions:deploy": "supabase functions deploy delete-account --no-verify-jwt && supabase functions deploy livekit-token --no-verify-jwt && supabase functions deploy push-notifications --no-verify-jwt",
     "supabase:link": "supabase link",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
@@ -40,7 +41,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b --pretty false",
     "validate": "npm run typecheck && npm run lint && npm run test && npm run format:check && npm run build",
-    "validate:android": "npm run validate && cap sync android",
+    "validate:android": "npm run validate && npm run android:push:check && cap sync android",
     "validate:desktop": "npm run validate && npm run desktop:check"
   },
   "dependencies": {
@@ -51,6 +52,7 @@
     "@capacitor/keyboard": "^8.0.5",
     "@capacitor/local-notifications": "^8.2.1",
     "@capacitor/network": "^8.0.1",
+    "@capacitor/push-notifications": "^8.1.2",
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",

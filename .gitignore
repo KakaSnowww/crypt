@@ -17,6 +17,7 @@ coverage/
 .tmp/
 supabase/.branches/
 supabase/.temp/
+supabase/.env.push
 
 # Editores e sistema operacional
 .vscode/
@@ -30,3 +31,5 @@ src-tauri/gen/
 android/.gradle/
 android/local.properties
 android/app/build/
+android/app/google-services.json
+*firebase-adminsdk*.json

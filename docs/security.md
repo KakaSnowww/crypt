@@ -199,6 +199,18 @@ usuário autenticado. Uma constraint na tabela impede salvar caminho de outra co
 formato `banner-{uuid}`. Efeitos são identificadores fechados e renderização CSS; não aceitam HTML,
 JavaScript ou URLs.
 
+## Push Android
+
+Tokens FCM ficam em `push_devices`, sem permissão direta para `anon` ou `authenticated`. O registro e
+a remoção passam por RPCs `security definer` vinculadas a `auth.uid()`. Um token só pode pertencer a
+uma conta por vez e é removido antes do logout local.
+
+O Database Webhook usa um segredo aleatório dedicado no header `x-crypt-webhook-secret`; ele não
+envia a chave administrativa do Supabase. A Edge Function consulta tokens com credencial disponível
+somente no ambiente servidor, confere novamente `system_enabled`, limita tentativas e desativa
+tokens rejeitados pelo Firebase. Arquivos `google-services.json`, chaves Firebase e `.env.push` são
+ignorados pelo Git.
+
 ## Exclusão de conta
 
 `delete-account` continua validando origem, Publishable key, JWT, senha atual no frontend e a palavra

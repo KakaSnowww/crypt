@@ -3,7 +3,23 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 14.3–14.4
+## Estado atual — Fase 16
+
+A Fase 16 entrega notificações push no Android com o Crypt totalmente fechado:
+
+- Firebase Cloud Messaging integrado pelo plugin oficial do Capacitor;
+- tokens privados por conta e instalação, atualizados e removidos no logout;
+- entrega segura por Database Webhook e Edge Function protegida por segredo dedicado;
+- mensagens, menções, amizades e moderação com abertura na rota correta;
+- preferências de categoria, sistema e som reaproveitadas sem duplicar o Realtime;
+- tentativas idempotentes, auditoria administrativa e descarte de tokens inválidos;
+- `som1.mp3` para mensagens/menções e `som4.mp3` para amizades no Android;
+- versão Android `0.3.0`, `versionCode 9`.
+
+Consulte [docs/push-notifications.md](docs/push-notifications.md) para configurar o Firebase, o
+webhook e executar o teste com o aplicativo encerrado.
+
+## Fases anteriores
 
 As Fases 14.3 e 14.4 foram unificadas e entregam chamadas e transmissão nativa no Android:
 
@@ -200,7 +216,8 @@ As migrations novas são:
 7. `20260727030000_phase11_voice_video.sql`;
 8. `20260728010000_phase11_voice_presence.sql`;
 9. `20260728180000_phase12_notifications.sql`;
-10. `20260728230000_phase125_profile_visuals.sql`.
+10. `20260728230000_phase125_profile_visuals.sql`;
+11. `20260802030000_phase16_android_push_notifications.sql`.
 
 Elas criam tabelas, funções, índices, buckets, policies, publicação Realtime e a movimentação segura
 da hierarquia de cargos. Não crie esses recursos manualmente no painel.
@@ -320,6 +337,7 @@ Consulte:
 - [docs/android.md](docs/android.md)
 - [docs/android-mobile-resources.md](docs/android-mobile-resources.md)
 - [docs/releases-updates.md](docs/releases-updates.md)
+- [docs/push-notifications.md](docs/push-notifications.md)
 
 ### Nota da auditoria
 
@@ -329,10 +347,11 @@ RSC, que não são usadas neste aplicativo SPA. Não execute `npm audit fix --fo
 ## Limitações atuais
 
 - o envio padrão de e-mails do Supabase é apropriado apenas para testes;
-- alertas do sistema em segundo plano exigem publicação HTTPS e serão ativados com a PWA;
+- push com o navegador totalmente fechado ainda depende da futura publicação HTTPS/PWA;
 - busca global no histórico ainda não foi adicionada;
 - a base Android, chamadas, câmera e transmissão nativa já estão prontas;
-- notificações push com o aplicativo totalmente encerrado entram na próxima fase;
+- notificações push com o aplicativo totalmente encerrado já funcionam no Android após configurar
+  o Firebase e o Database Webhook;
 - distribuição Android pela Play Store ainda depende da conta de publicação;
 - o instalador inicial do Windows não possui assinatura de código.
 

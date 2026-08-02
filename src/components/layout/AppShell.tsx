@@ -312,13 +312,21 @@ export function AppShell() {
   const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
-    await signOut();
-    addToast({
-      message: 'Sua sessão foi encerrada somente neste dispositivo.',
-      title: 'Você saiu do Crypt',
-      tone: 'info',
-    });
-    void navigate('/login', { replace: true });
+    try {
+      await signOut();
+      addToast({
+        message: 'Sua sessão foi encerrada somente neste dispositivo.',
+        title: 'Você saiu do Crypt',
+        tone: 'info',
+      });
+      void navigate('/login', { replace: true });
+    } catch {
+      addToast({
+        message: 'Conecte o celular à internet para remover os avisos desta conta com segurança.',
+        title: 'Não foi possível sair agora',
+        tone: 'error',
+      });
+    }
   }
 
   return (
