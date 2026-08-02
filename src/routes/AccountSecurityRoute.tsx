@@ -19,6 +19,7 @@ import { deleteAccount, updatePassword } from '../features/auth/auth.service';
 import { AuthFormError } from '../features/auth/components/AuthFormError';
 import { useAuth } from '../features/auth/useAuth';
 import { DesktopUpdatePanel } from '../features/desktopUpdates/DesktopUpdatePanel';
+import { AndroidUpdatePanel } from '../features/androidUpdates/AndroidUpdatePanel';
 import { SettingsNavigation } from '../features/profile/components/SettingsNavigation';
 
 export function AccountSecurityRoute() {
@@ -144,6 +145,7 @@ export function AccountSecurityRoute() {
       </section>
 
       <DesktopUpdatePanel />
+      <AndroidUpdatePanel />
 
       <section
         className="mt-5 rounded-[1.75rem] border border-red-400/15 bg-red-500/[0.06] p-5 sm:p-7"

@@ -9,6 +9,7 @@ import { DesktopUpdateBanner } from '../features/desktopUpdates/DesktopUpdateBan
 import { DesktopStartupSound } from '../features/desktopUpdates/DesktopStartupSound';
 import { PostUpdateWhatsNew } from '../features/desktopUpdates/PostUpdateWhatsNew';
 import { AndroidPushRegistration } from '../features/notifications/AndroidPushRegistration';
+import { AndroidUpdateProvider } from '../features/androidUpdates/AndroidUpdateProvider';
 import { VoiceCallProvider } from '../features/voice/VoiceCallProvider';
 
 type AppProvidersProps = PropsWithChildren<{
@@ -43,12 +44,14 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        <MobileNetworkStatus />
-        <AndroidPermissionsPrompt />
-        <DesktopStartupSound />
-        <DesktopUpdateBanner />
-        <PostUpdateWhatsNew />
-        {authContent}
+        <AndroidUpdateProvider>
+          <MobileNetworkStatus />
+          <AndroidPermissionsPrompt />
+          <DesktopStartupSound />
+          <DesktopUpdateBanner />
+          <PostUpdateWhatsNew />
+          {authContent}
+        </AndroidUpdateProvider>
       </ToastProvider>
     </QueryClientProvider>
   );

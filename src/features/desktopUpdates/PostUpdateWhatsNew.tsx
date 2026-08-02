@@ -2,7 +2,7 @@ import { BellRing, Download, ShieldCheck, Sparkles, Volume2 } from 'lucide-react
 import { useMemo, useState } from 'react';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
-import { isElectronRuntime } from '../../lib/platform';
+import { isNativeRuntime } from '../../lib/platform';
 import {
   getCurrentCryptRelease,
   pendingReleaseStorageKey,
@@ -21,7 +21,7 @@ export function PostUpdateWhatsNew() {
   );
   const currentVersion = bundledRelease?.version ?? pendingRelease?.version;
   const [open, setOpen] = useState(() => {
-    if (!isElectronRuntime() || !currentVersion) return false;
+    if (!isNativeRuntime() || !currentVersion) return false;
     return window.localStorage.getItem(seenReleaseStorageKey) !== currentVersion;
   });
   const dynamicNotes = releaseNoteLines(

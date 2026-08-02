@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(CryptCallPlugin.class);
+        registerPlugin(CryptUpdaterPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }

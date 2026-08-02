@@ -29,6 +29,7 @@ import {
 import { useDirectConversations } from '../../features/directMessages/directMessages.queries';
 import { useDirectListRealtime } from '../../features/directMessages/useDirectMessagesRealtime';
 import { DesktopUpdateHeaderButton } from '../../features/desktopUpdates/DesktopUpdateHeaderButton';
+import { AndroidUpdateHeaderButton } from '../../features/androidUpdates/AndroidUpdateHeaderButton';
 import {
   useNotificationPreferences,
   useNotifications,
@@ -590,6 +591,7 @@ export function AppShell() {
               label="Pesquisar neste canal"
             />
             <DesktopUpdateHeaderButton />
+            <AndroidUpdateHeaderButton />
             <NavLink
               aria-label={
                 unreadNotifications

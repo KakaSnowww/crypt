@@ -3,6 +3,7 @@ node_modules/
 dist/
 dist-electron/
 release/
+release-android/
 coverage/
 
 # Variáveis de ambiente
@@ -32,4 +33,6 @@ android/.gradle/
 android/local.properties
 android/app/build/
 android/app/google-services.json
+android/*.jks
+android/*.keystore
 *firebase-adminsdk*.json

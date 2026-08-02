@@ -3,7 +3,25 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 16
+## Estado atual — Fase 17
+
+A Fase 17 entrega distribuição e atualização do aplicativo Android:
+
+- APK e AAB de produção assinados com uma chave permanente;
+- publicação automática e verificada pelo GitHub Actions;
+- consulta à Release pública mais recente a cada quatro horas;
+- botão de atualização no cabeçalho e em Conta e segurança;
+- download pelo gerenciador nativo do Android, com progresso;
+- APK armazenado somente na área privada do Crypt;
+- origem limitada ao repositório oficial `KakaSnowww/crypt`;
+- confirmação obrigatória pelo instalador oficial do Android;
+- popup com as novidades depois de concluir a atualização;
+- versão Android `0.4.0`, `versionCode 10`.
+
+Consulte [docs/android-releases-updates.md](docs/android-releases-updates.md) antes de gerar a primeira
+assinatura. A mesma chave deverá ser preservada durante toda a vida do aplicativo.
+
+## Fase anterior — notificações Android
 
 A Fase 16 entrega notificações push no Android com o Crypt totalmente fechado:
 
@@ -19,7 +37,7 @@ A Fase 16 entrega notificações push no Android com o Crypt totalmente fechado:
 Consulte [docs/push-notifications.md](docs/push-notifications.md) para configurar o Firebase, o
 webhook e executar o teste com o aplicativo encerrado.
 
-## Fases anteriores
+## Outras fases anteriores
 
 As Fases 14.3 e 14.4 foram unificadas e entregam chamadas e transmissão nativa no Android:
 

@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -13,6 +13,7 @@
   "scripts": {
     "android:add": "npm run build && cap add android",
     "android:build:debug": "npm run android:sync && cd android && gradlew.bat assembleDebug",
+    "android:build:release": "npm run android:sync && cd android && gradlew.bat assembleRelease bundleRelease",
     "android:check": "npm run validate && cap doctor android",
     "android:open": "cap open android",
     "android:push:check": "node scripts/check-android-push-config.mjs",

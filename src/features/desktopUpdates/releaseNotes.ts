@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.4.0': {
+    highlights: [
+      {
+        description:
+          'O Crypt consulta o GitHub Releases e mostra uma nova versão diretamente no cabeçalho e nas configurações.',
+        title: 'Atualizações visíveis',
+      },
+      {
+        description:
+          'O APK é baixado pelo gerenciador nativo do Android com progresso e armazenamento privado do aplicativo.',
+        title: 'Download nativo e protegido',
+      },
+      {
+        description:
+          'A instalação usa a confirmação oficial do Android e preserva a conta, as conversas e as preferências.',
+        title: 'Instalação segura',
+      },
+      {
+        description:
+          'APK e AAB assinados podem ser gerados e publicados automaticamente a partir de uma tag no GitHub.',
+        title: 'Release reproduzível',
+      },
+    ],
+    summary:
+      'A Fase 17 entrega distribuição assinada e atualização integrada para o aplicativo Android.',
+    title: 'O Crypt agora se atualiza no Android',
+    version: '0.4.0',
+  },
   '0.3.0': {
     highlights: [
       {

@@ -2,12 +2,14 @@ import { CheckCircle2, Download, RefreshCw, Rocket, TriangleAlert, Volume2 } fro
 import { useState } from 'react';
 import { Button } from '../../components/common/Button';
 import { playCryptSound } from '../../lib/sounds';
+import { isAndroidRuntime } from '../../lib/platform';
 import packageMetadata from '../../../package.json';
 import { useDesktopUpdates } from './useDesktopUpdates';
 
 export function DesktopUpdatePanel() {
   const { check, desktopRuntime, restartAndInstall, state } = useDesktopUpdates();
   const [soundFeedback, setSoundFeedback] = useState<string | null>(null);
+  if (isAndroidRuntime()) return null;
   const visibleState: CryptDesktopUpdateState =
     state ??
     (desktopRuntime
