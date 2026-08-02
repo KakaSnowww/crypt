@@ -21,6 +21,33 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.2.6': {
+    highlights: [
+      {
+        description:
+          'O som5.mp3 agora toca sempre que o aplicativo Windows inicia, mesmo quando não existe atualização disponível.',
+        title: 'Som em toda inicialização',
+      },
+      {
+        description:
+          'Restaurar pela bandeja, minimizar ou clicar novamente no atalho não repete o som durante a mesma execução.',
+        title: 'Som apenas na primeira abertura',
+      },
+      {
+        description:
+          'Ao sair completamente e iniciar um novo processo do Crypt, o som volta a tocar uma única vez.',
+        title: 'Uma reprodução por execução',
+      },
+      {
+        description:
+          'A correção de streaming do protocolo crypt-app continua protegida por testes automatizados.',
+        title: 'Streaming mantido',
+      },
+    ],
+    summary: 'Esta versão transforma o som5.mp3 no som de abertura oficial do Crypt para Windows.',
+    title: 'O Crypt agora recebe você com som',
+    version: '0.2.6',
+  },
   '0.2.5': {
     highlights: [
       {
