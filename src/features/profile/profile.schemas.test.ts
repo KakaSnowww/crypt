@@ -52,6 +52,9 @@ describe('validação do perfil', () => {
       validateAvatarFile(new File(['imagem'], 'avatar.png', { type: 'image/png' })),
     ).not.toThrow();
     expect(() =>
+      validateAvatarFile(new File(['gif'], 'avatar.gif', { type: 'image/gif' })),
+    ).not.toThrow();
+    expect(() =>
       validateAvatarFile(new File(['texto'], 'avatar.svg', { type: 'image/svg+xml' })),
     ).toThrow(ProfileActionError);
     expect(() =>

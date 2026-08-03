@@ -27,7 +27,7 @@ const messages: Record<ServerErrorCode, string> = {
   invite_exhausted: 'Este convite atingiu o limite de usos.',
   invite_invalid: 'Este convite não existe ou não está mais disponível.',
   invite_revoked: 'Este convite foi revogado.',
-  media_invalid: 'Escolha uma imagem JPG, PNG ou WebP válida.',
+  media_invalid: 'Escolha uma imagem JPG, PNG, WebP ou GIF válida.',
   membership_banned: 'Sua conta não pode entrar neste servidor.',
   membership_required: 'Você não participa mais deste servidor.',
   name_confirmation: 'Digite exatamente o nome atual do servidor.',

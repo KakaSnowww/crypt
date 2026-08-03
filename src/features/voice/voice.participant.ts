@@ -25,8 +25,11 @@ export function getVoiceParticipantProfile(participant: Participant) {
     handle: typeof metadata.handle === 'string' ? metadata.handle : null,
     profileEffect:
       metadata.profile_effect === 'aurora' ||
+      metadata.profile_effect === 'emerald' ||
       metadata.profile_effect === 'neon' ||
-      metadata.profile_effect === 'pulse'
+      metadata.profile_effect === 'ocean' ||
+      metadata.profile_effect === 'pulse' ||
+      metadata.profile_effect === 'sunset'
         ? metadata.profile_effect
         : 'none',
   };

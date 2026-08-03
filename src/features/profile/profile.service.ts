@@ -164,6 +164,10 @@ export async function replaceAllInterests(interestIds: number[]) {
 }
 
 function extensionForMimeType(mimeType: string) {
+  if (mimeType === 'image/gif') {
+    return 'gif';
+  }
+
   if (mimeType === 'image/png') {
     return 'png';
   }

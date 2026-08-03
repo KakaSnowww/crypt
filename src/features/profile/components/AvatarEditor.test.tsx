@@ -41,7 +41,7 @@ afterEach(() => {
 });
 
 describe('AvatarEditor', () => {
-  it('envia a imagem automaticamente depois da escolha', async () => {
+  it('permite conferir e salvar um GIF como avatar', async () => {
     const createObjectUrl = vi.fn(() => 'blob:avatar-preview');
     const revokeObjectUrl = vi.fn();
     vi.stubGlobal(
@@ -60,8 +60,10 @@ describe('AvatarEditor', () => {
       </AppProviders>,
     );
 
-    const image = new File(['avatar'], 'avatar.png', { type: 'image/png' });
-    await user.upload(screen.getByLabelText('Escolher e enviar imagem'), image);
+    const image = new File(['avatar'], 'avatar.gif', { type: 'image/gif' });
+    await user.upload(screen.getByLabelText('Escolher imagem'), image);
+    expect(screen.getByText(/O GIF será preservado com animação/)).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Salvar enquadramento' }));
 
     await waitFor(() =>
       expect(uploadAvatarMock).toHaveBeenCalledWith(

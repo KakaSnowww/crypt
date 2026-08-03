@@ -30,6 +30,16 @@ describe('getVoiceParticipantProfile', () => {
     });
   });
 
+  it('mantém os novos temas de cor dentro da chamada', () => {
+    expect(
+      getVoiceParticipantProfile({
+        identity: 'profile-id',
+        metadata: JSON.stringify({ profile_effect: 'ocean' }),
+        name: 'Kaio',
+      } as Participant),
+    ).toMatchObject({ profileEffect: 'ocean' });
+  });
+
   it('continua seguro quando os metadados estiverem ausentes ou inválidos', () => {
     expect(
       getVoiceParticipantProfile(

@@ -4,7 +4,12 @@ import type { ServerMediaKind } from './servers.types';
 
 export const MAX_SERVER_ICON_BYTES = 2 * 1024 * 1024;
 export const MAX_SERVER_BANNER_BYTES = 5 * 1024 * 1024;
-export const ALLOWED_SERVER_MEDIA_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+export const ALLOWED_SERVER_MEDIA_TYPES = new Set([
+  'image/gif',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
 
 const noControlCharacters = /^[^\p{Cc}\p{Cf}]*$/u;
 

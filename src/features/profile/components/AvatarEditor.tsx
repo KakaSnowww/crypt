@@ -2,7 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImagePlus, Trash2, Upload } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { Button } from '../../../components/common/Button';
+import { ImagePositionEditor } from '../../../components/common/ImagePositionEditor';
 import { useToast } from '../../../components/common/ToastContext';
+import {
+  centeredImagePosition,
+  preparePositionedImage,
+  type ImagePosition,
+} from '../../../lib/imagePosition';
 import { useAuth } from '../../auth/useAuth';
 import { toProfileActionError } from '../profile.errors';
 import { profileKeys } from '../profile.queries';
@@ -24,6 +30,7 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
   const [file, setFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [selectionError, setSelectionError] = useState<string>();
+  const [position, setPosition] = useState<ImagePosition>(centeredImagePosition);
 
   useEffect(() => {
     return () => {
@@ -39,7 +46,9 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
         return;
       }
 
-      await uploadAvatar(user.id, selectedFile, profile.avatar_path);
+      const positionedFile = await preparePositionedImage(selectedFile, 1, position);
+      validateAvatarFile(positionedFile);
+      await uploadAvatar(user.id, positionedFile, profile.avatar_path);
     },
     onMutate: () => {
       onBusyChange?.(true);
@@ -51,6 +60,7 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
 
       setFile(undefined);
       setPreviewUrl(undefined);
+      setPosition(centeredImagePosition);
       await queryClient.invalidateQueries({ queryKey: profileKeys.current(user.id) });
       addToast({
         message: 'A nova imagem já aparece no seu perfil.',
@@ -102,7 +112,8 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
       <div>
         <p className="text-sm font-semibold text-white">Sua imagem no Crypt</p>
         <p className="mt-1 max-w-xl text-xs leading-5 text-crypt-subtle">
-          JPG, PNG ou WebP de até 2 MB. A imagem será cortada ao centro para manter o formato.
+          JPG, PNG, WebP ou GIF de até 2 MB. Imagens estáticas podem ser reposicionadas antes do
+          envio.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <label
@@ -110,9 +121,9 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
             htmlFor={inputId}
           >
             <ImagePlus aria-hidden="true" size={16} />
-            Escolher e enviar imagem
+            Escolher imagem
             <input
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/gif,image/jpeg,image/png,image/webp"
               className="sr-only"
               disabled={uploadMutation.isPending}
               id={inputId}
@@ -125,8 +136,8 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
                     validateAvatarFile(selectedFile);
                     setFile(selectedFile);
                     setPreviewUrl(URL.createObjectURL(selectedFile));
+                    setPosition(centeredImagePosition);
                     uploadMutation.reset();
-                    uploadMutation.mutate(selectedFile);
                   } catch (error) {
                     setFile(undefined);
                     setPreviewUrl(undefined);
@@ -139,6 +150,15 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
               type="file"
             />
           </label>
+          {file && !uploadMutation.isPending ? (
+            <Button
+              leadingIcon={<Upload aria-hidden="true" size={16} />}
+              onClick={() => uploadMutation.mutate(file)}
+              size="sm"
+            >
+              Salvar enquadramento
+            </Button>
+          ) : null}
           {uploadMutation.isPending ? (
             <span
               aria-live="polite"
@@ -147,15 +167,6 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
               <Upload aria-hidden="true" className="animate-pulse" size={16} />
               Enviando avatar…
             </span>
-          ) : null}
-          {file && uploadMutation.isError ? (
-            <Button
-              leadingIcon={<Upload aria-hidden="true" size={16} />}
-              onClick={() => uploadMutation.mutate(file)}
-              size="sm"
-            >
-              Tentar novamente
-            </Button>
           ) : null}
           {profile.avatar_path && !file ? (
             <Button
@@ -169,6 +180,15 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
             </Button>
           ) : null}
         </div>
+        {file && previewUrl ? (
+          <ImagePositionEditor
+            animated={file.type === 'image/gif'}
+            aspectRatio={1}
+            imageUrl={previewUrl}
+            onChange={setPosition}
+            position={position}
+          />
+        ) : null}
         {selectionError ? <p className="mt-3 text-xs text-red-300">{selectionError}</p> : null}
         {actionError ? (
           <p className="mt-3 text-xs text-red-300">{toProfileActionError(actionError).message}</p>

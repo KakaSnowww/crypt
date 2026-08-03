@@ -324,7 +324,12 @@ function validateGroupTitle(value: string) {
 }
 
 function validateGroupAvatar(file: File) {
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5_242_880) {
-    throw toDirectMessageError(new Error('Use uma imagem JPG, PNG ou WebP de no máximo 5 MB.'));
+  if (
+    !['image/gif', 'image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+    file.size > 5_242_880
+  ) {
+    throw toDirectMessageError(
+      new Error('Use uma imagem JPG, PNG, WebP ou GIF de no máximo 5 MB.'),
+    );
   }
 }

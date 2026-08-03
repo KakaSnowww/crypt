@@ -8,7 +8,7 @@ export type ProfileErrorCode =
   | 'unknown';
 
 const messages: Record<ProfileErrorCode, string> = {
-  avatar_invalid: 'Escolha uma imagem JPG, PNG ou WebP válida.',
+  avatar_invalid: 'Escolha uma imagem JPG, PNG, WebP ou GIF válida.',
   avatar_too_large: 'O avatar deve possuir no máximo 2 MB.',
   banner_too_large: 'O banner deve possuir no máximo 5 MB.',
   configuration: 'A estrutura da Fase 4 ainda não foi aplicada ao Supabase.',

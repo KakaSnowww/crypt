@@ -8,7 +8,19 @@ const soundPaths: Record<CryptSound, string> = {
   update: '/som5.mp3',
 };
 
+const soundVolumes: Record<CryptSound, number> = {
+  'call-join': 0.48,
+  'call-leave': 0.46,
+  'friend-request': 0.5,
+  message: 0.42,
+  update: 0.52,
+};
+
 const audioCache = new Map<CryptSound, HTMLAudioElement>();
+
+export function getCryptSoundVolume(sound: CryptSound) {
+  return soundVolumes[sound];
+}
 
 export async function playCryptSound(sound: CryptSound) {
   if (typeof Audio === 'undefined') return false;
@@ -18,7 +30,7 @@ export async function playCryptSound(sound: CryptSound) {
     const audio = audioCache.get(sound) ?? new Audio(source);
     audio.preload = 'auto';
     audio.muted = false;
-    audio.volume = 1;
+    audio.volume = getCryptSoundVolume(sound);
     if (audio.readyState > 0) audio.currentTime = 0;
     audioCache.set(sound, audio);
 

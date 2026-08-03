@@ -96,11 +96,11 @@ export function CreateDirectGroupModal({
           <span className="min-w-0 flex-1">
             <span className="block font-medium text-white">Imagem do grupo (opcional)</span>
             <span className="mt-0.5 block truncate text-xs">
-              {avatarFile?.name ?? 'JPG, PNG ou WebP de até 5 MB'}
+              {avatarFile?.name ?? 'JPG, PNG, WebP ou GIF de até 5 MB'}
             </span>
           </span>
           <input
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/gif,image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={(event) => setAvatarFile(event.target.files?.[0] ?? null)}
             type="file"

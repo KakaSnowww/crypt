@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createServerSchema, extractInviteCode } from './servers.schemas';
+import { createServerSchema, extractInviteCode, validateServerMediaFile } from './servers.schemas';
 
 describe('schemas de servidores', () => {
   it('normaliza nome e descrição sem destruir maiúsculas ou acentos', () => {
@@ -29,5 +29,12 @@ describe('schemas de servidores', () => {
         'https://crypt.local/app/convite/abcdefabcdefabcdefabcdefabcdefabcdef?origem=copy',
       ),
     ).toBe('abcdefabcdefabcdefabcdefabcdefabcdef');
+  });
+
+  it('aceita GIF como ícone e banner', () => {
+    const gif = new File(['gif'], 'servidor.gif', { type: 'image/gif' });
+
+    expect(() => validateServerMediaFile(gif, 'icon')).not.toThrow();
+    expect(() => validateServerMediaFile(gif, 'banner')).not.toThrow();
   });
 });

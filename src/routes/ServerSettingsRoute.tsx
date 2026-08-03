@@ -1,7 +1,8 @@
 import { Crown, ImagePlus, Save, ShieldAlert, Trash2, Upload, UserRoundCog } from 'lucide-react';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { ImagePositionEditor } from '../components/common/ImagePositionEditor';
 import { Input } from '../components/common/Input';
 import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
@@ -17,6 +18,11 @@ import type {
   ServerOverview,
 } from '../features/servers/servers.types';
 import { useServerActions } from '../features/servers/useServerActions';
+import {
+  centeredImagePosition,
+  preparePositionedImage,
+  type ImagePosition,
+} from '../lib/imagePosition';
 
 export function ServerSettingsRoute() {
   const { serverId = '' } = useParams();
@@ -369,17 +375,63 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
   const inputId = useId();
   const actions = useServerActions();
   const [selectionError, setSelectionError] = useState<string>();
+  const [draftFile, setDraftFile] = useState<File>();
+  const [draftUrl, setDraftUrl] = useState<string>();
+  const [position, setPosition] = useState<ImagePosition>(centeredImagePosition);
   const path = kind === 'icon' ? server.icon_path : server.banner_path;
   const url = getServerMediaUrl(path);
   const isBusy = actions.replaceMedia.isPending && actions.replaceMedia.variables?.kind === kind;
 
+  useEffect(() => {
+    return () => {
+      if (draftUrl) URL.revokeObjectURL(draftUrl);
+    };
+  }, [draftUrl]);
+
+  async function saveDraft() {
+    if (!draftFile) return;
+
+    try {
+      const positionedFile = await preparePositionedImage(
+        draftFile,
+        kind === 'icon' ? 1 : 3.2,
+        position,
+      );
+      validateServerMediaFile(positionedFile, kind);
+      await actions.replaceMedia.mutateAsync({ file: positionedFile, kind, server });
+      setDraftFile(undefined);
+      setDraftUrl(undefined);
+      setPosition(centeredImagePosition);
+    } catch (error) {
+      setSelectionError(toServerActionError(error).message);
+    }
+  }
+
   return (
     <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
       {kind === 'icon' ? (
-        <ServerIcon iconPath={server.icon_path} name={server.server_name} size="lg" />
+        draftUrl ? (
+          <span className="grid size-16 overflow-hidden rounded-2xl bg-crypt-elevated">
+            <img
+              alt="Prévia do ícone"
+              className="size-full object-cover"
+              src={draftUrl}
+              style={{ objectPosition: `${position.x}% ${position.y}%` }}
+            />
+          </span>
+        ) : (
+          <ServerIcon iconPath={server.icon_path} name={server.server_name} size="lg" />
+        )
       ) : (
         <span className="grid h-24 w-full min-w-0 overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/30 to-blue-600/20 sm:w-48">
-          {url ? <img alt="Banner atual" className="size-full object-cover" src={url} /> : null}
+          {draftUrl || url ? (
+            <img
+              alt="Banner atual"
+              className="size-full object-cover"
+              src={draftUrl ?? url ?? ''}
+              style={{ objectPosition: `${position.x}% ${position.y}%` }}
+            />
+          ) : null}
         </span>
       )}
       <div>
@@ -387,7 +439,7 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
           {kind === 'icon' ? 'Ícone do servidor' : 'Banner do servidor'}
         </p>
         <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-          JPG, PNG ou WebP de até {kind === 'icon' ? '2 MB' : '5 MB'}.
+          JPG, PNG, WebP ou GIF de até {kind === 'icon' ? '2 MB' : '5 MB'}.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <label
@@ -401,7 +453,7 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
             )}
             {path ? 'Trocar imagem' : 'Enviar imagem'}
             <input
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/gif,image/jpeg,image/png,image/webp"
               className="sr-only"
               disabled={isBusy}
               id={inputId}
@@ -412,10 +464,10 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
                 if (file) {
                   try {
                     validateServerMediaFile(file, kind);
+                    setDraftFile(file);
+                    setDraftUrl(URL.createObjectURL(file));
+                    setPosition(centeredImagePosition);
                     actions.replaceMedia.reset();
-                    void actions.replaceMedia
-                      .mutateAsync({ file, kind, server })
-                      .catch(() => undefined);
                   } catch (error) {
                     setSelectionError(toServerActionError(error).message);
                   }
@@ -426,6 +478,16 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
               type="file"
             />
           </label>
+          {draftFile ? (
+            <Button
+              leadingIcon={<Save aria-hidden="true" size={15} />}
+              loading={isBusy}
+              onClick={() => void saveDraft()}
+              size="sm"
+            >
+              Salvar enquadramento
+            </Button>
+          ) : null}
           {path ? (
             <Button
               leadingIcon={<Trash2 aria-hidden="true" size={15} />}
@@ -442,6 +504,15 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
             </Button>
           ) : null}
         </div>
+        {draftFile && draftUrl ? (
+          <ImagePositionEditor
+            animated={draftFile.type === 'image/gif'}
+            aspectRatio={kind === 'icon' ? 1 : 3.2}
+            imageUrl={draftUrl}
+            onChange={setPosition}
+            position={position}
+          />
+        ) : null}
         {selectionError ? <p className="mt-3 text-xs text-red-300">{selectionError}</p> : null}
         {actions.replaceMedia.error ? (
           <p className="mt-3 text-xs text-red-300">

@@ -331,3 +331,21 @@ a {
 .profile-effect-pulse {
   animation: crypt-pulse 2.7s ease-in-out infinite;
 }
+
+.profile-effect-ocean {
+  background-color: #082f49;
+  background-image: linear-gradient(135deg, rgb(8 47 73 / 0.84), rgb(14 116 144 / 0.52));
+  box-shadow: inset 0 0 0 1px rgb(34 211 238 / 0.25);
+}
+
+.profile-effect-sunset {
+  background-color: #4c1d42;
+  background-image: linear-gradient(135deg, rgb(190 24 93 / 0.5), rgb(234 88 12 / 0.38));
+  box-shadow: inset 0 0 0 1px rgb(251 146 60 / 0.24);
+}
+
+.profile-effect-emerald {
+  background-color: #052e2b;
+  background-image: linear-gradient(135deg, rgb(6 78 59 / 0.74), rgb(13 148 136 / 0.38));
+  box-shadow: inset 0 0 0 1px rgb(52 211 153 / 0.24);
+}

@@ -3,7 +3,7 @@ import { ProfileActionError } from './profile.errors';
 
 export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 export const MAX_BANNER_BYTES = 5 * 1024 * 1024;
-export const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+export const ALLOWED_AVATAR_TYPES = new Set(['image/gif', 'image/jpeg', 'image/png', 'image/webp']);
 
 const displayNameSchema = z
   .string()

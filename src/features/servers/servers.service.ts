@@ -31,6 +31,10 @@ function normalizeInviteCode(value: string) {
 }
 
 function extensionForMimeType(mimeType: string) {
+  if (mimeType === 'image/gif') {
+    return 'gif';
+  }
+
   if (mimeType === 'image/png') {
     return 'png';
   }

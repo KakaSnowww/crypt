@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.6.0': {
+    highlights: [
+      {
+        description:
+          'Escolha entre novos visuais Oceano, Pôr do sol e Esmeralda, além dos efeitos que já existiam.',
+        title: 'Mais cores no perfil',
+      },
+      {
+        description:
+          'Avatar, banner, ícone e banner de servidor aceitam GIF; as conversas continuam reproduzindo GIF enviado como anexo.',
+        title: 'GIF no Crypt',
+      },
+      {
+        description:
+          'Posicione fotos horizontal e verticalmente antes de salvar avatar, banner ou mídia do servidor.',
+        title: 'Enquadramento sob controle',
+      },
+      {
+        description:
+          'Mensagens, amizade, entrada, saída e atualização agora usam um volume mais confortável e equilibrado.',
+        title: 'Sons mais suaves',
+      },
+    ],
+    summary:
+      'A Fase 19 reúne personalização visual, GIFs, enquadramento de imagens e uma nova mixagem dos sons.',
+    title: 'Seu Crypt, do seu jeito',
+    version: '0.6.0',
+  },
   '0.5.1': {
     highlights: [
       {

@@ -1,9 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, Sparkles, Trash2 } from 'lucide-react';
-import { useId, useState } from 'react';
+import { ImagePlus, Sparkles, Trash2, Upload } from 'lucide-react';
+import { useEffect, useId, useState } from 'react';
 import { Button } from '../../../components/common/Button';
+import { ImagePositionEditor } from '../../../components/common/ImagePositionEditor';
 import { useToast } from '../../../components/common/ToastContext';
 import { classNames } from '../../../lib/classNames';
+import {
+  centeredImagePosition,
+  preparePositionedImage,
+  type ImagePosition,
+} from '../../../lib/imagePosition';
 import { useAuth } from '../../auth/useAuth';
 import { toProfileActionError } from '../profile.errors';
 import { profileKeys } from '../profile.queries';
@@ -22,6 +28,9 @@ const effects = [
   { id: 'aurora', label: 'Aurora', description: 'Luzes roxas e azuis em movimento.' },
   { id: 'neon', label: 'Neon', description: 'Contorno luminoso no seu cartão.' },
   { id: 'pulse', label: 'Pulso', description: 'Brilho suave e ritmado.' },
+  { id: 'ocean', label: 'Oceano', description: 'Azul profundo com brilho ciano.' },
+  { id: 'sunset', label: 'Pôr do sol', description: 'Rosa, laranja e violeta aquecem o cartão.' },
+  { id: 'emerald', label: 'Esmeralda', description: 'Verde escuro com reflexos luminosos.' },
 ] as const;
 
 export function ProfileVisualEditor({ profile }: { profile: Profile }) {
@@ -30,15 +39,30 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
   const { addToast } = useToast();
   const { user } = useAuth();
   const [selectionError, setSelectionError] = useState('');
+  const [bannerFile, setBannerFile] = useState<File>();
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [position, setPosition] = useState<ImagePosition>(centeredImagePosition);
   const bannerUrl = getProfileMediaUrl(profile.banner_path);
+  const displayedBannerUrl = previewUrl ?? bannerUrl;
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
   const refresh = async () => {
     if (user) await queryClient.invalidateQueries({ queryKey: profileKeys.current(user.id) });
   };
   const bannerMutation = useMutation({
     mutationFn: async (file: File) => {
-      if (user) await uploadBanner(user.id, file, profile.banner_path);
+      const positionedFile = await preparePositionedImage(file, 3.2, position);
+      validateBannerFile(positionedFile);
+      if (user) await uploadBanner(user.id, positionedFile, profile.banner_path);
     },
     onSuccess: async () => {
+      setBannerFile(undefined);
+      setPreviewUrl(undefined);
+      setPosition(centeredImagePosition);
       await refresh();
       addToast({
         message: 'O banner também será usado quando sua câmera estiver desligada na call.',
@@ -68,7 +92,14 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
           'profile-visual-preview relative isolate min-h-48 overflow-hidden rounded-2xl border border-white/10',
           `profile-effect-${profile.profile_effect}`,
         )}
-        style={bannerUrl ? { backgroundImage: `url("${bannerUrl}")` } : undefined}
+        style={
+          displayedBannerUrl
+            ? {
+                backgroundImage: `url("${displayedBannerUrl}")`,
+                backgroundPosition: `${position.x}% ${position.y}%`,
+              }
+            : undefined
+        }
       >
         <div className="absolute inset-0 bg-gradient-to-t from-[#090b14]/90 via-[#090b14]/25 to-transparent" />
         <div className="relative z-10 flex min-h-48 items-end gap-3 p-5">
@@ -87,7 +118,7 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
       <div>
         <p className="text-sm font-semibold text-white">Banner do perfil e da call</p>
         <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-          JPG, PNG ou WebP de até 5 MB. Use uma imagem horizontal.
+          JPG, PNG, WebP ou GIF de até 5 MB. Use uma imagem horizontal.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <label
@@ -97,7 +128,7 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
             <ImagePlus size={16} />
             {profile.banner_path ? 'Trocar banner' : 'Adicionar banner'}
             <input
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/gif,image/jpeg,image/png,image/webp"
               className="sr-only"
               id={inputId}
               onChange={(event) => {
@@ -106,7 +137,10 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
                 if (file) {
                   try {
                     validateBannerFile(file);
-                    bannerMutation.mutate(file);
+                    setBannerFile(file);
+                    setPreviewUrl(URL.createObjectURL(file));
+                    setPosition(centeredImagePosition);
+                    bannerMutation.reset();
                   } catch (caught) {
                     setSelectionError(toProfileActionError(caught).message);
                   }
@@ -116,6 +150,16 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
               type="file"
             />
           </label>
+          {bannerFile ? (
+            <Button
+              leadingIcon={<Upload size={15} />}
+              loading={bannerMutation.isPending}
+              onClick={() => bannerMutation.mutate(bannerFile)}
+              size="sm"
+            >
+              Salvar enquadramento
+            </Button>
+          ) : null}
           {profile.banner_path ? (
             <Button
               leadingIcon={<Trash2 size={15} />}
@@ -128,10 +172,19 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
             </Button>
           ) : null}
         </div>
+        {bannerFile && previewUrl ? (
+          <ImagePositionEditor
+            animated={bannerFile.type === 'image/gif'}
+            aspectRatio={3.2}
+            imageUrl={previewUrl}
+            onChange={setPosition}
+            position={position}
+          />
+        ) : null}
       </div>
       <fieldset>
         <legend className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Sparkles size={16} /> Efeito do perfil
+          <Sparkles size={16} /> Cor e efeito do perfil
         </legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {effects.map((effect) => (

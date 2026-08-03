@@ -392,7 +392,7 @@ export type Database = {
           interest_category_labels: string[];
           interest_labels: string[];
           mutual_friend_count: number;
-          profile_effect: 'aurora' | 'neon' | 'none' | 'pulse';
+          profile_effect: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
           profile_id: string;
           relationship_status: string;
         }>;
@@ -1240,7 +1240,7 @@ export type Database = {
           favorite_spotify_url?: null | string;
           handle: string;
           id: string;
-          profile_effect?: 'aurora' | 'neon' | 'none' | 'pulse';
+          profile_effect?: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
           updated_at?: string;
         };
         Relationships: [
@@ -1263,7 +1263,7 @@ export type Database = {
           favorite_spotify_url: null | string;
           handle: string;
           id: string;
-          profile_effect: 'aurora' | 'neon' | 'none' | 'pulse';
+          profile_effect: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
           updated_at: string;
         };
         Update: {
@@ -1275,7 +1275,7 @@ export type Database = {
           favorite_spotify_title?: null | string;
           favorite_spotify_url?: null | string;
           handle?: string;
-          profile_effect?: 'aurora' | 'neon' | 'none' | 'pulse';
+          profile_effect?: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
           updated_at?: string;
         };
       };
