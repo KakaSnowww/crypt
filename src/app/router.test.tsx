@@ -46,6 +46,7 @@ describe('rotas do Crypt', () => {
 
     expect(await screen.findByText('Informe um e-mail válido.')).toBeVisible();
     expect(screen.getByText('Digite sua senha.')).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Área de acesso' })).toHaveClass('overflow-y-auto');
   });
 
   it('mostra a página 404 para um caminho inexistente', async () => {

@@ -4,6 +4,7 @@ export type AuthErrorCode =
   | 'account_exists'
   | 'configuration'
   | 'email_not_confirmed'
+  | 'email_rate_limit'
   | 'handle_unavailable'
   | 'invalid_credentials'
   | 'invalid_link'
@@ -14,10 +15,12 @@ const errorMessages: Record<AuthErrorCode, string> = {
   account_exists: 'Já existe uma conta vinculada a este e-mail.',
   configuration: 'O Supabase ainda não foi configurado neste ambiente.',
   email_not_confirmed: 'Confirme seu e-mail antes de entrar.',
+  email_rate_limit:
+    'O serviço de confirmação atingiu o limite de e-mails. Tente outro endereço ou fale com o suporte do Crypt.',
   handle_unavailable: 'Este identificador @ já está em uso. Escolha outro.',
   invalid_credentials: 'E-mail ou senha incorretos.',
   invalid_link: 'Este link é inválido ou expirou. Solicite um novo.',
-  rate_limit: 'Muitas tentativas em pouco tempo. Aguarde alguns minutos.',
+  rate_limit: 'O serviço de autenticação recusou esta tentativa. Tente novamente mais tarde.',
   unknown: 'Não foi possível concluir a ação. Tente novamente.',
 };
 
@@ -51,6 +54,14 @@ export function toAuthActionError(error: unknown): AuthActionError {
 
     if (code === 'email_not_confirmed' || message.includes('email not confirmed')) {
       return new AuthActionError('email_not_confirmed', error);
+    }
+
+    if (
+      code.includes('email_rate_limit') ||
+      code.includes('over_email_send_rate_limit') ||
+      message.includes('email rate limit')
+    ) {
+      return new AuthActionError('email_rate_limit', error);
     }
 
     if (

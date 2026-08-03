@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.5.1': {
+    highlights: [
+      {
+        description:
+          'Cadastro, confirmação e etapas iniciais agora rolam corretamente em telas menores e com o teclado do Android aberto.',
+        title: 'Cadastro sem conteúdo preso',
+      },
+      {
+        description:
+          'Ao avançar no perfil inicial, a nova etapa volta ao topo do próprio conteúdo em vez de movimentar a janela inteira.',
+        title: 'Onboarding mais confortável',
+      },
+      {
+        description:
+          'O Crypt diferencia o limite de envio de confirmação dos demais erros de autenticação e evita instruções enganosas.',
+        title: 'Erros de cadastro claros',
+      },
+      {
+        description:
+          'A correção mantém o mesmo comportamento responsivo no navegador, aplicativo Windows e Android.',
+        title: 'Correção multiplataforma',
+      },
+    ],
+    summary:
+      'A versão 0.5.1 corrige a rolagem do cadastro e do onboarding e esclarece limites do serviço de autenticação.',
+    title: 'Cadastro mais fluido no Crypt',
+    version: '0.5.1',
+  },
   '0.5.0': {
     highlights: [
       {

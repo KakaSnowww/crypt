@@ -19,8 +19,8 @@ const benefits = [
 
 export function AuthLayout() {
   return (
-    <main className="grid min-h-dvh lg:grid-cols-[minmax(0,1.08fr)_minmax(28rem,0.92fr)]">
-      <section className="relative hidden overflow-hidden border-r border-white/5 p-12 lg:flex lg:flex-col xl:p-16">
+    <main className="grid h-dvh min-h-0 overflow-hidden lg:grid-cols-[minmax(0,1.08fr)_minmax(28rem,0.92fr)]">
+      <section className="relative hidden h-full overflow-hidden border-r border-white/5 p-12 lg:flex lg:flex-col xl:p-16">
         <div
           aria-hidden="true"
           className="absolute -left-40 top-20 size-[30rem] rounded-full bg-violet-600/20 blur-[120px]"
@@ -67,14 +67,19 @@ export function AuthLayout() {
         </p>
       </section>
 
-      <section className="relative grid min-h-dvh place-items-center px-5 py-10 sm:px-8">
+      <section
+        aria-label="Área de acesso"
+        className="relative h-full min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8"
+      >
         <div
           aria-hidden="true"
           className="absolute left-1/2 top-[-14rem] size-[26rem] -translate-x-1/2 rounded-full bg-violet-600/15 blur-[100px] lg:hidden"
         />
-        <div className="relative w-full max-w-md">
-          <Brand className="mb-12 lg:hidden" />
-          <Outlet />
+        <div className="relative mx-auto flex min-h-full w-full max-w-md flex-col justify-center py-10">
+          <div>
+            <Brand className="mb-12 lg:hidden" />
+            <Outlet />
+          </div>
         </div>
       </section>
     </main>

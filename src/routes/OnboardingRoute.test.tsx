@@ -78,7 +78,9 @@ describe('OnboardingRoute', () => {
   it('explica a opcionalidade e persiste o avanço', async () => {
     const user = userEvent.setup();
 
-    renderOnboarding();
+    const { container } = renderOnboarding();
+
+    expect(container.querySelector('main')).toHaveClass('overflow-y-auto');
 
     expect(
       screen.getByRole('heading', { name: 'Vamos deixar seu espaço com a sua cara' }),

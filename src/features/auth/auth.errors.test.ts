@@ -18,4 +18,15 @@ describe('mensagens seguras de autenticação', () => {
     expect(mappedError.message).toBe('O Supabase ainda não foi configurado neste ambiente.');
     expect(mappedError.message).not.toContain('VITE_SUPABASE_PUBLISHABLE_KEY');
   });
+
+  it('distingue o limite de e-mail do bloqueio geral de autenticação', () => {
+    const mappedError = toAuthActionError({
+      code: 'over_email_send_rate_limit',
+      message: 'Email rate limit exceeded',
+      status: 429,
+    });
+
+    expect(mappedError.code).toBe('email_rate_limit');
+    expect(mappedError.message).not.toContain('Aguarde alguns minutos');
+  });
 });

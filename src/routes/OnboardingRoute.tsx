@@ -9,7 +9,7 @@ import {
   Sparkles,
   UserRound,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
@@ -47,6 +47,11 @@ export function OnboardingRoute() {
   const [stepOverride, setStepOverride] = useState<null | number>(null);
   const [selectionOverride, setSelectionOverride] = useState<null | number[]>(null);
   const [avatarIsUploading, setAvatarIsUploading] = useState(false);
+  const onboardingTopRef = useRef<HTMLDivElement>(null);
+
+  function scrollToOnboardingTop() {
+    onboardingTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   const progressMutation = useMutation({
     mutationFn: async (nextStep: number) => {
@@ -60,7 +65,7 @@ export function OnboardingRoute() {
         await queryClient.invalidateQueries({ queryKey: profileKeys.settings(user.id) });
       }
       setStepOverride(nextStep);
-      window.scrollTo({ behavior: 'smooth', top: 0 });
+      scrollToOnboardingTop();
     },
   });
   const categoryMutation = useMutation({
@@ -87,7 +92,7 @@ export function OnboardingRoute() {
         ]);
       }
       setStepOverride(nextStep);
-      window.scrollTo({ behavior: 'smooth', top: 0 });
+      scrollToOnboardingTop();
     },
   });
   const completionMutation = useMutation({
@@ -342,11 +347,11 @@ export function OnboardingRoute() {
   }
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-crypt-background px-4 py-6 sm:px-6 sm:py-10">
+    <main className="relative h-dvh min-h-0 overflow-x-hidden overflow-y-auto overscroll-contain bg-crypt-background px-4 py-6 sm:px-6 sm:py-10">
       <div className="pointer-events-none absolute -left-32 -top-40 size-96 rounded-full bg-violet-600/15 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -right-28 size-96 rounded-full bg-blue-600/15 blur-3xl" />
 
-      <div className="relative mx-auto w-full max-w-3xl">
+      <div className="relative mx-auto w-full max-w-3xl" ref={onboardingTopRef}>
         <header className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img alt="" aria-hidden="true" className="size-10" src="/crypt-mark.svg" />
