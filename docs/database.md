@@ -325,6 +325,8 @@ somente participantes recebem URL assinada de leitura.
   isolamento obrigatório da terceira pessoa na Fase 9.
 - `private_groups_calls_rls.test.sql`: criação, administração única, participantes, mídia privada,
   transferência e isolamento das chamadas na Fase 18.
+- `final_security_audit.test.sql`: RLS forçada, privilégios mínimos, buckets privados e limite de
+  tokens LiveKit das Fases 21 e 22.
 
 Execute com Docker Desktop aberto:
 

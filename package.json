@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -31,6 +31,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
+    "security:check": "node scripts/security-audit.mjs",
     "supabase:db:push": "supabase db push",
     "supabase:functions:deploy": "supabase functions deploy delete-account --no-verify-jwt && supabase functions deploy livekit-token --no-verify-jwt && supabase functions deploy push-notifications --no-verify-jwt",
     "supabase:link": "supabase link",
@@ -41,7 +42,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b --pretty false",
-    "validate": "npm run typecheck && npm run lint && npm run test && npm run format:check && npm run build",
+    "validate": "npm run typecheck && npm run lint && npm run security:check && npm run test && npm run format:check && npm run build",
     "validate:android": "npm run validate && npm run android:push:check && cap sync android",
     "validate:desktop": "npm run validate && npm run desktop:check"
   },
@@ -69,7 +70,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-hook-form": "7.83.0",
-    "react-router-dom": "7.18.1",
+    "react-router-dom": "7.18.2",
     "zod": "4.4.3"
   },
   "devDependencies": {

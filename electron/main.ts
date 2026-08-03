@@ -25,6 +25,11 @@ import {
 import { applicationScheme, applicationSchemePrivileges } from './applicationProtocol.js';
 import { registerDesktopUpdaterIpc, startDesktopUpdater } from './desktopUpdater.js';
 import { startDiscordPresence, stopDiscordPresence } from './discordPresence.js';
+import {
+  isAllowedCryptDeepLink,
+  isAllowedExternalUrl,
+  isTrustedApplicationUrl,
+} from './security.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectDirectory = path.resolve(currentDirectory, '..');
@@ -52,7 +57,7 @@ if (!hasSingleInstanceLock) {
   app.quit();
 } else {
   app.on('second-instance', (_event, commandLine) => {
-    const deepLink = commandLine.find(isCryptDeepLink);
+    const deepLink = commandLine.find(isAllowedCryptDeepLink);
     if (deepLink) deliverDeepLink(deepLink);
 
     if (mainWindow) {
@@ -104,6 +109,9 @@ function registerCryptProtocol() {
 function configureApplicationProtocol() {
   protocol.handle(applicationScheme, (request) => {
     const requestUrl = new URL(request.url);
+    if (!isTrustedApplicationUrl(request.url)) {
+      return new Response('Not found', { status: 404 });
+    }
     const relativePath = decodeURIComponent(requestUrl.pathname).replace(/^\/+/, '');
     const distributionDirectory = path.join(projectDirectory, 'dist');
     const requestedFile = path.resolve(distributionDirectory, relativePath || 'index.html');
@@ -121,12 +129,23 @@ function configureApplicationProtocol() {
 
 function configureSession() {
   session.defaultSession.setPermissionCheckHandler(
-    (_webContents, permission) => permission === 'media' || permission === 'notifications',
+    (webContents, permission, requestingOrigin) =>
+      isTrustedApplicationUrl(
+        requestingOrigin || webContents?.getURL() || '',
+        developmentServerUrl,
+      ) &&
+      (permission === 'media' || permission === 'notifications'),
   );
 
-  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-    callback(permission === 'media' || permission === 'notifications');
-  });
+  session.defaultSession.setPermissionRequestHandler(
+    (webContents, permission, callback, details) => {
+      const requestingUrl = details.requestingUrl || webContents?.getURL() || '';
+      callback(
+        isTrustedApplicationUrl(requestingUrl, developmentServerUrl) &&
+          (permission === 'media' || permission === 'notifications'),
+      );
+    },
+  );
 
   session.defaultSession.setDisplayMediaRequestHandler(
     (request, callback) => {
@@ -253,16 +272,13 @@ async function createMainWindow() {
   window.on('move', scheduleWindowStateSave);
   window.on('resize', scheduleWindowStateSave);
   window.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('https://') || url.startsWith('http://')) void shell.openExternal(url);
+    if (isAllowedExternalUrl(url)) void shell.openExternal(url);
     return { action: 'deny' };
   });
   window.webContents.on('will-navigate', (event, url) => {
-    if (
-      !url.startsWith(`${applicationScheme}://`) &&
-      (!developmentServerUrl || !url.startsWith(developmentServerUrl))
-    ) {
+    if (!isTrustedApplicationUrl(url, developmentServerUrl)) {
       event.preventDefault();
-      if (url.startsWith('https://') || url.startsWith('http://')) void shell.openExternal(url);
+      if (isAllowedExternalUrl(url)) void shell.openExternal(url);
     }
   });
 
@@ -280,7 +296,7 @@ async function createMainWindow() {
 }
 
 function deliverDeepLink(url: string) {
-  if (!isCryptDeepLink(url)) return;
+  if (!isAllowedCryptDeepLink(url)) return;
 
   if (!mainWindow || mainWindow.webContents.isLoading()) {
     pendingDeepLink = url;
@@ -288,10 +304,6 @@ function deliverDeepLink(url: string) {
   }
 
   mainWindow.webContents.send('crypt:deep-link', url);
-}
-
-function isCryptDeepLink(value: string) {
-  return value.startsWith('crypt://');
 }
 
 function createTray() {

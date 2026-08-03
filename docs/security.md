@@ -219,6 +219,19 @@ Tokens FCM ficam em `push_devices`, sem permissão direta para `anon` ou `authen
 a remoção passam por RPCs `security definer` vinculadas a `auth.uid()`. Um token só pode pertencer a
 uma conta por vez e é removido antes do logout local.
 
+## Auditoria final
+
+As Fases 21 e 22 forçam RLS em todas as tabelas públicas do aplicativo, removem execução pública
+das funções privilegiadas e fixam seu `search_path`. O único acesso anônimo mantido é a consulta de
+disponibilidade de identificador usada no cadastro.
+
+Tokens LiveKit ficam limitados por conta e minuto antes da assinatura. As Edge Functions rejeitam
+corpos grandes, JSON inválido, ações desconhecidas e origens não autorizadas. No Electron,
+permissões de mídia são aceitas somente para a interface interna e links externos ou `crypt://`
+passam por validação explícita.
+
+Consulte `docs/final-security-testing.md` para o relatório e a matriz final de testes.
+
 O Database Webhook usa um segredo aleatório dedicado no header `x-crypt-webhook-secret`; ele não
 envia a chave administrativa do Supabase. A Edge Function consulta tokens com credencial disponível
 somente no ambiente servidor, confere novamente `system_enabled`, limita tentativas e desativa

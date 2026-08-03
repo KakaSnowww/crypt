@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.8';
+import { readJsonBody, RequestBodyError, secretsMatch } from '../_shared/request-security.ts';
 
 type JsonObject = Record<string, unknown>;
 
@@ -41,15 +42,6 @@ function readKeyDictionary(variableName: string): string[] {
   } catch {
     return [];
   }
-}
-
-function secretsMatch(received: null | string, expected: string) {
-  if (!received || received.length !== expected.length) return false;
-  let difference = 0;
-  for (let index = 0; index < expected.length; index += 1) {
-    difference |= received.charCodeAt(index) ^ expected.charCodeAt(index);
-  }
-  return difference === 0;
 }
 
 function base64Url(value: Uint8Array | string) {
@@ -216,9 +208,12 @@ Deno.serve(async (request) => {
 
   let body: WebhookBody;
   try {
-    body = (await request.json()) as WebhookBody;
-  } catch {
-    return jsonResponse(400, { error: 'invalid_body' });
+    body = await readJsonBody<WebhookBody>(request);
+  } catch (error) {
+    return jsonResponse(
+      error instanceof RequestBodyError && error.code === 'payload_too_large' ? 413 : 400,
+      { error: error instanceof RequestBodyError ? error.code : 'invalid_body' },
+    );
   }
 
   const notificationId = body.record?.id;

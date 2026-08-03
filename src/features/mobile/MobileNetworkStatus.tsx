@@ -7,19 +7,30 @@ export function MobileNetworkStatus() {
   const [connected, setConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!isAndroidRuntime()) return;
-
     let disposed = false;
     let removeListener: (() => Promise<void>) | undefined;
+    const applyStatus = (isConnected: boolean) => {
+      if (disposed) return;
+      setConnected(isConnected);
+      onlineManager.setOnline(isConnected);
+    };
+    const handleOnline = () => applyStatus(true);
+    const handleOffline = () => applyStatus(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    applyStatus(navigator.onLine);
+
+    if (!isAndroidRuntime()) {
+      return () => {
+        disposed = true;
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
 
     void import('@capacitor/network')
       .then(async ({ Network }) => {
-        const applyStatus = (isConnected: boolean) => {
-          if (disposed) return;
-          setConnected(isConnected);
-          onlineManager.setOnline(isConnected);
-        };
-
         const initialStatus = await Network.getStatus();
         applyStatus(initialStatus.connected);
 
@@ -43,6 +54,8 @@ export function MobileNetworkStatus() {
 
     return () => {
       disposed = true;
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       void removeListener?.();
     };
   }, []);
@@ -56,7 +69,7 @@ export function MobileNetworkStatus() {
       role="status"
     >
       <WifiOff aria-hidden="true" size={16} />
-      Sem conexão. O Crypt reconectará automaticamente.
+      Sem conexão. Suas telas continuam abertas e o Crypt reconectará automaticamente.
     </aside>
   );
 }

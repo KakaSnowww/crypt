@@ -22,7 +22,9 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
+            refetchOnReconnect: true,
             retry: 1,
+            retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 10_000),
             staleTime: 30_000,
           },
         },

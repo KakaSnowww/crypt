@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.8.0': {
+    highlights: [
+      {
+        description:
+          'Tabelas, arquivos privados e funções administrativas receberam uma auditoria final de isolamento e privilégios.',
+        title: 'Dados mais protegidos',
+      },
+      {
+        description:
+          'Links, permissões, navegação externa e conteúdo interno do aplicativo Windows agora respeitam limites mais rígidos.',
+        title: 'Electron reforçado',
+      },
+      {
+        description:
+          'A emissão de tokens de chamada ganhou limite por conta e as funções de borda rejeitam origens, ações e cargas inválidas.',
+        title: 'Chamadas protegidas contra abuso',
+      },
+      {
+        description:
+          'O Crypt preserva a tela durante quedas de internet, reconecta automaticamente e inclui uma matriz final de testes Windows e Android.',
+        title: 'Mais estabilidade',
+      },
+    ],
+    summary:
+      'As Fases 21 e 22 foram unificadas em uma auditoria de segurança e estabilidade com testes finais multiplataforma.',
+    title: 'Segurança e estabilidade até o último detalhe',
+    version: '0.8.0',
+  },
   '0.7.0': {
     highlights: [
       {

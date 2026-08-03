@@ -3,21 +3,22 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 20
+## Estado atual — Fases 21 e 22
 
-A Fase 20 deixa o Crypt mais direto, consistente e fácil de explorar:
+A entrega unificada das Fases 21 e 22 fecha a auditoria de segurança e os testes finais do Crypt:
 
-- navegação principal sem os atalhos redundantes Conversa Geral e Base visual;
-- início renovado com acesso direto a servidores, mensagens e conexões;
-- busca por texto, pessoa e data em canais e conversas privadas;
-- galeria de mídias e painel de mensagens fixadas no mesmo buscador;
-- login, painéis, navegação e superfícies refinados para Windows e Android;
-- volume geral e categorias de som configuráveis em Conta e segurança;
-- atualização Windows silenciosa: o Crypt fecha, instala e reabre sem assistente;
-- versão Windows e Android `0.7.0`, com `versionCode 14` no Android.
+- RLS forçada em todas as tabelas públicas do aplicativo;
+- anexos privados, mídia pública de identidade e tipos de arquivo revisados;
+- funções privilegiadas com `search_path` fixo e permissões mínimas;
+- tokens LiveKit limitados por conta e requisições das Edge Functions validadas;
+- navegação, permissões e deep links do Electron protegidos por listas explícitas;
+- estado offline visível e reconexão automática sem desmontar a tela atual;
+- auditoria estática integrada ao comando `npm run validate`;
+- matriz documentada para Windows, Android, múltiplas contas, voz e histórico;
+- versão Windows e Android `0.8.0`, com `versionCode 15` no Android.
 
-Consulte [docs/phase20-experience.md](docs/phase20-experience.md) para conhecer as mudanças e o
-roteiro de validação.
+Consulte [docs/final-security-testing.md](docs/final-security-testing.md) para aplicar a migração e
+executar o roteiro completo de validação.
 
 ## Fase anterior — distribuição Windows e Android
 

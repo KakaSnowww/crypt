@@ -1,5 +1,13 @@
 import { AccessToken, RoomServiceClient } from 'npm:livekit-server-sdk@2.17.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.110.8';
+import {
+  isAllowedLivekitAction,
+  isUuid,
+  originIsAllowed,
+  parseAllowedOrigins,
+  readJsonBody,
+  RequestBodyError,
+} from '../_shared/request-security.ts';
 
 type KeyDictionary = Record<string, string>;
 
@@ -14,13 +22,7 @@ function readKeys(name: string) {
 }
 
 function allowedOrigins() {
-  return (
-    Deno.env.get('ALLOWED_ORIGINS') ??
-    'http://127.0.0.1:5173,http://localhost:5173,crypt-app://app,https://crypt.local'
-  )
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  return parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS'));
 }
 
 function headers(origin: string) {
@@ -41,7 +43,7 @@ function json(origin: string, status: number, body: Record<string, unknown>) {
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin') ?? '';
 
-  if (!allowedOrigins().includes(origin)) {
+  if (!originIsAllowed(origin, allowedOrigins())) {
     return json('null', 403, { error: 'origin_not_allowed' });
   }
 
@@ -70,23 +72,27 @@ Deno.serve(async (request) => {
 
   let body: { action?: unknown; channel_id?: unknown; conversation_id?: unknown };
   try {
-    body = (await request.json()) as {
+    body = await readJsonBody<{
       action?: unknown;
       channel_id?: unknown;
       conversation_id?: unknown;
-    };
-  } catch {
-    return json(origin, 400, { error: 'invalid_body' });
+    }>(request);
+  } catch (error) {
+    return json(
+      origin,
+      error instanceof RequestBodyError && error.code === 'payload_too_large' ? 413 : 400,
+      {
+        error: error instanceof RequestBodyError ? error.code : 'invalid_body',
+      },
+    );
   }
 
-  const channelId =
-    typeof body.channel_id === 'string' && /^[0-9a-f-]{36}$/.test(body.channel_id)
-      ? body.channel_id
-      : null;
-  const conversationId =
-    typeof body.conversation_id === 'string' && /^[0-9a-f-]{36}$/.test(body.conversation_id)
-      ? body.conversation_id
-      : null;
+  if (!isAllowedLivekitAction(body.action)) {
+    return json(origin, 400, { error: 'invalid_action' });
+  }
+
+  const channelId = isUuid(body.channel_id) ? body.channel_id : null;
+  const conversationId = isUuid(body.conversation_id) ? body.conversation_id : null;
 
   if ((!channelId && !conversationId) || (channelId && conversationId)) {
     return json(origin, 400, { error: 'invalid_call_target' });
@@ -204,6 +210,19 @@ Deno.serve(async (request) => {
         room_name: roomName,
       });
     }
+  }
+
+  const { data: rateLimitAccepted, error: rateLimitError } = await userClient.rpc(
+    'consume_livekit_token_rate_limit',
+  );
+
+  if (rateLimitError) {
+    console.error('livekit-token: rate limit unavailable', rateLimitError.message);
+    return json(origin, 503, { error: 'rate_limit_unavailable' });
+  }
+
+  if (!rateLimitAccepted) {
+    return json(origin, 429, { error: 'too_many_token_requests' });
   }
 
   const { data: visualProfile } = await userClient

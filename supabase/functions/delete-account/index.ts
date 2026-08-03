@@ -1,4 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.8';
+import {
+  originIsAllowed,
+  parseAllowedOrigins,
+  readJsonBody,
+  RequestBodyError,
+} from '../_shared/request-security.ts';
 
 type KeyDictionary = Record<string, string>;
 
@@ -17,13 +23,7 @@ function readKeyDictionary(variableName: string): string[] {
 }
 
 function getAllowedOrigins() {
-  return (
-    Deno.env.get('ALLOWED_ORIGINS') ??
-    'http://127.0.0.1:5173,http://localhost:5173,crypt-app://app,https://crypt.local'
-  )
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  return parseAllowedOrigins(Deno.env.get('ALLOWED_ORIGINS'));
 }
 
 function responseHeaders(origin: string) {
@@ -46,7 +46,7 @@ function jsonResponse(origin: string, status: number, body: Record<string, unkno
 Deno.serve(async (request) => {
   const origin = request.headers.get('Origin') ?? '';
 
-  if (!getAllowedOrigins().includes(origin)) {
+  if (!originIsAllowed(origin, getAllowedOrigins())) {
     return jsonResponse('null', 403, { error: 'origin_not_allowed' });
   }
 
@@ -100,9 +100,13 @@ Deno.serve(async (request) => {
   let requestBody: { confirmation?: unknown };
 
   try {
-    requestBody = (await request.json()) as { confirmation?: unknown };
-  } catch {
-    return jsonResponse(origin, 400, { error: 'invalid_body' });
+    requestBody = await readJsonBody<{ confirmation?: unknown }>(request);
+  } catch (error) {
+    return jsonResponse(
+      origin,
+      error instanceof RequestBodyError && error.code === 'payload_too_large' ? 413 : 400,
+      { error: error instanceof RequestBodyError ? error.code : 'invalid_body' },
+    );
   }
 
   if (requestBody.confirmation !== 'EXCLUIR') {
