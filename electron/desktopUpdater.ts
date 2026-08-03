@@ -34,7 +34,7 @@ export function registerDesktopUpdaterIpc() {
   ipcMain.handle('crypt:update:check', () => checkForDesktopUpdate(true));
   ipcMain.handle('crypt:update:restart', () => {
     if (currentState.state !== 'ready') return false;
-    autoUpdater.quitAndInstall(false, true);
+    autoUpdater.quitAndInstall(true, true);
     return true;
   });
 }
@@ -56,6 +56,7 @@ export function startDesktopUpdater() {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowPrerelease = false;
+  autoUpdater.disableDifferentialDownload = false;
 
   autoUpdater.on('checking-for-update', () => setState({ state: 'checking' }));
   autoUpdater.on('update-available', (info: UpdateInfo) =>

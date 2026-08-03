@@ -45,7 +45,7 @@ export function DesktopUpdatePanel() {
           </h2>
           <p className="mt-1 text-sm leading-6 text-crypt-muted">
             Versão atual: {visibleState.currentVersion}. O Crypt verifica novas versões
-            automaticamente e baixa o instalador em segundo plano.
+            automaticamente e baixa somente o necessário em segundo plano.
           </p>
         </div>
       </div>
@@ -56,7 +56,7 @@ export function DesktopUpdatePanel() {
         <div className="mt-5 flex flex-wrap gap-3">
           {ready ? (
             <Button leadingIcon={<Rocket size={17} />} onClick={() => void restartAndInstall()}>
-              Reiniciar e instalar {visibleState.version}
+              Atualizar e reiniciar {visibleState.version}
             </Button>
           ) : (
             <Button
@@ -118,7 +118,7 @@ function UpdateStatus({ state }: { state: CryptDesktopUpdateState | null }) {
     },
     ready: {
       icon: <Rocket size={16} />,
-      text: `Versão ${state.version ?? 'nova'} pronta para instalar.`,
+      text: `Versão ${state.version ?? 'nova'} pronta. O Crypt fechará, atualizará silenciosamente e abrirá novamente.`,
       tone: 'border-emerald-400/15 bg-emerald-500/[0.06] text-emerald-100',
     },
     'up-to-date': {

@@ -16,6 +16,7 @@ import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
 import { useAuth } from '../features/auth/useAuth';
 import { MessageAttachmentCard } from '../features/messages/components/MessageAttachmentCard';
+import { ConversationToolsModal } from '../features/messages/components/ConversationToolsModal';
 import {
   collectMessageMentionIds,
   filterMentionMembers,
@@ -54,6 +55,7 @@ export function ChannelRoute() {
   const [mentionMenuDismissed, setMentionMenuDismissed] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [reply, setReply] = useState<ChannelMessageRow | null>(null);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -90,6 +92,12 @@ export function ChannelRoute() {
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages.length]);
+
+  useEffect(() => {
+    const openTools = () => setToolsOpen(true);
+    window.addEventListener('crypt:open-conversation-search', openTools);
+    return () => window.removeEventListener('crypt:open-conversation-search', openTools);
+  }, []);
 
   if (
     overviewQuery.isPending ||
@@ -421,6 +429,15 @@ export function ChannelRoute() {
           </div>
         </div>
       </section>
+
+      <ConversationToolsModal
+        canLoadMore={Boolean(messagesQuery.hasNextPage)}
+        loadingMore={messagesQuery.isFetchingNextPage}
+        messages={messages}
+        onLoadMore={() => void messagesQuery.fetchNextPage()}
+        onOpenChange={setToolsOpen}
+        open={toolsOpen}
+      />
     </main>
   );
 }
@@ -440,7 +457,10 @@ function MessageItem({
 
   if (message.deleted_at) {
     return (
-      <div className="px-3 py-3 text-xs italic text-crypt-subtle">
+      <div
+        className="px-3 py-3 text-xs italic text-crypt-subtle"
+        id={`message-${message.message_id}`}
+      >
         Mensagem excluída · {formatMessageTime(message.created_at)}
       </div>
     );
@@ -458,6 +478,7 @@ function MessageItem({
       className={`group relative flex gap-3 rounded-2xl px-3 py-3 hover:bg-white/[0.035] ${
         message.pinned_at ? 'border border-violet-400/15 bg-violet-500/[0.035]' : ''
       }`}
+      id={`message-${message.message_id}`}
     >
       <ProfileAvatar
         avatarPath={message.author_avatar_path}

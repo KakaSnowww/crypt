@@ -10,11 +10,11 @@ describe('rotas do Crypt', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Seus servidores agora têm conversas de verdade',
+        name: 'Tudo o que importa, sem menus desnecessários.',
       }),
     ).toBeVisible();
-    expect(screen.getByText('Fases 7 e 8 — entrega unificada')).toBeVisible();
-    expect(screen.getByRole('link', { name: 'Abrir meus servidores' })).toHaveAttribute(
+    expect(screen.getByText('Seu espaço no Crypt')).toBeVisible();
+    expect(screen.getByRole('link', { name: /Continuar no Crypt/ })).toHaveAttribute(
       'href',
       '/app/servidores',
     );

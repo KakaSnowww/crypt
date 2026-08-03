@@ -21,6 +21,7 @@ import { useAuth } from '../features/auth/useAuth';
 import { DesktopUpdatePanel } from '../features/desktopUpdates/DesktopUpdatePanel';
 import { AndroidUpdatePanel } from '../features/androidUpdates/AndroidUpdatePanel';
 import { SettingsNavigation } from '../features/profile/components/SettingsNavigation';
+import { SoundSettingsPanel } from '../features/settings/SoundSettingsPanel';
 
 export function AccountSecurityRoute() {
   const navigate = useNavigate();
@@ -146,6 +147,7 @@ export function AccountSecurityRoute() {
 
       <DesktopUpdatePanel />
       <AndroidUpdatePanel />
+      <SoundSettingsPanel />
 
       <section
         className="mt-5 rounded-[1.75rem] border border-red-400/15 bg-red-500/[0.06] p-5 sm:p-7"

@@ -8,7 +8,6 @@ import {
   Monitor,
   Menu,
   MessageCircle,
-  Palette,
   Plus,
   Search,
   Server as ServerGlyph,
@@ -69,22 +68,10 @@ import { IconButton } from '../common/IconButton';
 
 const channelLinks = [
   {
-    end: true,
-    icon: Hash,
-    label: 'Conversa Geral',
-    to: '/app',
-  },
-  {
     end: false,
     icon: ServerGlyph,
     label: 'Servidores',
     to: '/app/servidores',
-  },
-  {
-    end: false,
-    icon: Palette,
-    label: 'Base visual',
-    to: '/app/componentes',
   },
   {
     end: false,
@@ -333,13 +320,13 @@ export function AppShell() {
   return (
     <div
       className={classNames(
-        'app-shell h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17rem_minmax(0,1fr)]',
-        !isVoiceRoute && '2xl:grid-cols-[4.5rem_17rem_minmax(0,1fr)_15rem]',
+        'app-shell h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[5rem_18rem_minmax(0,1fr)]',
+        !isVoiceRoute && '2xl:grid-cols-[5rem_18rem_minmax(0,1fr)_15rem]',
       )}
     >
       <aside
         aria-label="Seus espaços"
-        className="app-shell__rail hidden border-r border-white/5 bg-crypt-deep px-2 py-4 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:items-center lg:overflow-hidden"
+        className="app-shell__rail hidden border-r border-white/[0.06] px-2.5 py-4 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:items-center lg:overflow-hidden"
       >
         <NavLink
           aria-label="Início do Crypt"
@@ -392,18 +379,18 @@ export function AppShell() {
 
       <aside
         aria-label={currentServer ? `Canais de ${currentServer.server_name}` : 'Navegação do Crypt'}
-        className="app-shell__sidebar hidden border-r border-white/5 bg-crypt-sidebar lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:overflow-hidden"
+        className="app-shell__sidebar hidden border-r border-white/[0.06] lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:overflow-hidden"
       >
-        <div className="border-b border-white/5 px-4 py-4">
-          <p className="text-xs font-medium text-violet-300">
+        <div className="border-b border-white/[0.06] px-5 py-[1.15rem]">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-violet-300">
             {currentServer ? 'Servidor atual' : 'Navegação'}
           </p>
-          <h1 className="mt-1 truncate font-semibold text-white">
+          <h1 className="mt-1.5 truncate text-base font-bold tracking-tight text-white">
             {currentServer?.server_name ?? 'Crypt'}
           </h1>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-5">
+        <nav className="flex-1 overflow-y-auto px-3.5 py-5">
           {currentServer && selectedServerId ? (
             <>
               <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
@@ -533,7 +520,7 @@ export function AppShell() {
 
         <VoiceCallPanel />
 
-        <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.04] p-3">
+        <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.045] p-3 shadow-lg shadow-black/10">
           <ProfileAvatar
             avatarPath={profileQuery.data?.avatar_path ?? null}
             displayName={displayName}
@@ -562,7 +549,7 @@ export function AppShell() {
       </aside>
 
       <section className="app-shell__main flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden">
-        <header className="app-shell__header flex min-h-16 shrink-0 items-center gap-3 border-b border-white/5 bg-crypt-background/90 px-4 backdrop-blur-xl sm:px-5">
+        <header className="app-shell__header flex min-h-[4.25rem] shrink-0 items-center gap-3 border-b border-white/[0.06] bg-crypt-background/85 px-4 backdrop-blur-2xl sm:px-6">
           <div className="lg:hidden">
             <IconButton
               icon={<Menu aria-hidden="true" size={20} />}
@@ -570,11 +557,13 @@ export function AppShell() {
               onClick={() => void navigate('/app/servidores')}
             />
           </div>
-          <span className="grid size-9 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
+          <span className="grid size-10 place-items-center rounded-2xl border border-violet-400/10 bg-violet-500/10 text-violet-200">
             <HeaderIcon aria-hidden="true" size={18} />
           </span>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-white">{pageHeader.title}</h2>
+            <h2 className="truncate text-sm font-bold tracking-tight text-white">
+              {pageHeader.title}
+            </h2>
             <p className="hidden truncate text-xs text-crypt-subtle sm:block">
               {pageHeader.description}
             </p>
@@ -586,10 +575,13 @@ export function AppShell() {
             </span>
           ) : null}
           <div className="ml-auto flex items-center gap-1">
-            <IconButton
-              icon={<Search aria-hidden="true" size={18} />}
-              label="Pesquisar neste canal"
-            />
+            {isConversationRoute ? (
+              <IconButton
+                icon={<Search aria-hidden="true" size={18} />}
+                label="Pesquisar nesta conversa"
+                onClick={() => window.dispatchEvent(new Event('crypt:open-conversation-search'))}
+              />
+            ) : null}
             <DesktopUpdateHeaderButton />
             <AndroidUpdateHeaderButton />
             <NavLink

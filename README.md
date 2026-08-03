@@ -3,22 +3,21 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 18
+## Estado atual — Fase 20
 
-A Fase 18 transforma as mensagens privadas em espaços para amigos e pequenos grupos:
+A Fase 20 deixa o Crypt mais direto, consistente e fácil de explorar:
 
-- grupos privados com nome, imagem e até 10 participantes;
-- criação somente com amigos, respeitando bloqueios e isolamento no banco;
-- administrador único, transferência de propriedade, entrada, remoção e saída seguras;
-- mensagens, anexos, respostas, edição, exclusão, reações, digitação e não lidas em grupo;
-- atualização instantânea da lista e dos participantes por Realtime;
-- chamadas de áudio e vídeo individuais ou em grupo, preservadas durante a navegação;
-- imagens privadas no Storage e tokens LiveKit emitidos somente para participantes;
-- avisos internos e push ao entrar no grupo ou receber novas mensagens;
-- versão Windows e Android `0.5.0`, com `versionCode 11` no Android.
+- navegação principal sem os atalhos redundantes Conversa Geral e Base visual;
+- início renovado com acesso direto a servidores, mensagens e conexões;
+- busca por texto, pessoa e data em canais e conversas privadas;
+- galeria de mídias e painel de mensagens fixadas no mesmo buscador;
+- login, painéis, navegação e superfícies refinados para Windows e Android;
+- volume geral e categorias de som configuráveis em Conta e segurança;
+- atualização Windows silenciosa: o Crypt fecha, instala e reabre sem assistente;
+- versão Windows e Android `0.7.0`, com `versionCode 14` no Android.
 
-Consulte [docs/private-groups-calls.md](docs/private-groups-calls.md) para aplicar a migration, publicar
-a Edge Function e executar o roteiro de validação com três contas.
+Consulte [docs/phase20-experience.md](docs/phase20-experience.md) para conhecer as mudanças e o
+roteiro de validação.
 
 ## Fase anterior — distribuição Windows e Android
 

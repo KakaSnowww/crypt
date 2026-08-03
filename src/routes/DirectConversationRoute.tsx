@@ -32,6 +32,7 @@ import type { DirectMessageRow } from '../features/directMessages/directMessages
 import { useDirectMessageActions } from '../features/directMessages/useDirectMessageActions';
 import { useDirectMessagesRealtime } from '../features/directMessages/useDirectMessagesRealtime';
 import { MessageAttachmentCard } from '../features/messages/components/MessageAttachmentCard';
+import { ConversationToolsModal } from '../features/messages/components/ConversationToolsModal';
 import {
   parseMessageAttachments,
   parseMessageReactions,
@@ -54,6 +55,7 @@ export function DirectConversationRoute() {
   const [files, setFiles] = useState<File[]>([]);
   const [reply, setReply] = useState<DirectMessageRow | null>(null);
   const [groupSettingsOpen, setGroupSettingsOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const voiceCall = useVoiceCall();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -81,6 +83,12 @@ export function DirectConversationRoute() {
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages.length]);
+
+  useEffect(() => {
+    const openTools = () => setToolsOpen(true);
+    window.addEventListener('crypt:open-conversation-search', openTools);
+    return () => window.removeEventListener('crypt:open-conversation-search', openTools);
+  }, []);
 
   if (conversationsQuery.isPending || messagesQuery.isPending) {
     return (
@@ -336,6 +344,15 @@ export function DirectConversationRoute() {
           open={groupSettingsOpen}
         />
       ) : null}
+      <ConversationToolsModal
+        attachmentBucket={DIRECT_ATTACHMENTS_BUCKET}
+        canLoadMore={Boolean(messagesQuery.hasNextPage)}
+        loadingMore={messagesQuery.isFetchingNextPage}
+        messages={messages}
+        onLoadMore={() => void messagesQuery.fetchNextPage()}
+        onOpenChange={setToolsOpen}
+        open={toolsOpen}
+      />
     </main>
   );
 }
@@ -355,7 +372,10 @@ function DirectMessageItem({
 
   if (message.deleted_at) {
     return (
-      <div className="px-3 py-3 text-xs italic text-crypt-subtle">
+      <div
+        className="px-3 py-3 text-xs italic text-crypt-subtle"
+        id={`message-${message.message_id}`}
+      >
         Mensagem excluída · {formatMessageTime(message.created_at)}
       </div>
     );
@@ -369,7 +389,10 @@ function DirectMessageItem({
   }
 
   return (
-    <article className="group relative flex gap-3 rounded-2xl px-3 py-3 hover:bg-white/[0.035]">
+    <article
+      className="group relative flex gap-3 rounded-2xl px-3 py-3 hover:bg-white/[0.035]"
+      id={`message-${message.message_id}`}
+    >
       <ProfileAvatar
         avatarPath={message.author_avatar_path}
         displayName={message.author_display_name}

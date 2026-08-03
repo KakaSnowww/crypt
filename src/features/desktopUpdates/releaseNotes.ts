@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.7.0': {
+    highlights: [
+      {
+        description:
+          'A navegação principal ficou mais direta e não exibe mais Conversa Geral nem Base visual entre os destinos do dia a dia.',
+        title: 'Menos distrações',
+      },
+      {
+        description:
+          'Canais e mensagens privadas agora reúnem busca por texto, pessoa e data, galeria de mídias e acesso às mensagens fixadas.',
+        title: 'Encontre qualquer conversa',
+      },
+      {
+        description:
+          'A identidade visual foi refinada em login, início, painéis e navegação para funcionar melhor no Windows e no Android.',
+        title: 'Visual mais claro e consistente',
+      },
+      {
+        description:
+          'No Windows, o Crypt fecha, aplica a nova versão silenciosamente e reabre; os sons também ganharam volume e categorias configuráveis.',
+        title: 'Atualização e som sob controle',
+      },
+    ],
+    summary:
+      'A Fase 20 simplifica a navegação, moderniza a interface e adiciona ferramentas para encontrar mensagens, mídias e fixados.',
+    title: 'Um Crypt mais simples de usar',
+    version: '0.7.0',
+  },
   '0.6.0': {
     highlights: [
       {

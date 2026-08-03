@@ -72,7 +72,7 @@ export function DesktopUpdateBanner() {
 
       {ready ? (
         <Button className="mt-4 w-full" onClick={() => void restartAndInstall()}>
-          Reiniciar e instalar
+          Atualizar e reiniciar
         </Button>
       ) : null}
     </aside>

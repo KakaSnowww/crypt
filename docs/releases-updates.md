@@ -8,7 +8,7 @@ quatro horas. Quando encontra uma versão estável mais recente:
 1. o instalador é baixado em segundo plano;
 2. o `som5.mp3` avisa uma vez e o progresso aparece no cabeçalho do Crypt;
 3. a versão baixada é validada pelos metadados e pelo hash produzidos no mesmo build;
-4. a pessoa escolhe **Reiniciar e instalar**;
+4. a pessoa escolhe **Atualizar e reiniciar**;
 5. o Electron encerra a instância atual e o NSIS aplica a atualização.
 6. na primeira abertura da nova versão, um popup resume as mudanças.
 
@@ -83,7 +83,7 @@ Uma atualização só pode ser confirmada entre duas versões publicadas:
 4. aguarde a verificação inicial ou acesse **Conta e segurança → Verificar agora**;
 5. confirme que o `som5.mp3` toca e que o botão aparece no cabeçalho;
 6. acompanhe o download;
-7. clique em **Reiniciar e instalar**;
+7. clique em **Atualizar e reiniciar**;
 8. confirme que **Versão instalada** mostra `0.2.6`, que o som toca apenas na primeira abertura do processo e que o popup aparece.
 
 Releases em rascunho não são oferecidas pelo atualizador. O instalador e `latest.yml` precisam vir

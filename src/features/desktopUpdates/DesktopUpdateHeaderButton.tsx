@@ -45,7 +45,7 @@ export function DesktopUpdateHeaderButton() {
         footer={
           ready ? (
             <Button leadingIcon={<Rocket size={17} />} onClick={() => void restartAndInstall()}>
-              Reiniciar e instalar
+              Atualizar e reiniciar
             </Button>
           ) : (
             <Button onClick={() => setOpen(false)} variant="secondary">

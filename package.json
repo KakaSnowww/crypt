@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -145,10 +145,12 @@
       }
     ],
     "nsis": {
-      "allowToChangeInstallationDirectory": true,
+      "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "oneClick": false,
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
       "shortcutName": "Crypt"
     }
   }

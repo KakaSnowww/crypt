@@ -16,14 +16,54 @@ const soundVolumes: Record<CryptSound, number> = {
   update: 0.52,
 };
 
+export type CryptSoundPreferences = {
+  disabled: CryptSound[];
+  masterVolume: number;
+};
+
+export const soundPreferencesStorageKey = 'crypt:sound-preferences';
+export const defaultSoundPreferences: CryptSoundPreferences = {
+  disabled: [],
+  masterVolume: 0.8,
+};
+
 const audioCache = new Map<CryptSound, HTMLAudioElement>();
 
 export function getCryptSoundVolume(sound: CryptSound) {
-  return soundVolumes[sound];
+  return soundVolumes[sound] * readCryptSoundPreferences().masterVolume;
+}
+
+export function readCryptSoundPreferences(): CryptSoundPreferences {
+  if (typeof window === 'undefined') return defaultSoundPreferences;
+
+  try {
+    const stored = JSON.parse(
+      window.localStorage.getItem(soundPreferencesStorageKey) ?? 'null',
+    ) as Partial<CryptSoundPreferences> | null;
+    const masterVolume = Math.min(1, Math.max(0, Number(stored?.masterVolume ?? 0.8)));
+    const disabled = Array.isArray(stored?.disabled)
+      ? stored.disabled.filter((sound): sound is CryptSound => sound in soundPaths)
+      : [];
+    return { disabled, masterVolume };
+  } catch {
+    return defaultSoundPreferences;
+  }
+}
+
+export function saveCryptSoundPreferences(preferences: CryptSoundPreferences) {
+  const normalized = {
+    disabled: [...new Set(preferences.disabled)],
+    masterVolume: Math.min(1, Math.max(0, preferences.masterVolume)),
+  };
+  window.localStorage.setItem(soundPreferencesStorageKey, JSON.stringify(normalized));
+  return normalized;
 }
 
 export async function playCryptSound(sound: CryptSound) {
   if (typeof Audio === 'undefined') return false;
+
+  const preferences = readCryptSoundPreferences();
+  if (preferences.disabled.includes(sound) || preferences.masterVolume === 0) return false;
 
   try {
     const source = new URL(soundPaths[sound], window.location.href).href;

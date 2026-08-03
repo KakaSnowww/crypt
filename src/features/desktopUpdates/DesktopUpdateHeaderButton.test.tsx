@@ -19,7 +19,7 @@ describe('DesktopUpdateHeaderButton', () => {
     expect(screen.getByText('Uma experiência ainda melhor')).toBeInTheDocument();
     expect(screen.getByText('Botão de atualização no cabeçalho')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Reiniciar e instalar' }));
+    await user.click(screen.getByRole('button', { name: 'Atualizar e reiniciar' }));
     expect(restartAndInstall).toHaveBeenCalledOnce();
   });
 });

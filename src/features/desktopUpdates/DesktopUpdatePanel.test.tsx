@@ -17,7 +17,7 @@ describe('DesktopUpdatePanel', () => {
   it('mostra a versão também quando o Crypt está aberto no navegador', () => {
     render(<DesktopUpdatePanel />);
 
-    expect(screen.getByText(/Versão atual: 0\.6\.0/)).toBeInTheDocument();
+    expect(screen.getByText(/Versão atual: 0\.7\.0/)).toBeInTheDocument();
     expect(screen.getByText(/Você está usando o Crypt pelo navegador/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Verificar agora' })).not.toBeInTheDocument();
   });
@@ -28,8 +28,8 @@ describe('DesktopUpdatePanel', () => {
 
     render(<DesktopUpdatePanel />);
 
-    expect(await screen.findByText('Versão 0.2.7 pronta para instalar.')).toBeInTheDocument();
-    screen.getByRole('button', { name: 'Reiniciar e instalar 0.2.7' }).click();
+    expect(await screen.findByText(/Versão 0\.2\.7 pronta\. O Crypt fechará/)).toBeInTheDocument();
+    screen.getByRole('button', { name: 'Atualizar e reiniciar 0.2.7' }).click();
     expect(restartAndInstall).toHaveBeenCalledOnce();
   });
 
