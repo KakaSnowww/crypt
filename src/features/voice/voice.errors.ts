@@ -1,9 +1,10 @@
 const messages: Record<string, string> = {
   invalid_session: 'Sua sessão expirou. Entre novamente.',
+  invalid_call_target: 'A conversa escolhida não pode iniciar uma chamada.',
   livekit_not_configured: 'O LiveKit ainda não foi configurado neste ambiente.',
   livekit_presence_unavailable: 'O LiveKit não conseguiu informar quem está na chamada.',
   origin_not_allowed: 'Esta origem não está autorizada a usar chamadas.',
-  voice_channel_access_denied: 'Você não possui acesso a este canal de voz.',
+  voice_channel_access_denied: 'Você não possui acesso a esta chamada.',
 };
 
 export function toVoiceError(error: unknown) {

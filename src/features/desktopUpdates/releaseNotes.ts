@@ -21,6 +21,34 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.5.0': {
+    highlights: [
+      {
+        description:
+          'Crie espaços privados com nome, imagem e até dez participantes escolhidos entre seus amigos.',
+        title: 'Grupos privados',
+      },
+      {
+        description:
+          'Mensagens, anexos, respostas, reações, digitação e contadores são atualizados para todos em tempo real.',
+        title: 'Conversa completa',
+      },
+      {
+        description:
+          'Inicie áudio e vídeo na conversa individual ou no grupo e continue conectado enquanto navega pelo Crypt.',
+        title: 'Chamadas entre amigos',
+      },
+      {
+        description:
+          'Administração, participantes, imagens e tokens de chamada são protegidos por regras específicas no banco.',
+        title: 'Privacidade preservada',
+      },
+    ],
+    summary:
+      'A Fase 18 adiciona grupos privados completos e chamadas dentro das mensagens entre amigos.',
+    title: 'Seus grupos chegaram ao Crypt',
+    version: '0.5.0',
+  },
   '0.4.0': {
     highlights: [
       {

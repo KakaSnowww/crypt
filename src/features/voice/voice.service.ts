@@ -14,11 +14,29 @@ export async function createVoiceConnection(channelId: string): Promise<VoiceCon
   return result.data;
 }
 
-export async function createAndroidScreenShareConnection(
-  channelId: string,
+export async function createDirectVoiceConnection(
+  conversationId: string,
 ): Promise<VoiceConnection> {
   const result = (await getSupabaseClient().functions.invoke('livekit-token', {
-    body: { action: 'android_screen_share', channel_id: channelId },
+    body: { conversation_id: conversationId },
+  })) as { data: VoiceConnection | null; error: unknown };
+
+  if (result.error || !result.data) {
+    throw await toVoiceError(result.error);
+  }
+
+  return result.data;
+}
+
+export async function createAndroidScreenShareConnection(
+  targetId: string,
+  targetKind: 'channel' | 'direct' = 'channel',
+): Promise<VoiceConnection> {
+  const result = (await getSupabaseClient().functions.invoke('livekit-token', {
+    body: {
+      action: 'android_screen_share',
+      ...(targetKind === 'direct' ? { conversation_id: targetId } : { channel_id: targetId }),
+    },
   })) as { data: VoiceConnection | null; error: unknown };
 
   if (result.error || !result.data) {

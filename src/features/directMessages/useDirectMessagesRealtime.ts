@@ -46,7 +46,6 @@ export function useDirectListRealtime(currentUserId: null | string) {
         'postgres_changes',
         {
           event: '*',
-          filter: `profile_id=eq.${currentUserId}`,
           schema: 'public',
           table: 'direct_conversation_participants',
         },
@@ -101,6 +100,21 @@ export function useDirectMessagesRealtime(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'direct_message_reactions' },
         invalidate,
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          filter: `conversation_id=eq.${conversationId}`,
+          schema: 'public',
+          table: 'direct_conversation_participants',
+        },
+        () => {
+          invalidate();
+          void queryClient.invalidateQueries({
+            queryKey: directMessageKeys.groupMembers(conversationId),
+          });
+        },
       );
 
     channel.subscribe();

@@ -31,6 +31,13 @@ export type Database = {
         Args: { target_profile_id: string };
         Returns: boolean;
       };
+      add_direct_group_member: {
+        Args: {
+          target_conversation_id: string;
+          target_profile_id: string;
+        };
+        Returns: undefined;
+      };
       can_view_profile_interests: {
         Args: { target_profile_id: string };
         Returns: boolean;
@@ -47,6 +54,13 @@ export type Database = {
         Args: {
           server_description?: null | string;
           server_name: string;
+        };
+        Returns: string;
+      };
+      create_direct_group: {
+        Args: {
+          group_title: string;
+          member_profile_ids: string[];
         };
         Returns: string;
       };
@@ -102,6 +116,10 @@ export type Database = {
       delete_direct_message: {
         Args: { target_message_id: string };
         Returns: string[];
+      };
+      delete_direct_group: {
+        Args: { target_conversation_id: string };
+        Returns: null | string;
       };
       delete_server: {
         Args: {
@@ -206,6 +224,30 @@ export type Database = {
           reply_to_id: null | string;
         }>;
       };
+      get_direct_group_members: {
+        Args: { target_conversation_id: string };
+        Returns: Array<{
+          avatar_path: null | string;
+          display_name: string;
+          handle: string;
+          is_online: boolean;
+          joined_at: string;
+          participant_role: 'member' | 'owner';
+          profile_id: string;
+        }>;
+      };
+      get_direct_voice_access: {
+        Args: { target_conversation_id: string };
+        Returns: Array<{
+          avatar_path: null | string;
+          can_publish: boolean;
+          conversation_id: string;
+          conversation_name: string;
+          display_name: string;
+          handle: string;
+          profile_id: string;
+        }>;
+      };
       get_friend_requests: {
         Args: { request_direction: string };
         Returns: Array<{
@@ -300,16 +342,21 @@ export type Database = {
       get_my_direct_conversations: {
         Args: NoArgs;
         Returns: Array<{
+          conversation_avatar_path: null | string;
           conversation_id: string;
+          conversation_title: string;
+          conversation_type: 'direct' | 'group';
           is_blocked: boolean;
           is_online: boolean;
+          is_owner: boolean;
           last_message_at: string;
           last_message_author_id: null | string;
           last_message_preview: string;
+          member_count: number;
           other_avatar_path: null | string;
-          other_display_name: string;
-          other_handle: string;
-          other_profile_id: string;
+          other_display_name: null | string;
+          other_handle: null | string;
+          other_profile_id: null | string;
           unread_count: number;
         }>;
       };
@@ -661,6 +708,32 @@ export type Database = {
       open_direct_conversation: {
         Args: { target_profile_id: string };
         Returns: string;
+      };
+      leave_direct_group: {
+        Args: { target_conversation_id: string };
+        Returns: undefined;
+      };
+      remove_direct_group_member: {
+        Args: {
+          target_conversation_id: string;
+          target_profile_id: string;
+        };
+        Returns: undefined;
+      };
+      transfer_direct_group_ownership: {
+        Args: {
+          target_conversation_id: string;
+          target_profile_id: string;
+        };
+        Returns: undefined;
+      };
+      update_direct_group: {
+        Args: {
+          group_avatar_path?: null | string;
+          group_title: string;
+          target_conversation_id: string;
+        };
+        Returns: null | string;
       };
       remove_friend: {
         Args: { target_profile_id: string };

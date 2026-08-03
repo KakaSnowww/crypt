@@ -4,6 +4,7 @@ import type { NativeScreenShareOptions } from './nativeScreenShare';
 import type { VoiceConnection } from './voice.types';
 
 export type VoiceCallContextValue = {
+  callKind: 'channel' | 'direct' | null;
   channelId: string | null;
   connection: VoiceConnection | null;
   error: string | null;
@@ -11,6 +12,7 @@ export type VoiceCallContextValue = {
   isExpanded: boolean;
   isNativeScreenSharing: boolean;
   join: (channelId: string) => Promise<void>;
+  joinDirect: (conversationId: string) => Promise<void>;
   leave: () => Promise<void>;
   listAndroidAudioOutputs: () => Promise<AndroidAudioOutput[]>;
   setExpanded: (expanded: boolean) => void;

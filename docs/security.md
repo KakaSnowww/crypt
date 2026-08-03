@@ -186,6 +186,20 @@ com `auth.uid()` validado novamente.
 O bucket `direct-message-attachments` é privado. A leitura exige participação e a exclusão exige
 que o UUID do autor no caminho seja o da sessão. A interface recebe apenas URLs assinadas curtas.
 
+## Grupos privados e chamadas
+
+Grupos são acessados pelo mesmo modelo de participação das DMs, mas todas as mudanças administrativas
+passam por RPCs `security definer` que verificam `auth.uid()` e o papel `owner`. Uma conta fora do
+grupo não lista participantes, não lê mensagens ou imagem e não recebe token de chamada mesmo com o
+UUID correto.
+
+O token LiveKit nunca aceita identidade, nome ou permissão enviados pelo cliente. A Edge Function
+consulta `get_direct_voice_access`, deriva a sala `crypt-direct-{conversation_id}` e libera publicação
+somente depois da validação no banco. Bloqueios entre participantes impedem envio e publicação.
+
+Imagens usam bucket privado, MIME fechado, limite de 5 MB, caminho validado e URL assinada. A troca
+de administrador preserva a imagem existente e permite que o novo responsável faça a próxima troca.
+
 ## Spotify
 
 O Crypt aceita somente uma URL de faixa em `open.spotify.com`, remove parâmetros de compartilhamento
@@ -262,6 +276,10 @@ interrompida.
 - [ ] Exclusão de mensagem, servidor e conta limpa anexos privados.
 - [ ] Não lidas e menções são calculadas somente em canais visíveis.
 - [ ] Terceira conta não lista nem consulta a DM entre outras duas pessoas.
+- [ ] Conta externa não lista grupo, participantes, imagem, mensagens ou chamada pelo UUID.
+- [ ] Grupo não ultrapassa 10 participantes nem fica sem administrador.
+- [ ] Somente o administrador altera nome, imagem e participantes do grupo.
+- [ ] Proprietário transfere a administração antes de sair.
 - [ ] Fechar uma DM não apaga o histórico e afeta somente a própria lista.
 - [ ] Política de novas DMs é aplicada no banco.
 - [ ] Moderador não expulsa, bane ou altera o dono.

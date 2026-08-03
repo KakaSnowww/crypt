@@ -5,7 +5,9 @@ import {
   LoaderCircle,
   MessageCircle,
   Pencil,
+  Phone,
   Send,
+  Settings2,
   SmilePlus,
   Trash2,
   X,
@@ -15,6 +17,9 @@ import { Link, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
 import { useAuth } from '../features/auth/useAuth';
+import { useFriends } from '../features/connections/connections.queries';
+import { DirectConversationAvatar } from '../features/directMessages/components/DirectConversationAvatar';
+import { DirectGroupSettingsModal } from '../features/directMessages/components/DirectGroupSettingsModal';
 import {
   DIRECT_ATTACHMENTS_BUCKET,
   markDirectRead,
@@ -33,6 +38,7 @@ import {
 } from '../features/messages/messages.types';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { useCurrentProfile } from '../features/profile/profile.queries';
+import { useVoiceCall } from '../features/voice/useVoiceCall';
 
 const reactionChoices = ['💜', '🔥', '😂', '👏', '🎉'] as const;
 
@@ -40,12 +46,15 @@ export function DirectConversationRoute() {
   const { conversationId = '' } = useParams();
   const { user } = useAuth();
   const profileQuery = useCurrentProfile(user?.id ?? null);
+  const friendsQuery = useFriends();
   const conversationsQuery = useDirectConversations();
   const messagesQuery = useDirectMessages(conversationId);
   const actions = useDirectMessageActions(conversationId);
   const [content, setContent] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [reply, setReply] = useState<DirectMessageRow | null>(null);
+  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false);
+  const voiceCall = useVoiceCall();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const conversation = conversationsQuery.data?.find(
@@ -122,31 +131,55 @@ export function DirectConversationRoute() {
   return (
     <main className="chat-layout flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <section className="chat-fixed shrink-0 border-b border-white/5 px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-3">
-          <ProfileAvatar
-            avatarPath={conversation.other_avatar_path}
-            displayName={conversation.other_display_name}
-            size="sm"
-          />
+        <div className="flex flex-wrap items-center gap-3">
+          <DirectConversationAvatar conversation={conversation} size="sm" />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-semibold text-white">{conversation.other_display_name}</h1>
-            <Link
-              className="text-xs text-crypt-subtle hover:text-violet-200"
-              to={`/app/pessoas/${conversation.other_handle}`}
-            >
-              @{conversation.other_handle}
-            </Link>
+            <h1 className="truncate font-semibold text-white">{conversation.conversation_title}</h1>
+            {conversation.conversation_type === 'group' ? (
+              <span className="text-xs text-crypt-subtle">
+                {conversation.member_count} participantes
+              </span>
+            ) : conversation.other_handle ? (
+              <Link
+                className="text-xs text-crypt-subtle hover:text-violet-200"
+                to={`/app/pessoas/${conversation.other_handle}`}
+              >
+                @{conversation.other_handle}
+              </Link>
+            ) : null}
           </div>
-          <Link to={`/app/pessoas/${conversation.other_handle}`}>
-            <Button size="sm" variant="ghost">
-              Ver perfil
+          <Button
+            aria-label="Entrar na chamada"
+            disabled={conversation.is_blocked}
+            loading={voiceCall.isConnecting}
+            onClick={() => void voiceCall.joinDirect(conversation.conversation_id)}
+            size="sm"
+            variant="secondary"
+          >
+            <Phone size={15} /> <span className="hidden sm:inline">Chamar</span>
+          </Button>
+          {conversation.conversation_type === 'group' ? (
+            <Button
+              aria-label="Configurações do grupo"
+              onClick={() => setGroupSettingsOpen(true)}
+              size="sm"
+              variant="ghost"
+            >
+              <Settings2 size={15} /> <span className="hidden sm:inline">Grupo</span>
             </Button>
-          </Link>
+          ) : conversation.other_handle ? (
+            <Link to={`/app/pessoas/${conversation.other_handle}`}>
+              <Button aria-label="Ver perfil" size="sm" variant="ghost">
+                <span className="hidden sm:inline">Ver perfil</span>
+                <span className="sm:hidden">Perfil</span>
+              </Button>
+            </Link>
+          ) : null}
         </div>
       </section>
 
       <section
-        aria-label={`Mensagens com ${conversation.other_display_name}`}
+        aria-label={`Mensagens em ${conversation.conversation_title}`}
         className="chat-scroll min-h-0 flex-1 overflow-y-auto px-3 py-5 sm:px-6"
       >
         {messagesQuery.hasNextPage ? (
@@ -179,10 +212,12 @@ export function DirectConversationRoute() {
               <MessageCircle size={25} />
             </span>
             <h2 className="mt-4 text-lg font-semibold text-white">
-              Comece a conversa com {conversation.other_display_name}
+              Comece a conversa em {conversation.conversation_title}
             </h2>
             <p className="mt-2 text-sm leading-6 text-crypt-muted">
-              Somente vocês duas pessoas conseguem consultar este histórico.
+              {conversation.conversation_type === 'group'
+                ? 'Somente os participantes do grupo conseguem consultar este histórico.'
+                : 'Somente vocês duas pessoas conseguem consultar este histórico.'}
             </p>
           </div>
         )}
@@ -252,7 +287,7 @@ export function DirectConversationRoute() {
                   <FilePlus2 size={19} />
                 </button>
                 <textarea
-                  aria-label={`Mensagem para ${conversation.other_display_name}`}
+                  aria-label={`Mensagem para ${conversation.conversation_title}`}
                   className="max-h-40 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-6 text-white outline-none placeholder:text-crypt-subtle"
                   maxLength={2_000}
                   onChange={(event) => {
@@ -265,7 +300,7 @@ export function DirectConversationRoute() {
                       void submitMessage();
                     }
                   }}
-                  placeholder={`Conversar com ${conversation.other_display_name}`}
+                  placeholder={`Conversar em ${conversation.conversation_title}`}
                   rows={1}
                   value={content}
                 />
@@ -292,6 +327,15 @@ export function DirectConversationRoute() {
           )}
         </div>
       </section>
+      {conversation.conversation_type === 'group' && user ? (
+        <DirectGroupSettingsModal
+          conversation={conversation}
+          currentUserId={user.id}
+          friends={friendsQuery.data ?? []}
+          onOpenChange={setGroupSettingsOpen}
+          open={groupSettingsOpen}
+        />
+      ) : null}
     </main>
   );
 }

@@ -17,16 +17,16 @@ describe('PostUpdateWhatsNew', () => {
     render(<PostUpdateWhatsNew />);
 
     expect(
-      screen.getByRole('dialog', { name: 'O Crypt agora se atualiza no Android' }),
+      screen.getByRole('dialog', { name: 'Seus grupos chegaram ao Crypt' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('O Crypt foi atualizado para a versão 0.4.0. Veja o que ficou diferente.'),
+      screen.getByText('O Crypt foi atualizado para a versão 0.5.0. Veja o que ficou diferente.'),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Começar a usar' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem(seenReleaseStorageKey)).toBe('0.4.0');
+    expect(window.localStorage.getItem(seenReleaseStorageKey)).toBe('0.5.0');
   });
 });
 

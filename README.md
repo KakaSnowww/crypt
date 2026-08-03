@@ -3,7 +3,24 @@
 Plataforma social de comunidades, conversas, amizades e descoberta de pessoas por interesses, com
 identidade visual em roxo e azul.
 
-## Estado atual — Fase 17
+## Estado atual — Fase 18
+
+A Fase 18 transforma as mensagens privadas em espaços para amigos e pequenos grupos:
+
+- grupos privados com nome, imagem e até 10 participantes;
+- criação somente com amigos, respeitando bloqueios e isolamento no banco;
+- administrador único, transferência de propriedade, entrada, remoção e saída seguras;
+- mensagens, anexos, respostas, edição, exclusão, reações, digitação e não lidas em grupo;
+- atualização instantânea da lista e dos participantes por Realtime;
+- chamadas de áudio e vídeo individuais ou em grupo, preservadas durante a navegação;
+- imagens privadas no Storage e tokens LiveKit emitidos somente para participantes;
+- avisos internos e push ao entrar no grupo ou receber novas mensagens;
+- versão Windows e Android `0.5.0`, com `versionCode 11` no Android.
+
+Consulte [docs/private-groups-calls.md](docs/private-groups-calls.md) para aplicar a migration, publicar
+a Edge Function e executar o roteiro de validação com três contas.
+
+## Fase anterior — distribuição Windows e Android
 
 A Fase 17 entrega distribuição e atualização do aplicativo Android:
 

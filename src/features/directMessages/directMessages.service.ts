@@ -4,12 +4,16 @@ import { validateMessagePayload } from '../messages/messages.schemas';
 import type { UploadedAttachment } from '../messages/messages.types';
 import { toDirectMessageError } from './directMessages.errors';
 import type {
+  CreateDirectGroupInput,
   DirectConversation,
+  DirectGroupMember,
   DirectMessageRow,
   SendDirectMessageInput,
+  UpdateDirectGroupInput,
 } from './directMessages.types';
 
 export const DIRECT_ATTACHMENTS_BUCKET = 'direct-message-attachments';
+export const DIRECT_GROUP_MEDIA_BUCKET = 'direct-group-media';
 
 export async function fetchDirectConversations(): Promise<DirectConversation[]> {
   const { data, error } = await getSupabaseClient().rpc('get_my_direct_conversations');
@@ -31,6 +35,140 @@ export async function openDirectConversation(profileId: string) {
   }
 
   return data;
+}
+
+export async function createDirectGroup(input: CreateDirectGroupInput) {
+  const title = validateGroupTitle(input.title);
+  const memberProfileIds = [...new Set(input.memberProfileIds)].filter(
+    (profileId) => profileId !== input.userId,
+  );
+
+  if (memberProfileIds.length < 2 || memberProfileIds.length > 9) {
+    throw toDirectMessageError(new Error('invalid_group_member_count'));
+  }
+
+  const client = getSupabaseClient();
+  const { data, error } = await client.rpc('create_direct_group', {
+    group_title: title,
+    member_profile_ids: memberProfileIds,
+  });
+
+  if (error || !data) {
+    throw toDirectMessageError(error ?? new Error('direct_group_not_found'));
+  }
+
+  if (input.avatarFile) {
+    await updateDirectGroup({
+      avatarFile: input.avatarFile,
+      conversationId: data,
+      currentAvatarPath: null,
+      title,
+      userId: input.userId,
+    });
+  }
+
+  return data;
+}
+
+export async function fetchDirectGroupMembers(
+  conversationId: string,
+): Promise<DirectGroupMember[]> {
+  const { data, error } = await getSupabaseClient().rpc('get_direct_group_members', {
+    target_conversation_id: conversationId,
+  });
+
+  if (error) throw toDirectMessageError(error);
+  return data ?? [];
+}
+
+export async function updateDirectGroup(input: UpdateDirectGroupInput) {
+  const client = getSupabaseClient();
+  const title = validateGroupTitle(input.title);
+  let nextAvatarPath = input.removeAvatar ? null : input.currentAvatarPath;
+  let uploadedPath: null | string = null;
+
+  if (input.avatarFile) {
+    validateGroupAvatar(input.avatarFile);
+    uploadedPath = `${input.conversationId}/${input.userId}/${crypto.randomUUID()}.${extensionForFile(input.avatarFile)}`;
+    const { error: uploadError } = await client.storage
+      .from(DIRECT_GROUP_MEDIA_BUCKET)
+      .upload(uploadedPath, input.avatarFile, {
+        cacheControl: '3600',
+        contentType: input.avatarFile.type,
+        upsert: false,
+      });
+
+    if (uploadError) throw toDirectMessageError(uploadError);
+    nextAvatarPath = uploadedPath;
+  }
+
+  try {
+    const { data: previousPath, error } = await client.rpc('update_direct_group', {
+      group_avatar_path: nextAvatarPath,
+      group_title: title,
+      target_conversation_id: input.conversationId,
+    });
+
+    if (error) throw error;
+    if (previousPath && previousPath !== nextAvatarPath) {
+      await client.storage.from(DIRECT_GROUP_MEDIA_BUCKET).remove([previousPath]);
+    }
+  } catch (error) {
+    if (uploadedPath) await client.storage.from(DIRECT_GROUP_MEDIA_BUCKET).remove([uploadedPath]);
+    throw toDirectMessageError(error);
+  }
+}
+
+export async function addDirectGroupMember(conversationId: string, profileId: string) {
+  const { error } = await getSupabaseClient().rpc('add_direct_group_member', {
+    target_conversation_id: conversationId,
+    target_profile_id: profileId,
+  });
+  if (error) throw toDirectMessageError(error);
+}
+
+export async function removeDirectGroupMember(conversationId: string, profileId: string) {
+  const { error } = await getSupabaseClient().rpc('remove_direct_group_member', {
+    target_conversation_id: conversationId,
+    target_profile_id: profileId,
+  });
+  if (error) throw toDirectMessageError(error);
+}
+
+export async function transferDirectGroupOwnership(conversationId: string, profileId: string) {
+  const { error } = await getSupabaseClient().rpc('transfer_direct_group_ownership', {
+    target_conversation_id: conversationId,
+    target_profile_id: profileId,
+  });
+  if (error) throw toDirectMessageError(error);
+}
+
+export async function leaveDirectGroup(conversationId: string) {
+  const { error } = await getSupabaseClient().rpc('leave_direct_group', {
+    target_conversation_id: conversationId,
+  });
+  if (error) throw toDirectMessageError(error);
+}
+
+export async function deleteDirectGroup({
+  avatarPath,
+  conversationId,
+}: {
+  avatarPath: null | string;
+  conversationId: string;
+}) {
+  const client = getSupabaseClient();
+  if (avatarPath) {
+    const { error: storageError } = await client.storage
+      .from(DIRECT_GROUP_MEDIA_BUCKET)
+      .remove([avatarPath]);
+    if (storageError) throw toDirectMessageError(storageError);
+  }
+
+  const { error } = await client.rpc('delete_direct_group', {
+    target_conversation_id: conversationId,
+  });
+  if (error) throw toDirectMessageError(error);
 }
 
 export async function hideDirectConversation(conversationId: string) {
@@ -175,4 +313,18 @@ function extensionForFile(file: File) {
   };
 
   return knownExtensions[file.type] ?? 'bin';
+}
+
+function validateGroupTitle(value: string) {
+  const title = value.trim();
+  if (title.length < 2 || title.length > 60) {
+    throw toDirectMessageError(new Error('invalid_group_title'));
+  }
+  return title;
+}
+
+function validateGroupAvatar(file: File) {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5_242_880) {
+    throw toDirectMessageError(new Error('Use uma imagem JPG, PNG ou WebP de no máximo 5 MB.'));
+  }
 }

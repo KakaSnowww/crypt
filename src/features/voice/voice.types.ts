@@ -7,6 +7,7 @@ export type VoiceConnection = {
   server_id: string;
   server_name: string;
   server_url: string;
+  target_kind?: 'channel' | 'direct';
 };
 
 export type VoiceChannelPresence = {

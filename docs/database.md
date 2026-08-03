@@ -294,6 +294,22 @@ não consulta o histórico mesmo conhecendo o UUID.
 O bucket `direct-message-attachments` é privado, aceita os mesmos seis MIME seguros e usa caminho
 `{conversation_id}/{auth.uid()}/{uuid}.{ext}`. Leitura exige participação; exclusão exige autoria.
 
+## Grupos privados e chamadas
+
+Na Fase 18, `direct_conversations` passa a guardar nome, imagem e data de atualização para registros
+do tipo `group`. `direct_conversation_participants.participant_role` mantém exatamente um
+administrador por grupo. As RPCs de criação e adição aceitam somente amigos sem bloqueio e limitam
+o total a 10 participantes, inclusive sob tentativas concorrentes.
+
+`get_my_direct_conversations` retorna DMs e grupos na mesma lista. `get_direct_group_members` expõe
+somente membros do grupo, enquanto as funções de edição, remoção e transferência exigem o papel
+`owner`. `get_direct_voice_access` reutiliza a participação como autorização para emissão do token
+LiveKit.
+
+O bucket `direct-group-media` é privado e usa o caminho
+`{conversation_id}/{uploader_id}/{uuid}.{ext}`. Somente o administrador envia ou exclui imagens;
+somente participantes recebem URL assinada de leitura.
+
 ## Testes
 
 - `profiles_rls.test.sql`: criação, identificador e proteção da Fase 3.
@@ -307,6 +323,8 @@ O bucket `direct-message-attachments` é privado, aceita os mesmos seis MIME seg
   reações, leitura, anexos e isolamento com três usuários nas Fases 7–8.
 - `direct_messages_rls.test.sql`: privacidade, histórico, bloqueio, leitura, fechamento, anexos e
   isolamento obrigatório da terceira pessoa na Fase 9.
+- `private_groups_calls_rls.test.sql`: criação, administração única, participantes, mídia privada,
+  transferência e isolamento das chamadas na Fase 18.
 
 Execute com Docker Desktop aberto:
 

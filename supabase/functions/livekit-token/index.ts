@@ -68,15 +68,28 @@ Deno.serve(async (request) => {
     return json(origin, 401, { error: 'authentication_required' });
   }
 
-  let body: { action?: unknown; channel_id?: unknown };
+  let body: { action?: unknown; channel_id?: unknown; conversation_id?: unknown };
   try {
-    body = (await request.json()) as { action?: unknown; channel_id?: unknown };
+    body = (await request.json()) as {
+      action?: unknown;
+      channel_id?: unknown;
+      conversation_id?: unknown;
+    };
   } catch {
     return json(origin, 400, { error: 'invalid_body' });
   }
 
-  if (typeof body.channel_id !== 'string' || !/^[0-9a-f-]{36}$/.test(body.channel_id)) {
-    return json(origin, 400, { error: 'invalid_channel_id' });
+  const channelId =
+    typeof body.channel_id === 'string' && /^[0-9a-f-]{36}$/.test(body.channel_id)
+      ? body.channel_id
+      : null;
+  const conversationId =
+    typeof body.conversation_id === 'string' && /^[0-9a-f-]{36}$/.test(body.conversation_id)
+      ? body.conversation_id
+      : null;
+
+  if ((!channelId && !conversationId) || (channelId && conversationId)) {
+    return json(origin, 400, { error: 'invalid_call_target' });
   }
 
   const userClient = createClient(supabaseUrl, apiKey, {
@@ -91,12 +104,37 @@ Deno.serve(async (request) => {
     return json(origin, 401, { error: 'invalid_session' });
   }
 
-  const { data: rows, error: accessError } = await userClient.rpc('get_voice_channel_access', {
-    target_channel_id: body.channel_id,
-  });
-  const access = rows?.[0];
+  const accessResult = conversationId
+    ? await userClient.rpc('get_direct_voice_access', {
+        target_conversation_id: conversationId,
+      })
+    : await userClient.rpc('get_voice_channel_access', {
+        target_channel_id: channelId,
+      });
+  const accessRow = accessResult.data?.[0];
+  const access = accessRow
+    ? conversationId
+      ? {
+          avatar_path: accessRow.avatar_path,
+          can_publish: accessRow.can_publish,
+          channel_name: accessRow.conversation_name,
+          channel_type: 'video',
+          display_name: accessRow.display_name,
+          handle: accessRow.handle,
+          profile_id: accessRow.profile_id,
+          server_id: accessRow.conversation_id,
+          server_name: 'Mensagens privadas',
+          target_id: accessRow.conversation_id,
+          target_kind: 'direct',
+        }
+      : {
+          ...accessRow,
+          target_id: accessRow.channel_id,
+          target_kind: 'channel',
+        }
+    : null;
 
-  if (accessError || !access || access.profile_id !== user.id) {
+  if (accessResult.error || !access || access.profile_id !== user.id) {
     return json(origin, 403, { error: 'voice_channel_access_denied' });
   }
 
@@ -109,7 +147,10 @@ Deno.serve(async (request) => {
     return json(origin, 503, { error: 'livekit_not_configured' });
   }
 
-  const roomName = `crypt-${access.channel_id}`;
+  const roomName =
+    access.target_kind === 'direct'
+      ? `crypt-direct-${access.target_id}`
+      : `crypt-${access.target_id}`;
 
   if (body.action === 'participants') {
     try {
@@ -202,5 +243,6 @@ Deno.serve(async (request) => {
     server_url: livekitUrl,
     server_id: access.server_id,
     server_name: access.server_name,
+    target_kind: access.target_kind,
   });
 });

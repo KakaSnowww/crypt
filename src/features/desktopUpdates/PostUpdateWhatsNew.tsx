@@ -25,7 +25,9 @@ export function PostUpdateWhatsNew() {
     return window.localStorage.getItem(seenReleaseStorageKey) !== currentVersion;
   });
   const dynamicNotes = releaseNoteLines(
-    pendingRelease?.version === currentVersion ? pendingRelease.releaseNotes : undefined,
+    pendingRelease && pendingRelease.version === currentVersion
+      ? pendingRelease.releaseNotes
+      : undefined,
   );
 
   if (!currentVersion || (!bundledRelease && dynamicNotes.length === 0)) return null;

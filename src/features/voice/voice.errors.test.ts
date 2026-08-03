@@ -8,4 +8,11 @@ describe('toVoiceError', () => {
     });
     expect(result.message).toContain('não foi configurado');
   });
+
+  it('recusa um destino de chamada privada inválido', async () => {
+    const result = await toVoiceError({
+      context: { json: () => Promise.resolve({ error: 'invalid_call_target' }) },
+    });
+    expect(result.message).toContain('conversa escolhida');
+  });
 });

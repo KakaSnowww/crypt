@@ -32,6 +32,7 @@ export function useChannelMessages(channelId: string, enabled = true) {
 
 export function useAttachmentSignedUrl(path: string, bucket = 'message-attachments') {
   return useQuery({
+    enabled: Boolean(path),
     queryFn: () => createAttachmentSignedUrl(path, bucket),
     queryKey: messageKeys.attachment(bucket, path),
     staleTime: 12 * 60 * 1000,

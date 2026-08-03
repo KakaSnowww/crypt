@@ -29,7 +29,11 @@ import {
   selectNativeCaptureSource,
   type NativeScreenShareOptions,
 } from './nativeScreenShare';
-import { createAndroidScreenShareConnection, createVoiceConnection } from './voice.service';
+import {
+  createAndroidScreenShareConnection,
+  createDirectVoiceConnection,
+  createVoiceConnection,
+} from './voice.service';
 import type { VoiceConnection } from './voice.types';
 import { VoiceCallContext } from './VoiceCallContext';
 import './voice.css';
@@ -39,6 +43,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   const { addToast } = useToast();
   const [connection, setConnection] = useState<VoiceConnection | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
+  const [callKind, setCallKind] = useState<'channel' | 'direct' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
@@ -92,7 +97,10 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
 
       if (isAndroidRuntime()) {
         if (!channelId) throw new Error('Entre em uma chamada antes de compartilhar a tela.');
-        const nativeConnection = await createAndroidScreenShareConnection(channelId);
+        const nativeConnection = await createAndroidScreenShareConnection(
+          channelId,
+          callKind ?? 'channel',
+        );
         const nextState = await startAndroidScreenShare({
           quality: options?.quality ?? 'balanced',
           serverUrl: nativeConnection.server_url,
@@ -147,7 +155,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         throw error;
       }
     },
-    [channelId, room, stopScreenShare],
+    [callKind, channelId, room, stopScreenShare],
   );
 
   const leave = useCallback(async () => {
@@ -158,13 +166,14 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     await room.disconnect();
     setConnection(null);
     setChannelId(null);
+    setCallKind(null);
     setExpanded(false);
     setError(null);
   }, [room, stopScreenShare]);
 
-  const join = useCallback(
-    async (channelId: string) => {
-      if (connection && room.name === `crypt-${channelId}`) {
+  const joinTarget = useCallback(
+    async (targetId: string, targetKind: 'channel' | 'direct') => {
+      if (connection && channelId === targetId && callKind === targetKind) {
         setExpanded(true);
         return;
       }
@@ -178,8 +187,12 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           await stopScreenShare();
           await room.disconnect();
         }
-        const nextConnection = await createVoiceConnection(channelId);
-        setChannelId(channelId);
+        const nextConnection =
+          targetKind === 'direct'
+            ? await createDirectVoiceConnection(targetId)
+            : await createVoiceConnection(targetId);
+        setChannelId(targetId);
+        setCallKind(targetKind);
         setConnection(nextConnection);
         setExpanded(true);
       } catch (caughtError) {
@@ -193,7 +206,17 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         setIsConnecting(false);
       }
     },
-    [addToast, connection, room, stopScreenShare],
+    [addToast, callKind, channelId, connection, room, stopScreenShare],
+  );
+
+  const join = useCallback(
+    async (targetChannelId: string) => joinTarget(targetChannelId, 'channel'),
+    [joinTarget],
+  );
+
+  const joinDirect = useCallback(
+    async (conversationId: string) => joinTarget(conversationId, 'direct'),
+    [joinTarget],
   );
 
   useEffect(() => {
@@ -279,6 +302,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
 
   const value = useMemo(
     () => ({
+      callKind,
       channelId,
       connection,
       error,
@@ -286,6 +310,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       isExpanded,
       isNativeScreenSharing,
       join,
+      joinDirect,
       leave,
       listAndroidAudioOutputs,
       setExpanded,
@@ -294,6 +319,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       stopScreenShare,
     }),
     [
+      callKind,
       channelId,
       connection,
       error,
@@ -301,6 +327,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       isExpanded,
       isNativeScreenSharing,
       join,
+      joinDirect,
       leave,
       startScreenShare,
       stopScreenShare,
@@ -326,6 +353,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         onDisconnected={() => {
           setConnection(null);
           setChannelId(null);
+          setCallKind(null);
           setExpanded(false);
         }}
         onError={(liveKitError) => {

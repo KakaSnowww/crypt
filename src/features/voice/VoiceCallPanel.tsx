@@ -18,7 +18,8 @@ import type { VoiceChannelPresence as VoicePresenceEntry } from './voice.types';
 
 export function VoiceCallPanel() {
   const navigate = useNavigate();
-  const { channelId, connection, isNativeScreenSharing, leave, setExpanded } = useVoiceCall();
+  const { callKind, channelId, connection, isNativeScreenSharing, leave, setExpanded } =
+    useVoiceCall();
   const connectionState = useConnectionState();
   const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant();
   const screenPublication = localParticipant.getTrackPublication(Track.Source.ScreenShare);
@@ -29,7 +30,11 @@ export function VoiceCallPanel() {
 
   const openCall = () => {
     setExpanded(true);
-    void navigate(`/app/servidores/${connection.server_id}/chamadas/${channelId}`);
+    void navigate(
+      callKind === 'direct'
+        ? `/app/mensagens/${channelId}`
+        : `/app/servidores/${connection.server_id}/chamadas/${channelId}`,
+    );
   };
 
   return (

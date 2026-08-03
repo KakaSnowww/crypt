@@ -1,11 +1,17 @@
 import { useInfiniteQuery, useQuery, type InfiniteData } from '@tanstack/react-query';
-import { fetchDirectConversations, fetchDirectMessages } from './directMessages.service';
+import {
+  fetchDirectConversations,
+  fetchDirectGroupMembers,
+  fetchDirectMessages,
+} from './directMessages.service';
 import type { DirectMessageRow } from './directMessages.types';
 
 export const directMessageKeys = {
   all: ['direct-messages'] as const,
   conversation: (conversationId: string) =>
     ['direct-messages', 'conversation', conversationId] as const,
+  groupMembers: (conversationId: string) =>
+    ['direct-messages', 'group-members', conversationId] as const,
   list: ['direct-messages', 'list'] as const,
 };
 
@@ -14,6 +20,14 @@ export function useDirectConversations(enabled = true) {
     enabled,
     queryFn: fetchDirectConversations,
     queryKey: directMessageKeys.list,
+  });
+}
+
+export function useDirectGroupMembers(conversationId: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && Boolean(conversationId),
+    queryFn: () => fetchDirectGroupMembers(conversationId),
+    queryKey: directMessageKeys.groupMembers(conversationId),
   });
 }
 

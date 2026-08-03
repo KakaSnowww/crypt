@@ -1,28 +1,33 @@
-import { MessageCircle, Search, X } from 'lucide-react';
+import { MessageCircle, Search, UsersRound, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { Spinner } from '../components/common/Spinner';
+import { useAuth } from '../features/auth/useAuth';
 import { useFriends } from '../features/connections/connections.queries';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
+import { CreateDirectGroupModal } from '../features/directMessages/components/CreateDirectGroupModal';
+import { DirectConversationAvatar } from '../features/directMessages/components/DirectConversationAvatar';
 import { useDirectConversations } from '../features/directMessages/directMessages.queries';
 import { useDirectMessageActions } from '../features/directMessages/useDirectMessageActions';
 
 export function DirectMessagesRoute() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const conversationsQuery = useDirectConversations();
   const friendsQuery = useFriends();
   const actions = useDirectMessageActions();
   const [search, setSearch] = useState('');
+  const [groupModalOpen, setGroupModalOpen] = useState(false);
   const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR');
   const conversations = useMemo(
     () =>
       (conversationsQuery.data ?? []).filter(
         (conversation) =>
           !normalizedSearch ||
-          conversation.other_display_name.toLocaleLowerCase('pt-BR').includes(normalizedSearch) ||
-          conversation.other_handle.toLocaleLowerCase('pt-BR').includes(normalizedSearch),
+          conversation.conversation_title.toLocaleLowerCase('pt-BR').includes(normalizedSearch) ||
+          conversation.other_handle?.toLocaleLowerCase('pt-BR').includes(normalizedSearch),
       ),
     [conversationsQuery.data, normalizedSearch],
   );
@@ -52,16 +57,23 @@ export function DirectMessagesRoute() {
     <main className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
       <section className="panel overflow-hidden">
         <div className="border-b border-white/5 p-5 sm:p-7">
-          <div className="flex items-start gap-3">
+          <div className="flex flex-wrap items-start gap-3">
             <span className="grid size-11 place-items-center rounded-2xl bg-violet-500/10 text-violet-200">
               <MessageCircle size={21} />
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1 className="text-xl font-semibold text-white">Mensagens privadas</h1>
               <p className="mt-1 text-sm text-crypt-muted">
-                Conversas individuais protegidas por privacidade e bloqueios.
+                Conversas individuais e grupos privados protegidos pelo Crypt.
               </p>
             </div>
+            <Button
+              disabled={!user || (friendsQuery.data ?? []).length < 2}
+              onClick={() => setGroupModalOpen(true)}
+              size="sm"
+            >
+              <UsersRound size={16} /> Novo grupo
+            </Button>
           </div>
           <div className="mt-5">
             <Input
@@ -86,11 +98,7 @@ export function DirectMessagesRoute() {
                   to={`/app/mensagens/${conversation.conversation_id}`}
                 >
                   <span className="relative">
-                    <ProfileAvatar
-                      avatarPath={conversation.other_avatar_path}
-                      displayName={conversation.other_display_name}
-                      size="md"
-                    />
+                    <DirectConversationAvatar conversation={conversation} size="md" />
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-crypt-panel ${
                         conversation.is_online ? 'bg-emerald-400' : 'bg-slate-500'
@@ -100,8 +108,13 @@ export function DirectMessagesRoute() {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
                       <span className="truncate text-sm font-semibold text-white">
-                        {conversation.other_display_name}
+                        {conversation.conversation_title}
                       </span>
+                      {conversation.conversation_type === 'group' ? (
+                        <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[0.65rem] text-violet-200">
+                          {conversation.member_count} membros
+                        </span>
+                      ) : null}
                       {conversation.is_blocked ? (
                         <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-[0.65rem] text-red-200">
                           Bloqueada
@@ -119,8 +132,8 @@ export function DirectMessagesRoute() {
                   ) : null}
                 </Link>
                 <button
-                  aria-label={`Fechar conversa com ${conversation.other_display_name}`}
-                  className="grid size-9 place-items-center rounded-xl text-crypt-subtle opacity-0 hover:bg-white/[0.07] hover:text-white group-hover:opacity-100 focus:opacity-100"
+                  aria-label={`Fechar conversa ${conversation.conversation_title}`}
+                  className="grid size-9 place-items-center rounded-xl text-crypt-subtle opacity-100 hover:bg-white/[0.07] hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
                   onClick={() => actions.hide.mutate(conversation.conversation_id)}
                   type="button"
                 >
@@ -170,6 +183,15 @@ export function DirectMessagesRoute() {
             ))}
           </div>
         </section>
+      ) : null}
+
+      {user ? (
+        <CreateDirectGroupModal
+          currentUserId={user.id}
+          friends={friendsQuery.data ?? []}
+          onOpenChange={setGroupModalOpen}
+          open={groupModalOpen}
+        />
       ) : null}
     </main>
   );

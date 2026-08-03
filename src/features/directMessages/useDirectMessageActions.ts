@@ -1,12 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../components/common/ToastContext';
 import {
+  addDirectGroupMember,
+  createDirectGroup,
   deleteDirectMessage,
+  deleteDirectGroup,
   editDirectMessage,
   hideDirectConversation,
+  leaveDirectGroup,
   openDirectConversation,
+  removeDirectGroupMember,
   sendDirectMessage,
   toggleDirectReaction,
+  transferDirectGroupOwnership,
+  updateDirectGroup,
 } from './directMessages.service';
 import { directMessageKeys } from './directMessages.queries';
 
@@ -22,10 +29,39 @@ export function useDirectMessageActions(conversationId?: string) {
             queryKey: directMessageKeys.conversation(conversationId),
           })
         : Promise.resolve(),
+      conversationId
+        ? queryClient.invalidateQueries({
+            queryKey: directMessageKeys.groupMembers(conversationId),
+          })
+        : Promise.resolve(),
     ]);
   }
 
+  function showGroupError(error: unknown) {
+    addToast({
+      message: error instanceof Error ? error.message : 'Tente novamente.',
+      title: 'Grupo não atualizado',
+      tone: 'error',
+    });
+  }
+
   return {
+    addGroupMember: useMutation({
+      mutationFn: ({ conversationId, profileId }: { conversationId: string; profileId: string }) =>
+        addDirectGroupMember(conversationId, profileId),
+      onError: showGroupError,
+      onSuccess: refresh,
+    }),
+    createGroup: useMutation({
+      mutationFn: createDirectGroup,
+      onError: showGroupError,
+      onSuccess: refresh,
+    }),
+    deleteGroup: useMutation({
+      mutationFn: deleteDirectGroup,
+      onError: showGroupError,
+      onSuccess: refresh,
+    }),
     delete: useMutation({
       mutationFn: deleteDirectMessage,
       onSuccess: refresh,
@@ -37,6 +73,11 @@ export function useDirectMessageActions(conversationId?: string) {
     }),
     hide: useMutation({
       mutationFn: hideDirectConversation,
+      onSuccess: refresh,
+    }),
+    leaveGroup: useMutation({
+      mutationFn: leaveDirectGroup,
+      onError: showGroupError,
       onSuccess: refresh,
     }),
     open: useMutation({
@@ -55,6 +96,12 @@ export function useDirectMessageActions(conversationId?: string) {
         toggleDirectReaction(messageId, emoji),
       onSuccess: refresh,
     }),
+    removeGroupMember: useMutation({
+      mutationFn: ({ conversationId, profileId }: { conversationId: string; profileId: string }) =>
+        removeDirectGroupMember(conversationId, profileId),
+      onError: showGroupError,
+      onSuccess: refresh,
+    }),
     send: useMutation({
       mutationFn: sendDirectMessage,
       onError: (error) => {
@@ -64,6 +111,17 @@ export function useDirectMessageActions(conversationId?: string) {
           tone: 'error',
         });
       },
+      onSuccess: refresh,
+    }),
+    transferGroup: useMutation({
+      mutationFn: ({ conversationId, profileId }: { conversationId: string; profileId: string }) =>
+        transferDirectGroupOwnership(conversationId, profileId),
+      onError: showGroupError,
+      onSuccess: refresh,
+    }),
+    updateGroup: useMutation({
+      mutationFn: updateDirectGroup,
+      onError: showGroupError,
       onSuccess: refresh,
     }),
   };
