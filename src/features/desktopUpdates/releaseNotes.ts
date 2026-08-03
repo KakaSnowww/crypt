@@ -21,6 +21,26 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.9.0': {
+    highlights: [
+      {
+        description: 'Arraste, amplie e salve sem destruir o arquivo original.',
+        title: 'Enquadramento de verdade',
+      },
+      {
+        description: 'Jornada mensal, gradientes, GIF, arquivos maiores, HD60 e Runas.',
+        title: 'A magia começou',
+      },
+      { description: 'Clique em membros para abrir cartões vivos.', title: 'Perfis mais vivos' },
+      {
+        description: 'Inicialização do Windows e conexões com privacidade.',
+        title: 'Mais controle',
+      },
+    ],
+    summary: 'A Fase 23 apresenta o Arcana e transforma a personalização do Crypt.',
+    title: 'Arcana desperta no Crypt',
+    version: '0.9.0',
+  },
   '0.8.0': {
     highlights: [
       {

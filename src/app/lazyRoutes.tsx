@@ -5,6 +5,10 @@ export const AccountSecurityRoute = lazy(async () => {
   const route = await import('../routes/AccountSecurityRoute');
   return { default: route.AccountSecurityRoute };
 });
+export const ArcanaRoute = lazy(async () => {
+  const route = await import('../routes/ArcanaRoute');
+  return { default: route.ArcanaRoute };
+});
 
 export const AppHomeRoute = lazy(async () => {
   const route = await import('../routes/AppHomeRoute');
@@ -39,6 +43,10 @@ export const DirectMessagesRoute = lazy(async () => {
 export const ConnectionsRoute = lazy(async () => {
   const route = await import('../routes/ConnectionsRoute');
   return { default: route.ConnectionsRoute };
+});
+export const ConnectedAccountsRoute = lazy(async () => {
+  const route = await import('../routes/ConnectedAccountsRoute');
+  return { default: route.ConnectedAccountsRoute };
 });
 
 export const ChannelRoute = lazy(async () => {

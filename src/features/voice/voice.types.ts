@@ -1,4 +1,5 @@
 export type VoiceConnection = {
+  arcana_hd60: boolean;
   can_publish: boolean;
   channel_name: string;
   channel_type: 'video' | 'voice';

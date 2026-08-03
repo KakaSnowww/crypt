@@ -28,6 +28,22 @@ describe('limites de navegação do Electron', () => {
 
   it('aceita somente callbacks e convites Crypt válidos', () => {
     expect(isAllowedCryptDeepLink('crypt://auth/callback?code=abc')).toBe(true);
+    expect(
+      isAllowedCryptDeepLink('crypt://connections/callback?provider=spotify&status=success'),
+    ).toBe(true);
+    expect(
+      isAllowedCryptDeepLink(
+        'crypt://connections/callback?provider=youtube&status=error&error=access_denied',
+      ),
+    ).toBe(true);
+    expect(
+      isAllowedCryptDeepLink('crypt://connections/callback?provider=dropbox&status=success'),
+    ).toBe(false);
+    expect(
+      isAllowedCryptDeepLink(
+        'crypt://connections/callback?provider=steam&status=error&error=../../arquivo',
+      ),
+    ).toBe(false);
     expect(isAllowedCryptDeepLink('crypt://invite/b44db508-c91c-43f6-85fa-ff847c1cce5b')).toBe(
       true,
     );

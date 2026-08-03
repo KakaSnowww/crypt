@@ -22,7 +22,13 @@ vi.mock('../profile.service', async (importOriginal) => {
 
 const profile: Profile = {
   avatar_path: null,
+  avatar_position_x: 50,
+  avatar_position_y: 50,
+  avatar_zoom: 1,
   banner_path: null,
+  banner_position_x: 50,
+  banner_position_y: 50,
+  banner_zoom: 1,
   bio: null,
   created_at: '2026-07-25T12:00:00.000Z',
   display_name: 'Kaio Snow',
@@ -32,6 +38,9 @@ const profile: Profile = {
   handle: 'kaiosnow',
   id: '10000000-0000-0000-0000-000000000001',
   profile_effect: 'none',
+  profile_gradient_angle: 135,
+  profile_gradient_end: null,
+  profile_gradient_start: null,
   updated_at: '2026-07-25T12:00:00.000Z',
 };
 
@@ -70,6 +79,7 @@ describe('AvatarEditor', () => {
         '10000000-0000-0000-0000-000000000001',
         image,
         null,
+        { x: 50, y: 50, zoom: 1 },
       ),
     );
     await waitFor(() => expect(onBusyChange).toHaveBeenLastCalledWith(false));

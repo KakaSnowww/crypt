@@ -230,6 +230,9 @@ Deno.serve(async (request) => {
     .select('banner_path, profile_effect')
     .eq('id', user.id)
     .maybeSingle();
+  const { data: arcanaHd60 } = await userClient.rpc('has_active_arcana', {
+    target_profile_id: user.id,
+  });
 
   const isAndroidScreenShare = body.action === 'android_screen_share';
   const token = new AccessToken(livekitApiKey, livekitApiSecret, {
@@ -254,6 +257,7 @@ Deno.serve(async (request) => {
   });
 
   return json(origin, 201, {
+    arcana_hd60: arcanaHd60 === true,
     can_publish: access.can_publish,
     channel_name: access.channel_name,
     channel_type: access.channel_type,

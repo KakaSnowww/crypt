@@ -1,10 +1,11 @@
 import { Crown } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import { ProfileAvatar } from '../../profile/components/ProfileAvatar';
 import type { ServerMember } from '../../servers/servers.types';
 import { classNames } from '../../../lib/classNames';
 import { buildServerMemberGroups, getHighestMemberRole } from '../memberGroups';
 import type { ServerMemberRoles, ServerRole } from '../workspace.types';
+import { MemberProfileCard } from '../../profile/components/MemberProfileCard';
 
 type ServerMemberGroupsProps = {
   assignments: ServerMemberRoles[];
@@ -14,6 +15,7 @@ type ServerMemberGroupsProps = {
 
 export function ServerMemberGroups({ assignments, members, roles }: ServerMemberGroupsProps) {
   const groups = buildServerMemberGroups(members, roles, assignments);
+  const [selectedHandle, setSelectedHandle] = useState<string>();
 
   return (
     <div className="mt-4 grid gap-5">
@@ -30,10 +32,11 @@ export function ServerMemberGroups({ assignments, members, roles }: ServerMember
               const highestRole = getHighestMemberRole(member.profile_id, roles, assignments);
 
               return (
-                <NavLink
+                <button
                   className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
                   key={member.profile_id}
-                  to={`/app/pessoas/${member.handle}`}
+                  onClick={() => setSelectedHandle(member.handle)}
+                  type="button"
                 >
                   <span className="relative">
                     <ProfileAvatar
@@ -62,12 +65,15 @@ export function ServerMemberGroups({ assignments, members, roles }: ServerMember
                       {member.is_online ? 'Online' : `@${member.handle}`}
                     </span>
                   </span>
-                </NavLink>
+                </button>
               );
             })}
           </div>
         </section>
       ))}
+      {selectedHandle ? (
+        <MemberProfileCard handle={selectedHandle} onClose={() => setSelectedHandle(undefined)} />
+      ) : null}
     </div>
   );
 }

@@ -5,7 +5,10 @@ type ProfileAvatarProps = {
   avatarPath: null | string;
   className?: string;
   displayName: string;
+  positionX?: number;
+  positionY?: number;
   size?: 'lg' | 'md' | 'sm';
+  zoom?: number;
 };
 
 const sizeClasses = {
@@ -28,7 +31,10 @@ export function ProfileAvatar({
   avatarPath,
   className,
   displayName,
+  positionX = 50,
+  positionY = 50,
   size = 'md',
+  zoom = 1,
 }: ProfileAvatarProps) {
   const avatarUrl = getProfileMediaUrl(avatarPath);
 
@@ -41,7 +47,12 @@ export function ProfileAvatar({
       )}
     >
       {avatarUrl ? (
-        <img alt={`Avatar de ${displayName}`} className="size-full object-cover" src={avatarUrl} />
+        <img
+          alt={`Avatar de ${displayName}`}
+          className="size-full object-cover"
+          src={avatarUrl}
+          style={{ objectPosition: `${positionX}% ${positionY}%`, transform: `scale(${zoom})` }}
+        />
       ) : (
         <span aria-label={`Iniciais de ${displayName}`}>{getProfileInitials(displayName)}</span>
       )}

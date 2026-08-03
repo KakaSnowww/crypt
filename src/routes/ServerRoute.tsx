@@ -23,6 +23,7 @@ import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
 import { Textarea } from '../components/common/Textarea';
 import { useToast } from '../components/common/ToastContext';
+import { copyTextToClipboard } from '../lib/clipboard';
 import { buildServerInviteLink, shareServerInvite } from '../lib/mobileShare';
 import { isAndroidRuntime } from '../lib/platform';
 import { useModerationActions } from '../features/moderation/useModerationActions';
@@ -98,9 +99,9 @@ export function ServerRoute() {
     return (
       <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
         <section className="panel p-8 text-center">
-          <h1 className="text-xl font-semibold text-white">Servidor indisponível</h1>
+          <h1 className="text-xl font-semibold text-white">Servidor indisponÃ­vel</h1>
           <p className="mt-2 text-sm text-crypt-muted">
-            Você pode ter saído ou não possuir acesso a este espaço privado.
+            VocÃª pode ter saÃ­do ou nÃ£o possuir acesso a este espaÃ§o privado.
           </p>
           <Button className="mt-5" onClick={() => void navigate('/app/servidores')}>
             Ver meus servidores
@@ -120,21 +121,22 @@ export function ServerRoute() {
 
   async function copyInvite(code: string) {
     const url = buildServerInviteLink(code);
+    const copied = await copyTextToClipboard(url);
 
-    try {
-      await navigator.clipboard.writeText(url);
+    if (copied) {
       addToast({
-        message: 'O link completo está pronto para compartilhar.',
+        message: 'O link completo estÃ¡ pronto para compartilhar.',
         title: 'Convite copiado',
         tone: 'success',
       });
-    } catch {
-      addToast({
-        message: url,
-        title: 'Copie este convite',
-        tone: 'info',
-      });
+      return;
     }
+
+    addToast({
+      message: url,
+      title: 'NÃ£o foi possÃ­vel copiar automaticamente',
+      tone: 'info',
+    });
   }
 
   async function shareInvite(code: string) {
@@ -211,7 +213,7 @@ export function ServerRoute() {
                   onClick={() => void navigate(`/app/servidores/${serverId}/moderacao`)}
                   variant="secondary"
                 >
-                  Moderação
+                  ModeraÃ§Ã£o
                 </Button>
               ) : null}
               {overview.is_owner ? (
@@ -228,7 +230,7 @@ export function ServerRoute() {
                     onClick={() => void navigate(`/app/servidores/${serverId}/configuracoes`)}
                     variant="secondary"
                   >
-                    Configurações
+                    ConfiguraÃ§Ãµes
                   </Button>
                 </>
               ) : (
@@ -250,7 +252,7 @@ export function ServerRoute() {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck aria-hidden="true" size={14} />
-              Proprietário: {overview.owner_display_name}
+              ProprietÃ¡rio: {overview.owner_display_name}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CalendarClock aria-hidden="true" size={14} />
@@ -280,10 +282,10 @@ export function ServerRoute() {
               <MessageCircle className="mx-auto text-crypt-subtle" size={25} />
               <p className="mt-3 text-sm font-semibold text-white">
                 {channels.length}{' '}
-                {channels.length === 1 ? 'canal disponível' : 'canais disponíveis'}
+                {channels.length === 1 ? 'canal disponÃ­vel' : 'canais disponÃ­veis'}
               </p>
               <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-                Histórico paginado, respostas, reações, anexos e mensagens em tempo real.
+                HistÃ³rico paginado, respostas, reaÃ§Ãµes, anexos e mensagens em tempo real.
               </p>
               {firstChannel ? (
                 <Button
@@ -312,7 +314,7 @@ export function ServerRoute() {
                   Convites
                 </h2>
                 <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-                  O backend valida validade, usos, revogação, banimento e duplicidade.
+                  O backend valida validade, usos, revogaÃ§Ã£o, banimento e duplicidade.
                 </p>
               </div>
             </div>
@@ -398,10 +400,10 @@ export function ServerRoute() {
                       </code>
                       <p className="mt-1 text-xs text-crypt-subtle">
                         {invite.uses_count}
-                        {invite.max_uses === null ? ' usos' : ` de ${invite.max_uses} usos`} ·{' '}
+                        {invite.max_uses === null ? ' usos' : ` de ${invite.max_uses} usos`} Â·{' '}
                         {invite.expires_at
                           ? `expira em ${formatDateTime(invite.expires_at)}`
-                          : 'sem expiração'}
+                          : 'sem expiraÃ§Ã£o'}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -444,7 +446,7 @@ export function ServerRoute() {
                 ))
               ) : (
                 <p className="rounded-2xl border border-dashed border-white/10 p-5 text-center text-xs text-crypt-subtle">
-                  Nenhum convite ativo criado por você.
+                  Nenhum convite ativo criado por vocÃª.
                 </p>
               )}
             </div>
@@ -481,7 +483,7 @@ export function ServerRoute() {
                     <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
                       {member.display_name}
                       {member.is_owner ? (
-                        <Crown aria-label="Proprietário" className="text-amber-300" size={13} />
+                        <Crown aria-label="ProprietÃ¡rio" className="text-amber-300" size={13} />
                       ) : null}
                     </span>
                     <span className="block truncate text-xs text-crypt-subtle">
@@ -508,7 +510,7 @@ export function ServerRoute() {
       </div>
 
       <Modal
-        description="A denúncia ficará visível apenas para a equipe de moderação deste servidor."
+        description="A denÃºncia ficarÃ¡ visÃ­vel apenas para a equipe de moderaÃ§Ã£o deste servidor."
         footer={
           <>
             <Button onClick={() => setReportTarget(null)} variant="ghost">
@@ -527,11 +529,11 @@ export function ServerRoute() {
                   .then(() => {
                     setReportTarget(null);
                     setReportDetails('');
-                    addToast({ message: 'Denúncia enviada à moderação.', tone: 'success' });
+                    addToast({ message: 'DenÃºncia enviada Ã  moderaÃ§Ã£o.', tone: 'success' });
                   });
               }}
             >
-              Enviar denúncia
+              Enviar denÃºncia
             </Button>
           </>
         }
@@ -546,10 +548,10 @@ export function ServerRoute() {
             onChange={(event) => setReportReason(event.target.value)}
             value={reportReason}
           >
-            <option value="harassment">Assédio</option>
+            <option value="harassment">AssÃ©dio</option>
             <option value="spam">Spam</option>
-            <option value="inappropriate_content">Conteúdo impróprio</option>
-            <option value="impersonation">Falsidade ideológica</option>
+            <option value="inappropriate_content">ConteÃºdo imprÃ³prio</option>
+            <option value="impersonation">Falsidade ideolÃ³gica</option>
             <option value="other">Outro</option>
           </select>
         </label>
@@ -567,7 +569,7 @@ export function ServerRoute() {
       </Modal>
 
       <Modal
-        description="Você perderá acesso ao conteúdo privado. Para retornar, precisará de outro convite."
+        description="VocÃª perderÃ¡ acesso ao conteÃºdo privado. Para retornar, precisarÃ¡ de outro convite."
         footer={
           <>
             <Button onClick={() => setLeaveOpen(false)} variant="ghost">
@@ -591,7 +593,7 @@ export function ServerRoute() {
           <p className="text-sm text-red-300">{toServerActionError(actions.leave.error).message}</p>
         ) : (
           <p className="text-sm leading-6 text-crypt-muted">
-            Sua conta e suas amizades não serão afetadas.
+            Sua conta e suas amizades nÃ£o serÃ£o afetadas.
           </p>
         )}
       </Modal>

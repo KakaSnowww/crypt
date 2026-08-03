@@ -17,7 +17,11 @@ export const messageSchema = z
   .trim()
   .max(MAX_MESSAGE_LENGTH, 'Use no máximo 2.000 caracteres.');
 
-export function validateMessagePayload(content: string, files: File[]) {
+export function validateMessagePayload(
+  content: string,
+  files: File[],
+  maximumAttachmentBytes = MAX_MESSAGE_ATTACHMENT_BYTES,
+) {
   const parsedContent = messageSchema.parse(content);
 
   if (!parsedContent && files.length === 0) {
@@ -33,8 +37,10 @@ export function validateMessagePayload(content: string, files: File[]) {
       throw new Error('Use imagens, GIF, PDF ou arquivo de texto.');
     }
 
-    if (file.size > MAX_MESSAGE_ATTACHMENT_BYTES) {
-      throw new Error('Cada arquivo deve possuir no máximo 5 MB.');
+    if (file.size > maximumAttachmentBytes) {
+      throw new Error(
+        `Cada arquivo deve possuir no máximo ${Math.round(maximumAttachmentBytes / 1024 / 1024)} MB.`,
+      );
     }
   }
 

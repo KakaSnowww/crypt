@@ -24,6 +24,7 @@ import {
 } from '../features/connections/connections.queries';
 import { useConnectionActions } from '../features/connections/useConnectionActions';
 import { useDirectMessageActions } from '../features/directMessages/useDirectMessageActions';
+import { ConnectedAccountsProfileSection } from '../features/externalConnections/ConnectedAccountsProfileSection';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { SpotifyEmbed } from '../features/profile/components/SpotifyEmbed';
 import { getProfileMediaUrl } from '../features/profile/profile.service';
@@ -211,7 +212,20 @@ export function PublicProfileRoute() {
             'profile-visual-preview relative h-36 overflow-hidden bg-gradient-to-br from-violet-700 via-indigo-700 to-blue-700 sm:h-44',
             `profile-effect-${profile.profile_effect}`,
           )}
-          style={bannerUrl ? { backgroundImage: `url("${bannerUrl}")` } : undefined}
+          style={
+            bannerUrl
+              ? {
+                  backgroundImage: `url("${bannerUrl}")`,
+                  backgroundPosition: `${profile.banner_position_x}% ${profile.banner_position_y}%`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: `${profile.banner_zoom * 100}%`,
+                }
+              : profile.profile_gradient_start && profile.profile_gradient_end
+                ? {
+                    background: `linear-gradient(${profile.profile_gradient_angle}deg,${profile.profile_gradient_start},${profile.profile_gradient_end})`,
+                  }
+                : undefined
+          }
         >
           <div className="absolute -right-16 -top-20 size-64 rounded-full bg-fuchsia-400/20 blur-3xl" />
           <div className="absolute -bottom-24 left-1/3 size-56 rounded-full bg-cyan-400/20 blur-3xl" />
@@ -221,13 +235,29 @@ export function PublicProfileRoute() {
             avatarPath={profile.avatar_path}
             className="-mt-14 ring-4 ring-crypt-panel sm:-mt-16"
             displayName={profile.display_name}
+            positionX={profile.avatar_position_x}
+            positionY={profile.avatar_position_y}
             size="lg"
+            zoom={profile.avatar_zoom}
           />
           <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h1 className="truncate text-3xl font-bold tracking-tight text-white">
-                {profile.display_name}
-              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-3xl font-bold tracking-tight text-white">
+                  {profile.display_name}
+                </h1>
+                {profile.arcana_active ? (
+                  <span
+                    className="rounded-full border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.12em]"
+                    style={{
+                      borderColor: `${profile.arcana_tier_color}66`,
+                      color: profile.arcana_tier_color,
+                    }}
+                  >
+                    Arcana {profile.arcana_tier_name}
+                  </span>
+                ) : null}
+              </div>
               <p className="mt-1 text-sm font-medium text-violet-300">@{profile.handle}</p>
               <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-crypt-muted">
                 {profile.bio ?? 'Esta pessoa ainda não escreveu uma biografia.'}
@@ -325,6 +355,11 @@ export function PublicProfileRoute() {
         </section>
       </div>
 
+      <ConnectedAccountsProfileSection
+        connectedAccounts={profile.connected_accounts}
+        currentActivity={profile.current_activity}
+      />
+
       {actionError ? (
         <p
           aria-live="polite"
@@ -337,7 +372,8 @@ export function PublicProfileRoute() {
       <section className="mt-5 flex items-start gap-3 rounded-2xl border border-emerald-400/10 bg-emerald-400/[0.045] p-4 text-sm text-crypt-muted">
         <ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0 text-emerald-300" size={18} />
         <p className="leading-6">
-          E-mail, lista completa de amigos e interesses privados nunca aparecem neste perfil.
+          E-mail, lista completa de amigos, tokens e interesses privados nunca aparecem neste
+          perfil.
         </p>
       </section>
 

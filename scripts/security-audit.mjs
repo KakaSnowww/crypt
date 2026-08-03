@@ -43,7 +43,12 @@ for (const path of trackedFiles.filter((file) =>
 }
 
 const functionConfiguration = read('supabase/config.toml');
-for (const functionName of ['delete-account', 'livekit-token', 'push-notifications']) {
+for (const functionName of [
+  'delete-account',
+  'external-oauth',
+  'livekit-token',
+  'push-notifications',
+]) {
   if (!functionConfiguration.includes(`[functions.${functionName}]\nverify_jwt = false`)) {
     failures.push(`configuração inesperada da função ${functionName}`);
   }
@@ -60,6 +65,21 @@ requireText(
   'livekit-token não valida a sessão manualmente',
 );
 requireText(
+  'supabase/functions/external-oauth/index.ts',
+  'auth.getUser()',
+  'external-oauth não valida a sessão manualmente',
+);
+requireText(
+  'supabase/functions/external-oauth/index.ts',
+  "requiredSecret('EXTERNAL_CONNECTIONS_ENCRYPTION_KEY')",
+  'tokens externos não usam a chave de criptografia dedicada',
+);
+requireText(
+  'supabase/functions/external-oauth/index.ts',
+  "name: 'AES-GCM'",
+  'tokens externos não usam criptografia autenticada',
+);
+requireText(
   'supabase/functions/push-notifications/index.ts',
   "Deno.env.get('PUSH_WEBHOOK_SECRET')",
   'webhook push não exige segredo dedicado',
@@ -73,6 +93,16 @@ requireText(
   'supabase/migrations/20260803180000_phase21_22_security_hardening.sql',
   'force row level security',
   'auditoria final não reforça RLS',
+);
+requireText(
+  'supabase/migrations/20260803233000_phase23_external_oauth.sql',
+  'external_connection_credentials force row level security',
+  'credenciais OAuth não possuem RLS forçada',
+);
+requireText(
+  'supabase/migrations/20260803233000_phase23_external_oauth.sql',
+  'revoke all on table public.external_connection_credentials',
+  'credenciais OAuth ainda possuem privilégios públicos',
 );
 
 if (failures.length) {

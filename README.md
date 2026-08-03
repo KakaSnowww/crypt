@@ -15,7 +15,8 @@ A entrega unificada das Fases 21 e 22 fecha a auditoria de segurança e os teste
 - estado offline visível e reconexão automática sem desmontar a tela atual;
 - auditoria estática integrada ao comando `npm run validate`;
 - matriz documentada para Windows, Android, múltiplas contas, voz e histórico;
-- versão Windows e Android `0.8.0`, com `versionCode 15` no Android.
+- versão Windows e Android `0.9.0`, com `versionCode 16` no Android.
+- Fase 23: Arcana, Runas de Comunidade, perfis avançados, contas conectadas e enquadramento com zoom.
 
 Consulte [docs/final-security-testing.md](docs/final-security-testing.md) para aplicar a migração e
 executar o roteiro completo de validação.

@@ -382,7 +382,17 @@ export type Database = {
         Returns: Array<{
           allow_friend_requests: boolean;
           avatar_path: null | string;
+          avatar_position_x: number;
+          avatar_position_y: number;
+          avatar_zoom: number;
+          arcana_active: boolean;
+          arcana_months: number;
+          arcana_tier_color: string;
+          arcana_tier_name: string;
           banner_path: null | string;
+          banner_position_x: number;
+          banner_position_y: number;
+          banner_zoom: number;
           bio: null | string;
           created_at: string;
           display_name: string;
@@ -392,11 +402,54 @@ export type Database = {
           interest_category_labels: string[];
           interest_labels: string[];
           mutual_friend_count: number;
+          connected_accounts: Json;
+          current_activity: Json;
+          profile_gradient_angle: number;
+          profile_gradient_end: null | string;
+          profile_gradient_start: null | string;
           profile_effect: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
           profile_id: string;
           relationship_status: string;
         }>;
       };
+      get_my_arcana_membership: {
+        Args: NoArgs;
+        Returns: Array<{
+          available_runes: number;
+          consecutive_months: number;
+          current_period_ends_at: null | string;
+          is_active: boolean;
+          status: string;
+          tier_color: string;
+          tier_name: string;
+          tier_number: number;
+        }>;
+      };
+      get_my_attachment_limit: { Args: NoArgs; Returns: number };
+      get_server_arcana_status: {
+        Args: { target_server_id: string };
+        Returns: Array<{ circle_level: number; circle_name: string; rune_count: number }>;
+      };
+      apply_arcana_rune: {
+        Args: { target_server_id: string; target_slot: number };
+        Returns: undefined;
+      };
+      remove_arcana_rune: { Args: { target_slot: number }; Returns: undefined };
+      save_my_profile_media: {
+        Args: {
+          media_kind: string;
+          media_path: string;
+          position_x?: number;
+          position_y?: number;
+          zoom_level?: number;
+        };
+        Returns: null | string;
+      };
+      set_my_profile_gradient: {
+        Args: { gradient_angle: number; gradient_end: string; gradient_start: string };
+        Returns: undefined;
+      };
+      clear_my_profile_gradient: { Args: NoArgs; Returns: undefined };
       get_server_invite_preview: {
         Args: { invite_code: string };
         Returns: Array<{
@@ -946,6 +999,66 @@ export type Database = {
       };
     };
     Tables: {
+      arcana_subscriptions: {
+        Insert: never;
+        Relationships: [];
+        Row: {
+          consecutive_months: number;
+          created_at: string;
+          current_period_ends_at: null | string;
+          current_period_started_at: null | string;
+          grace_ends_at: null | string;
+          profile_id: string;
+          provider: string;
+          provider_customer_id: null | string;
+          provider_subscription_id: null | string;
+          started_at: null | string;
+          status: string;
+          updated_at: string;
+        };
+        Update: never;
+      };
+      external_connections: {
+        Insert: never;
+        Relationships: [];
+        Row: {
+          avatar_url: null | string;
+          connected_at: string;
+          display_name: string;
+          external_user_id: string;
+          profile_id: string;
+          profile_url: null | string;
+          provider: 'spotify' | 'steam' | 'youtube';
+          show_activity: boolean;
+          show_on_profile: boolean;
+          updated_at: string;
+        };
+        Update: { show_activity?: boolean; show_on_profile?: boolean };
+      };
+      profile_activities: {
+        Insert: never;
+        Relationships: [];
+        Row: {
+          activity_type: 'listening';
+          ends_at: null | string;
+          expires_at: string;
+          external_url: null | string;
+          image_url: null | string;
+          profile_id: string;
+          provider: 'spotify';
+          refreshed_at: string;
+          started_at: null | string;
+          subtitle: null | string;
+          title: string;
+        };
+        Update: never;
+      };
+      server_arcana_runes: {
+        Insert: never;
+        Relationships: [];
+        Row: { applied_at: string; profile_id: string; rune_slot: number; server_id: string };
+        Update: never;
+      };
       connection_notifications: {
         Insert: {
           actor_id: string;
@@ -1231,7 +1344,13 @@ export type Database = {
       profiles: {
         Insert: {
           avatar_path?: null | string;
+          avatar_position_x?: number;
+          avatar_position_y?: number;
+          avatar_zoom?: number;
           banner_path?: null | string;
+          banner_position_x?: number;
+          banner_position_y?: number;
+          banner_zoom?: number;
           bio?: null | string;
           created_at?: string;
           display_name: string;
@@ -1241,6 +1360,9 @@ export type Database = {
           handle: string;
           id: string;
           profile_effect?: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
+          profile_gradient_angle?: number;
+          profile_gradient_end?: null | string;
+          profile_gradient_start?: null | string;
           updated_at?: string;
         };
         Relationships: [
@@ -1254,7 +1376,13 @@ export type Database = {
         ];
         Row: {
           avatar_path: null | string;
+          avatar_position_x: number;
+          avatar_position_y: number;
+          avatar_zoom: number;
           banner_path: null | string;
+          banner_position_x: number;
+          banner_position_y: number;
+          banner_zoom: number;
           bio: null | string;
           created_at: string;
           display_name: string;
@@ -1264,11 +1392,20 @@ export type Database = {
           handle: string;
           id: string;
           profile_effect: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
+          profile_gradient_angle: number;
+          profile_gradient_end: null | string;
+          profile_gradient_start: null | string;
           updated_at: string;
         };
         Update: {
           avatar_path?: null | string;
+          avatar_position_x?: number;
+          avatar_position_y?: number;
+          avatar_zoom?: number;
           banner_path?: null | string;
+          banner_position_x?: number;
+          banner_position_y?: number;
+          banner_zoom?: number;
           bio?: null | string;
           display_name?: string;
           favorite_spotify_thumbnail_url?: null | string;
@@ -1276,6 +1413,9 @@ export type Database = {
           favorite_spotify_url?: null | string;
           handle?: string;
           profile_effect?: 'aurora' | 'emerald' | 'neon' | 'none' | 'ocean' | 'pulse' | 'sunset';
+          profile_gradient_angle?: number;
+          profile_gradient_end?: null | string;
+          profile_gradient_start?: null | string;
           updated_at?: string;
         };
       };

@@ -34,6 +34,7 @@ import {
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectDirectory = path.resolve(currentDirectory, '..');
 const developmentServerUrl = process.env.CRYPT_DEV_SERVER_URL;
+const startHidden = process.argv.includes('--hidden');
 
 let mainWindow: BrowserWindow | null = null;
 let pendingDeepLink: string | null = null;
@@ -218,6 +219,16 @@ function registerDesktopIpc() {
   ipcMain.handle('crypt:clear-capture-source', () => {
     selectedCaptureSourceId = null;
   });
+  ipcMain.handle('crypt:startup:get', () => app.getLoginItemSettings().openAtLogin);
+  ipcMain.handle('crypt:startup:set', (_event, enabled: boolean) => {
+    app.setLoginItemSettings({
+      args: ['--hidden'],
+      openAtLogin: enabled,
+      openAsHidden: enabled,
+      path: process.execPath,
+    });
+    return app.getLoginItemSettings().openAtLogin;
+  });
 }
 
 async function getDesktopSources(): Promise<DesktopCapturerSource[]> {
@@ -258,7 +269,9 @@ async function createMainWindow() {
 
   mainWindow = window;
   if (savedState.maximized) window.maximize();
-  window.once('ready-to-show', () => showMainWindow());
+  window.once('ready-to-show', () => {
+    if (!startHidden) showMainWindow();
+  });
   window.on('close', (event) => {
     persistMainWindowState();
     if (!isQuitting) {

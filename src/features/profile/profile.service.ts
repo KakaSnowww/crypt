@@ -14,6 +14,7 @@ import type {
   ProfileSettings,
   SpotifyTrackPreview,
 } from './profile.types';
+import type { ImagePosition } from '../../lib/imagePosition';
 
 const PROFILE_MEDIA_BUCKET = 'profile-media';
 const SPOTIFY_FALLBACK_TITLE = 'Faixa favorita no Spotify';
@@ -187,7 +188,28 @@ export function getProfileMediaUrl(path: null | string) {
   return getSupabaseClient().storage.from(PROFILE_MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-export async function uploadAvatar(userId: string, file: File, previousPath: null | string) {
+async function saveUploadedProfileMedia(
+  kind: 'avatar' | 'banner',
+  path: string,
+  position: ImagePosition,
+) {
+  const { data, error } = await getSupabaseClient().rpc('save_my_profile_media', {
+    media_kind: kind,
+    media_path: path,
+    position_x: position.x,
+    position_y: position.y,
+    zoom_level: position.zoom ?? 1,
+  });
+  if (error) throw toProfileActionError(error);
+  return data;
+}
+
+export async function uploadAvatar(
+  userId: string,
+  file: File,
+  previousPath: null | string,
+  position: ImagePosition = { x: 50, y: 50, zoom: 1 },
+) {
   validateAvatarFile(file);
 
   const client = getSupabaseClient();
@@ -206,13 +228,13 @@ export async function uploadAvatar(userId: string, file: File, previousPath: nul
   }
 
   try {
-    const profile = await updateProfileRow(userId, { avatar_path: path });
+    const storedPreviousPath = await saveUploadedProfileMedia('avatar', path, position);
 
-    if (previousPath) {
-      await client.storage.from(PROFILE_MEDIA_BUCKET).remove([previousPath]);
+    if (storedPreviousPath ?? previousPath) {
+      await client.storage.from(PROFILE_MEDIA_BUCKET).remove([storedPreviousPath ?? previousPath!]);
     }
 
-    return profile;
+    return fetchCurrentProfile(userId);
   } catch (error) {
     await client.storage.from(PROFILE_MEDIA_BUCKET).remove([path]);
     throw error;
@@ -225,7 +247,12 @@ export async function removeAvatar(userId: string, previousPath: string) {
   return profile;
 }
 
-export async function uploadBanner(userId: string, file: File, previousPath: null | string) {
+export async function uploadBanner(
+  userId: string,
+  file: File,
+  previousPath: null | string,
+  position: ImagePosition = { x: 50, y: 50, zoom: 1 },
+) {
   validateBannerFile(file);
 
   const client = getSupabaseClient();
@@ -242,9 +269,10 @@ export async function uploadBanner(userId: string, file: File, previousPath: nul
   if (uploadError) throw toProfileActionError(uploadError);
 
   try {
-    const profile = await updateProfileRow(userId, { banner_path: path });
-    if (previousPath) await client.storage.from(PROFILE_MEDIA_BUCKET).remove([previousPath]);
-    return profile;
+    const storedPreviousPath = await saveUploadedProfileMedia('banner', path, position);
+    if (storedPreviousPath ?? previousPath)
+      await client.storage.from(PROFILE_MEDIA_BUCKET).remove([storedPreviousPath ?? previousPath!]);
+    return fetchCurrentProfile(userId);
   } catch (error) {
     await client.storage.from(PROFILE_MEDIA_BUCKET).remove([path]);
     throw error;

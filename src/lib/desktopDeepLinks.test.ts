@@ -24,6 +24,28 @@ describe('links internos do Crypt', () => {
     expect(window.location.search).toBe('?code=seguro');
   });
 
+  it('abre o resultado OAuth somente na tela de contas conectadas', () => {
+    openCryptDeepLink(
+      'crypt://connections/callback?provider=spotify&status=error&error=access_denied',
+    );
+
+    expect(window.location.pathname).toBe('/app/configuracoes/conexoes');
+    expect(window.location.search).toBe(
+      '?oauth_provider=spotify&oauth_status=error&oauth_error=access_denied',
+    );
+  });
+
+  it('ignora provedor ou código de erro não permitido', () => {
+    openCryptDeepLink('crypt://connections/callback?provider=evil&status=success');
+    expect(window.location.pathname).toBe('/');
+
+    openCryptDeepLink(
+      'crypt://connections/callback?provider=steam&status=error&error=../../arquivo',
+    );
+    expect(window.location.pathname).toBe('/app/configuracoes/conexoes');
+    expect(window.location.search).toBe('?oauth_provider=steam&oauth_status=error');
+  });
+
   it('recusa destinos externos em notificações', () => {
     expect(openCryptAppPath('https://exemplo.test/app/mensagens')).toBe(false);
     expect(window.location.pathname).toBe('/');

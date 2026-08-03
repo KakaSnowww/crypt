@@ -89,10 +89,17 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   const startScreenShare = useCallback(
     async (options?: NativeScreenShareOptions) => {
       await stopScreenShare();
+      if (options?.quality === 'arcana' && !connection?.arcana_hd60)
+        throw new Error('A transmissão em 1080p a 60 FPS requer Arcana ativo.');
       const preset =
         options?.quality === 'balanced'
           ? ScreenSharePresets.h720fps30
-          : ScreenSharePresets.h1080fps30;
+          : options?.quality === 'arcana'
+            ? {
+                encoding: { maxBitrate: 8_000_000, maxFramerate: 60 },
+                resolution: { frameRate: 60, height: 1080, width: 1920 },
+              }
+            : ScreenSharePresets.h1080fps30;
       const includeSystemAudio = options?.includeSystemAudio ?? true;
 
       if (isAndroidRuntime()) {
@@ -102,7 +109,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           callKind ?? 'channel',
         );
         const nextState = await startAndroidScreenShare({
-          quality: options?.quality ?? 'balanced',
+          quality: options?.quality === 'arcana' ? 'high' : (options?.quality ?? 'balanced'),
           serverUrl: nativeConnection.server_url,
           token: nativeConnection.participant_token,
         });
@@ -155,7 +162,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         throw error;
       }
     },
-    [callKind, channelId, room, stopScreenShare],
+    [callKind, channelId, connection?.arcana_hd60, room, stopScreenShare],
   );
 
   const leave = useCallback(async () => {

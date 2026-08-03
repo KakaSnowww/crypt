@@ -5,11 +5,7 @@ import { Button } from '../../../components/common/Button';
 import { ImagePositionEditor } from '../../../components/common/ImagePositionEditor';
 import { useToast } from '../../../components/common/ToastContext';
 import { classNames } from '../../../lib/classNames';
-import {
-  centeredImagePosition,
-  preparePositionedImage,
-  type ImagePosition,
-} from '../../../lib/imagePosition';
+import { centeredImagePosition, type ImagePosition } from '../../../lib/imagePosition';
 import { useAuth } from '../../auth/useAuth';
 import { toProfileActionError } from '../profile.errors';
 import { profileKeys } from '../profile.queries';
@@ -41,7 +37,11 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
   const [selectionError, setSelectionError] = useState('');
   const [bannerFile, setBannerFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState<string>();
-  const [position, setPosition] = useState<ImagePosition>(centeredImagePosition);
+  const [position, setPosition] = useState<ImagePosition>({
+    x: profile.banner_position_x,
+    y: profile.banner_position_y,
+    zoom: profile.banner_zoom,
+  });
   const bannerUrl = getProfileMediaUrl(profile.banner_path);
   const displayedBannerUrl = previewUrl ?? bannerUrl;
 
@@ -55,9 +55,8 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
   };
   const bannerMutation = useMutation({
     mutationFn: async (file: File) => {
-      const positionedFile = await preparePositionedImage(file, 3.2, position);
-      validateBannerFile(positionedFile);
-      if (user) await uploadBanner(user.id, positionedFile, profile.banner_path);
+      validateBannerFile(file);
+      if (user) await uploadBanner(user.id, file, profile.banner_path, position);
     },
     onSuccess: async () => {
       setBannerFile(undefined);
@@ -96,7 +95,9 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
           displayedBannerUrl
             ? {
                 backgroundImage: `url("${displayedBannerUrl}")`,
-                backgroundPosition: `${position.x}% ${position.y}%`,
+                backgroundPosition: `${previewUrl ? position.x : profile.banner_position_x}% ${previewUrl ? position.y : profile.banner_position_y}%`,
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: `${(previewUrl ? (position.zoom ?? 1) : profile.banner_zoom) * 100}%`,
               }
             : undefined
         }
@@ -107,7 +108,10 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
             avatarPath={profile.avatar_path}
             className="ring-4 ring-black/25"
             displayName={profile.display_name}
+            positionX={profile.avatar_position_x}
+            positionY={profile.avatar_position_y}
             size="md"
+            zoom={profile.avatar_zoom}
           />
           <div>
             <strong className="text-white">{profile.display_name}</strong>

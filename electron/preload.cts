@@ -11,6 +11,10 @@ contextBridge.exposeInMainWorld('cryptDesktop', {
     ipcRenderer.on('crypt:deep-link', handler);
     return () => ipcRenderer.removeListener('crypt:deep-link', handler);
   },
+  startup: {
+    get: () => ipcRenderer.invoke('crypt:startup:get'),
+    set: (enabled: boolean) => ipcRenderer.invoke('crypt:startup:set', enabled),
+  },
   updates: {
     check: () => ipcRenderer.invoke('crypt:update:check'),
     getState: () => ipcRenderer.invoke('crypt:update:get-state'),

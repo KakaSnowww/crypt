@@ -4,6 +4,7 @@ import {
   Hash,
   Headphones,
   Home,
+  Gem,
   LogOut,
   Monitor,
   Menu,
@@ -67,6 +68,7 @@ import { isElectronRuntime } from '../../lib/platform';
 import { IconButton } from '../common/IconButton';
 
 const channelLinks = [
+  { end: true, icon: Gem, label: 'Arcana', to: '/app/arcana' },
   {
     end: false,
     icon: ServerGlyph,

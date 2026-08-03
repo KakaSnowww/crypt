@@ -47,6 +47,18 @@ export function isAllowedCryptDeepLink(value: string) {
       return candidate.pathname === '/callback';
     }
 
+    if (candidate.hostname === 'connections') {
+      if (candidate.pathname !== '/callback') return false;
+      const provider = candidate.searchParams.get('provider');
+      const status = candidate.searchParams.get('status');
+      const error = candidate.searchParams.get('error');
+      return (
+        ['spotify', 'steam', 'youtube'].includes(provider ?? '') &&
+        ['error', 'success'].includes(status ?? '') &&
+        (error === null || /^[a-z0-9_]{1,64}$/u.test(error))
+      );
+    }
+
     if (candidate.hostname === 'invite') {
       const parts = candidate.pathname.split('/').filter(Boolean);
       return (

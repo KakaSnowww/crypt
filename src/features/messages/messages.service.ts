@@ -26,8 +26,10 @@ export async function fetchChannelMessages(
 }
 
 export async function sendChannelMessage(input: SendMessageInput) {
-  const content = validateMessagePayload(input.content, input.files);
   const client = getSupabaseClient();
+  const limitResult = await client.rpc('get_my_attachment_limit');
+  if (limitResult.error) throw toMessageActionError(limitResult.error);
+  const content = validateMessagePayload(input.content, input.files, limitResult.data);
   const uploaded: UploadedAttachment[] = [];
 
   try {

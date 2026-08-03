@@ -3,6 +3,7 @@ import { useState, type PropsWithChildren } from 'react';
 import { ToastProvider } from '../components/common/ToastProvider';
 import { AuthContext, type AuthContextValue } from '../features/auth/AuthContext';
 import { AuthProvider } from '../features/auth/AuthProvider';
+import { ExternalActivitySync } from '../features/externalConnections/ExternalActivitySync';
 import { MobileNetworkStatus } from '../features/mobile/MobileNetworkStatus';
 import { AndroidPermissionsPrompt } from '../features/mobile/AndroidPermissionsPrompt';
 import { DesktopUpdateBanner } from '../features/desktopUpdates/DesktopUpdateBanner';
@@ -15,6 +16,16 @@ import { VoiceCallProvider } from '../features/voice/VoiceCallProvider';
 type AppProvidersProps = PropsWithChildren<{
   authValue?: AuthContextValue;
 }>;
+
+function AuthenticatedServices({ children }: PropsWithChildren) {
+  return (
+    <>
+      <AndroidPushRegistration />
+      <ExternalActivitySync />
+      <VoiceCallProvider>{children}</VoiceCallProvider>
+    </>
+  );
+}
 
 export function AppProviders({ authValue, children }: AppProvidersProps) {
   const [queryClient] = useState(
@@ -33,13 +44,11 @@ export function AppProviders({ authValue, children }: AppProvidersProps) {
 
   const authContent = authValue ? (
     <AuthContext.Provider value={authValue}>
-      <AndroidPushRegistration />
-      <VoiceCallProvider>{children}</VoiceCallProvider>
+      <AuthenticatedServices>{children}</AuthenticatedServices>
     </AuthContext.Provider>
   ) : (
     <AuthProvider>
-      <AndroidPushRegistration />
-      <VoiceCallProvider>{children}</VoiceCallProvider>
+      <AuthenticatedServices>{children}</AuthenticatedServices>
     </AuthProvider>
   );
 

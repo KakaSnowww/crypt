@@ -1,6 +1,7 @@
 export type ImagePosition = {
   x: number;
   y: number;
+  zoom?: number;
 };
 
 export type CropRectangle = {
@@ -10,7 +11,7 @@ export type CropRectangle = {
   y: number;
 };
 
-export const centeredImagePosition: ImagePosition = { x: 50, y: 50 };
+export const centeredImagePosition: ImagePosition = { x: 50, y: 50, zoom: 1 };
 
 export function calculateCoverCrop(
   sourceWidth: number,
@@ -27,6 +28,10 @@ export function calculateCoverCrop(
   } else {
     height = sourceWidth / targetAspectRatio;
   }
+
+  const zoom = Math.min(3, Math.max(1, position.zoom ?? 1));
+  width /= zoom;
+  height /= zoom;
 
   const normalizedX = Math.min(100, Math.max(0, position.x)) / 100;
   const normalizedY = Math.min(100, Math.max(0, position.y)) / 100;

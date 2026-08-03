@@ -1,5 +1,5 @@
 export type NativeCaptureSourceKind = 'monitor' | 'window';
-export type NativeScreenShareQuality = 'balanced' | 'high';
+export type NativeScreenShareQuality = 'arcana' | 'balanced' | 'high';
 
 export type NativeScreenShareOptions = {
   includeSystemAudio: boolean;
@@ -39,7 +39,7 @@ export function getNativeScreenSharePreferences(): NativeScreenSharePreferences 
 
   return {
     includeSystemAudio: savedSystemAudio !== 'false',
-    quality: savedQuality === 'balanced' ? 'balanced' : 'high',
+    quality: savedQuality === 'balanced' || savedQuality === 'arcana' ? savedQuality : 'high',
   };
 }
 

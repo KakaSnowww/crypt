@@ -6,11 +6,13 @@ import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute';
 import {
   AccountSecurityRoute,
+  ArcanaRoute,
   AppHomeRoute,
   AppShell,
   AuthCallbackRoute,
   ChannelRoute,
   ConnectionsRoute,
+  ConnectedAccountsRoute,
   DesignSystemRoute,
   DirectConversationRoute,
   DirectMessagesRoute,
@@ -116,6 +118,14 @@ export const appRoutes: RouteObject[] = [
     errorElement: <RouteErrorFallback />,
     children: [
       {
+        path: 'arcana',
+        element: (
+          <LazyRoute>
+            <ArcanaRoute />
+          </LazyRoute>
+        ),
+      },
+      {
         index: true,
         element: (
           <LazyRoute>
@@ -136,6 +146,14 @@ export const appRoutes: RouteObject[] = [
         element: (
           <LazyRoute>
             <ConnectionsRoute />
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'configuracoes/conexoes',
+        element: (
+          <LazyRoute>
+            <ConnectedAccountsRoute />
           </LazyRoute>
         ),
       },

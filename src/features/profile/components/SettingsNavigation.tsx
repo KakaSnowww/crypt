@@ -1,8 +1,14 @@
-import { ShieldCheck, UserRound } from 'lucide-react';
+import { Link2, ShieldCheck, UserRound } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { classNames } from '../../../lib/classNames';
 
 const settingsLinks = [
+  {
+    description: 'Spotify, Steam, YouTube e atividade',
+    icon: Link2,
+    label: 'Contas conectadas',
+    to: '/app/configuracoes/conexoes',
+  },
   {
     description: 'Avatar, banner, interesses e privacidade',
     icon: UserRound,
@@ -21,7 +27,7 @@ export function SettingsNavigation() {
   return (
     <nav
       aria-label="Seções das configurações"
-      className="mb-8 grid gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-2 sm:grid-cols-2"
+      className="mb-8 grid gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-2 sm:grid-cols-3"
     >
       {settingsLinks.map((link) => {
         const Icon = link.icon;

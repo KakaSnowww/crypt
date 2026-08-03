@@ -8,6 +8,7 @@ import { InterestEditor } from '../features/profile/components/InterestEditor';
 import { PrivacySettingsForm } from '../features/profile/components/PrivacySettingsForm';
 import { ProfileDetailsForm } from '../features/profile/components/ProfileDetailsForm';
 import { ProfileVisualEditor } from '../features/profile/components/ProfileVisualEditor';
+import { ProfileGradientEditor } from '../features/arcana/ProfileGradientEditor';
 import { SettingsNavigation } from '../features/profile/components/SettingsNavigation';
 import { SpotifyTrackEditor } from '../features/profile/components/SpotifyTrackEditor';
 import {
@@ -145,6 +146,9 @@ export function ProfileSettingsRoute() {
         </div>
         <div className="mt-6">
           <ProfileVisualEditor profile={profile} />
+          <div className="mt-5">
+            <ProfileGradientEditor profile={profile} />
+          </div>
         </div>
       </section>
 

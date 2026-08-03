@@ -4,11 +4,7 @@ import { useEffect, useId, useState } from 'react';
 import { Button } from '../../../components/common/Button';
 import { ImagePositionEditor } from '../../../components/common/ImagePositionEditor';
 import { useToast } from '../../../components/common/ToastContext';
-import {
-  centeredImagePosition,
-  preparePositionedImage,
-  type ImagePosition,
-} from '../../../lib/imagePosition';
+import { centeredImagePosition, type ImagePosition } from '../../../lib/imagePosition';
 import { useAuth } from '../../auth/useAuth';
 import { toProfileActionError } from '../profile.errors';
 import { profileKeys } from '../profile.queries';
@@ -46,9 +42,8 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
         return;
       }
 
-      const positionedFile = await preparePositionedImage(selectedFile, 1, position);
-      validateAvatarFile(positionedFile);
-      await uploadAvatar(user.id, positionedFile, profile.avatar_path);
+      validateAvatarFile(selectedFile);
+      await uploadAvatar(user.id, selectedFile, profile.avatar_path, position);
     },
     onMutate: () => {
       onBusyChange?.(true);
@@ -105,7 +100,10 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
         <ProfileAvatar
           avatarPath={profile.avatar_path}
           displayName={profile.display_name}
+          positionX={profile.avatar_position_x}
+          positionY={profile.avatar_position_y}
           size="lg"
+          zoom={profile.avatar_zoom}
         />
       )}
 

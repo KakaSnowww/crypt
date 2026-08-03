@@ -1,6 +1,8 @@
 import { isElectronRuntime } from './platform';
 
 const internalAppPathPattern = /^\/app(?:\/|$)/;
+const externalProviders = new Set(['spotify', 'steam', 'youtube']);
+const externalStatuses = new Set(['error', 'success']);
 
 export function openCryptAppPath(value: string, replace = false) {
   let url: URL;
@@ -41,6 +43,24 @@ export function openCryptDeepLink(value: string) {
   if (url.hostname === 'auth' && url.pathname === '/callback') {
     window.history.replaceState({}, '', `/auth/callback${url.search}${url.hash}`);
     window.dispatchEvent(new PopStateEvent('popstate'));
+    return;
+  }
+
+  if (url.hostname === 'connections' && url.pathname === '/callback') {
+    const provider = url.searchParams.get('provider') ?? '';
+    const status = url.searchParams.get('status') ?? '';
+    const error = url.searchParams.get('error') ?? '';
+
+    if (!externalProviders.has(provider) || !externalStatuses.has(status)) return;
+
+    const search = new URLSearchParams({
+      oauth_provider: provider,
+      oauth_status: status,
+    });
+    if (status === 'error' && /^[a-z0-9_]{1,64}$/u.test(error)) {
+      search.set('oauth_error', error);
+    }
+    openCryptAppPath(`/app/configuracoes/conexoes?${search.toString()}`, true);
     return;
   }
 

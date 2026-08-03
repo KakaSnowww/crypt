@@ -38,6 +38,7 @@ declare global {
         selectSource: (sourceId: string) => Promise<void>;
       };
       onDeepLink: (listener: (url: string) => void) => () => void;
+      startup?: { get: () => Promise<boolean>; set: (enabled: boolean) => Promise<boolean> };
       updates: {
         check: () => Promise<CryptDesktopUpdateState>;
         getState: () => Promise<CryptDesktopUpdateState>;

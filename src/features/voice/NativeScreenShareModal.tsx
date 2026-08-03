@@ -13,6 +13,7 @@ import {
   type NativeScreenShareOptions,
   type NativeScreenShareQuality,
 } from './nativeScreenShare';
+import { useArcanaMembership } from '../arcana/arcana.queries';
 
 export function NativeScreenShareModal({
   busy,
@@ -31,6 +32,7 @@ export function NativeScreenShareModal({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [preferences, setPreferences] = useState(getNativeScreenSharePreferences);
+  const arcana = useArcanaMembership(open);
   const grouped = useMemo(() => groupNativeCaptureSources(sources), [sources]);
   const visibleSources = activeKind === 'monitor' ? grouped.monitors : grouped.windows;
 
@@ -188,6 +190,14 @@ export function NativeScreenShareModal({
                 selected={preferences.quality === 'high'}
                 value="high"
               />
+              <QualityOption
+                description="1080p · 60 FPS · exclusivo Arcana"
+                disabled={!arcana.data?.is_active}
+                label="Arcana HD60"
+                onSelect={() => setPreferences((current) => ({ ...current, quality: 'arcana' }))}
+                selected={preferences.quality === 'arcana'}
+                value="arcana"
+              />
             </div>
           </fieldset>
           <label className="native-share-picker__audio">
@@ -219,12 +229,14 @@ export function NativeScreenShareModal({
 
 function QualityOption({
   description,
+  disabled = false,
   label,
   onSelect,
   selected,
   value,
 }: {
   description: string;
+  disabled?: boolean;
   label: string;
   onSelect: () => void;
   selected: boolean;
@@ -234,6 +246,7 @@ function QualityOption({
     <label className={selected ? 'is-selected' : ''}>
       <input
         checked={selected}
+        disabled={disabled}
         name="screen-share-quality"
         onChange={onSelect}
         type="radio"
