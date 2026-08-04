@@ -220,23 +220,22 @@ function callbackPage(provider: Provider, status: 'error' | 'success', error?: s
   const providerLabel =
     provider === 'spotify' ? 'Spotify' : provider === 'youtube' ? 'YouTube' : 'Steam';
   const success = status === 'success';
-  const title = success
-    ? `${providerLabel} conectado`
-    : `Não foi possível conectar ${providerLabel}`;
-  const description = success
-    ? 'A conta foi vinculada com segurança. Volte ao Crypt para escolher o que aparece no seu perfil.'
-    : 'A autorização foi cancelada, expirou ou não pôde ser validada. Você pode tentar novamente no Crypt.';
+  const titleHtml = success
+    ? `${escapeHtml(providerLabel)} conectado`
+    : `N&atilde;o foi poss&iacute;vel conectar ${escapeHtml(providerLabel)}`;
+  const descriptionHtml = success
+    ? 'A conta foi vinculada com seguran&ccedil;a. Volte ao Crypt para escolher o que aparece no seu perfil.'
+    : 'A autoriza&ccedil;&atilde;o foi cancelada, expirou ou n&atilde;o p&ocirc;de ser validada. Voc&ecirc; pode tentar novamente no Crypt.';
   const safeDestination = escapeHtml(destination);
-
-  return new Response(
-    `<!doctype html>
+  const destinationJson = JSON.stringify(destination).replaceAll('<', '\\u003c');
+  const html = `<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
-  <title>${escapeHtml(title)}</title>
+  <title>${titleHtml}</title>
   <style>
     :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#f8fafc;background:#070b16}
     body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top,#312e8166,transparent 45%),#070b16}
@@ -244,30 +243,36 @@ function callbackPage(provider: Provider, status: 'error' | 'success', error?: s
     .mark{width:64px;height:64px;margin:auto;display:grid;place-items:center;border-radius:22px;background:${success ? '#10b98122' : '#ef444422'};color:${success ? '#6ee7b7' : '#fca5a5'};font-size:30px}
     h1{margin:22px 0 10px;font-size:28px}p{margin:0;color:#aab4c8;line-height:1.65}
     a{display:inline-flex;margin-top:26px;min-height:46px;align-items:center;justify-content:center;border-radius:16px;padding:0 20px;background:#7c3aed;color:#fff;text-decoration:none;font-weight:700}
+    small{display:block;margin-top:18px;color:#718096;line-height:1.5}
   </style>
 </head>
 <body>
   <main>
-    <div class="mark">${success ? '✓' : '!'}</div>
-    <h1>${escapeHtml(title)}</h1>
-    <p>${escapeHtml(description)}</p>
+    <div class="mark">${success ? '&#10003;' : '!'}</div>
+    <h1>${titleHtml}</h1>
+    <p>${descriptionHtml}</p>
     <a href="${safeDestination}">Voltar ao Crypt</a>
+    <small>Se o Crypt n&atilde;o abrir automaticamente, feche esta aba e volte ao aplicativo.</small>
   </main>
-  <script>setTimeout(function(){location.replace(${JSON.stringify(destination)})},350)</script>
+  <script>
+    setTimeout(function(){
+      window.location.href=${destinationJson};
+    },500);
+  </script>
 </body>
-</html>`,
-    {
-      headers: {
-        'Cache-Control': 'no-store',
-        'Content-Type': 'text/html; charset=utf-8',
-        'Referrer-Policy': 'no-referrer',
-        'X-Content-Type-Options': 'nosniff',
-      },
-      status: success ? 200 : 400,
-    },
-  );
-}
+</html>`;
 
+  return new Response(encoder.encode(html), {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+      'Content-Disposition': 'inline; filename="crypt-oauth.html"',
+      'Content-Type': 'text/html; charset=UTF-8',
+      'Referrer-Policy': 'no-referrer',
+      'X-Content-Type-Options': 'nosniff',
+    },
+    status: success ? 200 : 400,
+  });
+}
 function errorCode(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
   if (message.startsWith('missing_secret:')) return 'provider_not_configured';
