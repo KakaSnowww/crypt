@@ -4,20 +4,66 @@ import { readFileSync } from 'node:fs';
 const failures = [];
 
 function read(path) {
-  return readFileSync(path, 'utf8');
+  return readFileSync(path, 'utf8').replace(/\r\n?/gu, '\n');
 }
 
 function requireText(path, expected, description) {
-  if (!read(path).includes(expected)) failures.push(`${description}: ${path}`);
+  if (!read(path).includes(expected)) {
+    failures.push(`${description}: ${path}`);
+  }
 }
 
 function forbidText(path, forbidden, description) {
-  if (read(path).includes(forbidden)) failures.push(`${description}: ${path}`);
+  if (read(path).includes(forbidden)) {
+    failures.push(`${description}: ${path}`);
+  }
 }
 
-const trackedFiles = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
+function readFunctionConfiguration(path) {
+  const sections = new Map();
+  let currentFunction = null;
+
+  for (const rawLine of read(path).split('\n')) {
+    const line = rawLine.trim();
+    const section = line.match(/^\[functions\.(?:"([^"]+)"|([^\]]+))\]$/u);
+
+    if (section) {
+      currentFunction = section[1] ?? section[2] ?? null;
+
+      if (currentFunction) {
+        sections.set(currentFunction, new Map());
+      }
+
+      continue;
+    }
+
+    if (!currentFunction || !line || line.startsWith('#')) {
+      continue;
+    }
+
+    const setting = line.match(/^([a-zA-Z0-9_]+)\s*=\s*([^#]+?)(?:\s+#.*)?$/u);
+
+    if (!setting) {
+      continue;
+    }
+
+    const key = setting[1];
+    const value = setting[2]?.trim();
+
+    if (key && value) {
+      sections.get(currentFunction)?.set(key, value);
+    }
+  }
+
+  return sections;
+}
+
+const trackedFiles = execFileSync('git', ['ls-files', '-z'], {
+  encoding: 'utf8',
+})
   .split('\0')
   .filter(Boolean);
+
 const forbiddenTrackedFiles = trackedFiles.filter((path) =>
   /(^|\/)(\.env\.local|google-services\.json|key\.properties|[^/]+\.(jks|keystore))$/iu.test(path),
 );
@@ -42,14 +88,18 @@ for (const path of trackedFiles.filter((file) =>
   forbidText(path, 'dangerouslySetInnerHTML', 'HTML não confiável inserido diretamente');
 }
 
-const functionConfiguration = read('supabase/config.toml');
+const functionConfiguration = readFunctionConfiguration('supabase/config.toml');
+
 for (const functionName of [
+  'arcana-billing',
   'delete-account',
   'external-oauth',
   'livekit-token',
   'push-notifications',
 ]) {
-  if (!functionConfiguration.includes(`[functions.${functionName}]\nverify_jwt = false`)) {
+  const verifyJwt = functionConfiguration.get(functionName)?.get('verify_jwt');
+
+  if (verifyJwt !== 'false') {
     failures.push(`configuração inesperada da função ${functionName}`);
   }
 }
@@ -68,6 +118,11 @@ requireText(
   'supabase/functions/external-oauth/index.ts',
   'auth.getUser()',
   'external-oauth não valida a sessão manualmente',
+);
+requireText(
+  'supabase/functions/arcana-billing/index.ts',
+  'auth.getUser()',
+  'arcana-billing não valida a sessão manualmente',
 );
 requireText(
   'supabase/functions/external-oauth/index.ts',
@@ -107,7 +162,11 @@ requireText(
 
 if (failures.length) {
   console.error('Auditoria estática de segurança falhou:');
-  for (const failure of failures) console.error(`- ${failure}`);
+
+  for (const failure of failures) {
+    console.error(`- ${failure}`);
+  }
+
   process.exit(1);
 }
 

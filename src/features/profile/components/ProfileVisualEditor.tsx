@@ -82,16 +82,6 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
         zoom: profile.banner_zoom,
       };
 
-  useEffect(() => {
-    if (!editing) {
-      setPosition({
-        x: profile.banner_position_x,
-        y: profile.banner_position_y,
-        zoom: profile.banner_zoom,
-      });
-    }
-  }, [editing, profile.banner_position_x, profile.banner_position_y, profile.banner_zoom]);
-
   useEffect(
     () => () => {
       if (previewUrl) {

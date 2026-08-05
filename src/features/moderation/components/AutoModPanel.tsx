@@ -9,7 +9,7 @@ import {
   Save,
   ShieldCheck,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
 import { Spinner } from '../../../components/common/Spinner';
@@ -84,10 +84,6 @@ function AutoModSettingsForm({
   const [duplicateWindow, setDuplicateWindow] = useState(settings.duplicate_window_seconds);
   const [maxMentions, setMaxMentions] = useState(settings.max_mentions);
   const [termsText, setTermsText] = useState(settings.blocked_terms.join('\n'));
-
-  useEffect(() => {
-    setEnabled(settings.enabled);
-  }, [settings.enabled]);
 
   const mutation = useMutation({
     mutationFn: async () => {

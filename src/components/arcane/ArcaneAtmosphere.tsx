@@ -23,21 +23,23 @@ function deterministicParticles() {
     const duration = 12 + ((index * 5) % 18);
     const delay = -((index * 3) % 17);
 
+    const style: ParticleStyle = {
+      '--arcane-delay': `${delay}s`,
+      '--arcane-duration': `${duration}s`,
+      '--arcane-left': `${left}%`,
+      '--arcane-size': `${size}px`,
+      '--arcane-top': `${top}%`,
+    };
+
     return {
       id: index,
-      style: {
-        '--arcane-delay': `${delay}s`,
-        '--arcane-duration': `${duration}s`,
-        '--arcane-left': `${left}%`,
-        '--arcane-size': `${size}px`,
-        '--arcane-top': `${top}%`,
-      } as ParticleStyle,
+      style,
     };
   });
 }
 
 export function ArcaneAtmosphere() {
-  const particles = useMemo(deterministicParticles, []);
+  const particles = useMemo(() => deterministicParticles(), []);
   const [mode, setMode] = useState<ArcaneVisualMode>(readArcaneVisualMode);
   const [announcement, setAnnouncement] = useState('');
 

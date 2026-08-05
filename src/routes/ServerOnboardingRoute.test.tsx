@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastProvider } from '../components/common/ToastContext';
+import { ToastProvider } from '../components/common/ToastProvider';
 import { ServerOnboardingRoute } from './ServerOnboardingRoute';
 
 vi.mock('../features/server-onboarding/serverOnboarding.queries', () => ({

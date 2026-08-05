@@ -227,7 +227,7 @@ export function AppShell() {
   const handle =
     profileQuery.data?.handle ??
     (typeof user?.user_metadata.handle === 'string' ? user.user_metadata.handle : undefined);
-  const identityLabel = handle ? `@${handle}` : user?.email;
+  const identityLabel = handle ? `@${handle}` : (user?.email ?? 'Pessoa do Crypt');
   const pageHeader = location.pathname.startsWith('/app/servidores/')
     ? location.pathname.includes('/chamadas/')
       ? {

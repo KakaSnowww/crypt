@@ -20,13 +20,18 @@ export function ServerArcanaSettingsCard({ serverId }: { serverId: string }) {
   const status = statusQuery.data;
 
   useEffect(() => {
-    if (!status) return;
+    if (!status) {
+      return;
+    }
 
     const palette = getServerCirclePalette(status);
+    const synchronizeTimeout = window.setTimeout(() => {
+      setStart(palette.start);
+      setEnd(palette.end);
+      setAngle(palette.angle);
+    }, 0);
 
-    setStart(palette.start);
-    setEnd(palette.end);
-    setAngle(palette.angle);
+    return () => window.clearTimeout(synchronizeTimeout);
   }, [status]);
 
   async function refresh() {

@@ -6,7 +6,7 @@ type UnknownRecord = Record<string, unknown>;
 
 type RpcResult = {
   data: unknown;
-  error: null | unknown;
+  error: unknown;
 };
 
 type UntypedRpc = (functionName: string, args?: Record<string, unknown>) => Promise<RpcResult>;
@@ -79,7 +79,7 @@ export async function fetchServerArcanaStatus(serverId: string) {
     throw toServerActionError(error);
   }
 
-  const row = Array.isArray(data) ? data[0] : data;
+  const row: unknown = Array.isArray(data) ? (data as unknown[])[0] : data;
 
   return normalizeStatus(row);
 }
@@ -91,9 +91,13 @@ export async function fetchMyServerArcanaStatuses() {
     throw toServerActionError(error);
   }
 
-  return Array.isArray(data)
-    ? data.map(normalizeStatus).filter((status): status is ServerArcanaStatus => Boolean(status))
-    : [];
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return (data as unknown[])
+    .map(normalizeStatus)
+    .filter((status): status is ServerArcanaStatus => Boolean(status));
 }
 
 export async function saveServerArcanaGradient(

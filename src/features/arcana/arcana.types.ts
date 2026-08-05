@@ -10,7 +10,7 @@ export type ArcanaMembership = {
   is_active: boolean;
   last_payment_at: null | string;
   last_payment_status: null | string;
-  provider: 'asaas' | 'manual' | 'mercado_pago' | 'stripe' | string;
+  provider: string;
   started_at: null | string;
   status: ArcanaMembershipStatus;
   tier_color: string;

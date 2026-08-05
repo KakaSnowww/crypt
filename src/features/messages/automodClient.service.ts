@@ -16,7 +16,7 @@ export async function fetchLatestAutoModBlock(
       args: Record<string, unknown>,
     ) => Promise<{
       data: unknown;
-      error: null | unknown;
+      error: unknown;
     }>;
   };
   const { data, error } = await client.rpc('get_my_latest_automod_event', {
@@ -28,7 +28,8 @@ export async function fetchLatestAutoModBlock(
     return null;
   }
 
-  const row = data[0];
+  const rows = data as unknown[];
+  const row = rows[0];
 
   if (!row || typeof row !== 'object' || !('rule_code' in row)) {
     return null;
@@ -51,19 +52,10 @@ export async function fetchLatestAutoModBlock(
     return null;
   }
 
+  const createdAt = 'created_at' in row && typeof row.created_at === 'string' ? row.created_at : '';
+
   return {
-    created_at:
-      typeof (
-        row as {
-          created_at?: unknown;
-        }
-      ).created_at === 'string'
-        ? (
-            row as {
-              created_at: string;
-            }
-          ).created_at
-        : '',
+    created_at: createdAt,
     rule_code: rule,
   };
 }

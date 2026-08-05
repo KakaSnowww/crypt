@@ -12,12 +12,18 @@ const messages: Record<string, string> = {
 };
 
 function errorCode(error: unknown) {
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    return String((error as { message?: unknown }).message ?? '').toLocaleLowerCase('en-US');
-  }
-
   if (error instanceof Error) {
     return error.message.toLocaleLowerCase('en-US');
+  }
+
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (
+      error as {
+        message?: unknown;
+      }
+    ).message;
+
+    return typeof message === 'string' ? message.toLocaleLowerCase('en-US') : '';
   }
 
   return '';

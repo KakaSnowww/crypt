@@ -15,7 +15,7 @@ type UntypedRpcClient = {
     args?: Record<string, unknown>,
   ) => Promise<{
     data: unknown;
-    error: null | unknown;
+    error: unknown;
   }>;
 };
 
@@ -140,7 +140,7 @@ export async function fetchServerOnboardingStatus(serverId: string) {
     throw toServerOnboardingError(error);
   }
 
-  const row = Array.isArray(data) ? data[0] : data;
+  const row: unknown = Array.isArray(data) ? (data as unknown[])[0] : data;
 
   return parseServerOnboardingStatus(row);
 }

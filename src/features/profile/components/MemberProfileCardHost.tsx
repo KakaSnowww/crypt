@@ -5,27 +5,30 @@ import { MemberProfileCard } from './MemberProfileCard';
 
 export function MemberProfileCardHost() {
   const location = useLocation();
-  const [request, setRequest] = useState<MemberProfileCardRequest>();
+  const [requestState, setRequestState] = useState<{
+    pathname: string;
+    request: MemberProfileCardRequest;
+  }>();
+  const request = requestState?.pathname === location.pathname ? requestState.request : undefined;
 
   useEffect(() => {
     const openCard = (event: WindowEventMap[typeof memberProfileCardEvent]) => {
-      setRequest(event.detail);
+      setRequestState({
+        pathname: window.location.pathname,
+        request: event.detail,
+      });
     };
 
     window.addEventListener(memberProfileCardEvent, openCard);
     return () => window.removeEventListener(memberProfileCardEvent, openCard);
   }, []);
 
-  useEffect(() => {
-    setRequest(undefined);
-  }, [location.pathname]);
-
   if (!request) return null;
 
   return (
     <MemberProfileCard
       handle={request.handle}
-      onClose={() => setRequest(undefined)}
+      onClose={() => setRequestState(undefined)}
       presenceStatus={request.presenceStatus}
       roleBadges={request.roleBadges}
     />

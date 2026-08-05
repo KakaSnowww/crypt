@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';

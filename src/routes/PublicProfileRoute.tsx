@@ -275,7 +275,7 @@ export function PublicProfileRoute() {
                   }`}
                 />
                 {publicPresenceLabels[profile.presence_status] ?? 'Offline'}
-                {profile.custom_status ? <span>Â· {profile.custom_status}</span> : null}
+                {profile.custom_status ? <span>· {profile.custom_status}</span> : null}
               </div>
               <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-crypt-muted">
                 {profile.bio ?? 'Esta pessoa ainda não escreveu uma biografia.'}

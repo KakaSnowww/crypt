@@ -41,16 +41,6 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
   const currentUrl = getProfileMediaUrl(profile.avatar_path);
   const editorUrl = previewUrl ?? currentUrl;
 
-  useEffect(() => {
-    if (!editing) {
-      setPosition({
-        x: profile.avatar_position_x,
-        y: profile.avatar_position_y,
-        zoom: profile.avatar_zoom,
-      });
-    }
-  }, [editing, profile.avatar_position_x, profile.avatar_position_y, profile.avatar_zoom]);
-
   useEffect(
     () => () => {
       if (previewUrl) {
@@ -300,6 +290,11 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
             </Button>
           ) : null}
         </div>
+        {file?.type === 'image/gif' ? (
+          <p className="mt-3 rounded-xl border border-violet-400/20 bg-violet-500/[0.08] px-3 py-2 text-xs leading-5 text-violet-100">
+            O GIF será preservado com animação em todo o Crypt.
+          </p>
+        ) : null}
 
         {editing && editorUrl ? (
           <ImagePositionEditor

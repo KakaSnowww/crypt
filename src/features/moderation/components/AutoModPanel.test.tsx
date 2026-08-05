@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, expect, it, vi } from 'vitest';
-import { ToastProvider } from '../../../components/common/ToastContext';
+import { ToastProvider } from '../../../components/common/ToastProvider';
 import { AutoModPanel } from './AutoModPanel';
 
 vi.mock('../automod.queries', () => ({

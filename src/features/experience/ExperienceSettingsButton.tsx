@@ -1,5 +1,5 @@
 import { Accessibility, Gauge, RotateCcw, Sparkles, Type } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../../components/common/Button';
 import { IconButton } from '../../components/common/IconButton';
 import { Modal } from '../../components/common/Modal';
@@ -51,11 +51,10 @@ export function ExperienceSettingsButton() {
   const [open, setOpen] = useState(false);
   const [preferences, setPreferences] = useState<ExperiencePreferences>(readExperiencePreferences);
 
-  useEffect(() => {
-    if (open) {
-      setPreferences(readExperiencePreferences());
-    }
-  }, [open]);
+  function openSettings() {
+    setPreferences(readExperiencePreferences());
+    setOpen(true);
+  }
 
   function update(next: ExperiencePreferences) {
     setPreferences(next);
@@ -89,7 +88,7 @@ export function ExperienceSettingsButton() {
       <IconButton
         icon={<Accessibility aria-hidden="true" size={18} />}
         label="Acessibilidade e efeitos visuais"
-        onClick={() => setOpen(true)}
+        onClick={openSettings}
       />
 
       <Modal

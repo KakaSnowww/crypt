@@ -16,7 +16,11 @@ import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { useGlobalMessageSearch } from '../features/search/globalSearch.queries';
-import type { GlobalSearchOrder, GlobalSearchScope } from '../features/search/globalSearch.types';
+import type {
+  GlobalSearchOrder,
+  GlobalSearchResult,
+  GlobalSearchScope,
+} from '../features/search/globalSearch.types';
 import {
   buildGlobalSearchResultPath,
   searchHighlightParts,
@@ -48,7 +52,11 @@ export function GlobalSearchRoute() {
   });
 
   useEffect(() => {
-    setDraft(query);
+    const synchronizeTimeout = window.setTimeout(() => {
+      setDraft(query);
+    }, 0);
+
+    return () => window.clearTimeout(synchronizeTimeout);
   }, [query]);
 
   useEffect(() => {
@@ -72,7 +80,10 @@ export function GlobalSearchRoute() {
     return () => window.clearTimeout(timeout);
   }, [draft, searchParams, setSearchParams]);
 
-  const results = useMemo(() => searchQuery.data?.pages.flat() ?? [], [searchQuery.data?.pages]);
+  const results = useMemo<GlobalSearchResult[]>(
+    () => searchQuery.data?.pages.flat() ?? [],
+    [searchQuery.data?.pages],
+  );
   const ready = query.trim().length >= 2;
 
   function updateParam(name: string, value: null | string) {

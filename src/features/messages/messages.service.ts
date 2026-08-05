@@ -12,7 +12,7 @@ type AttachmentLimitRpc = (
   args?: Record<string, unknown>,
 ) => Promise<{
   data: null | number | string;
-  error: null | unknown;
+  error: unknown;
 }>;
 
 export async function fetchChannelMessages(

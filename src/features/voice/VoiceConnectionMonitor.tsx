@@ -79,7 +79,9 @@ export function VoiceConnectionMonitor({ audioProfile, onChangeAudioProfile }: P
   const hasWarnedRef = useRef(false);
 
   useEffect(() => {
-    setQuality(localParticipant.connectionQuality);
+    const synchronizeTimeout = window.setTimeout(() => {
+      setQuality(localParticipant.connectionQuality);
+    }, 0);
 
     const handleQuality = (nextQuality: ConnectionQuality, participant: Participant) => {
       if (!participant.isLocal) return;
@@ -126,6 +128,7 @@ export function VoiceConnectionMonitor({ audioProfile, onChangeAudioProfile }: P
     room.on(RoomEvent.Reconnected, handleReconnected);
 
     return () => {
+      window.clearTimeout(synchronizeTimeout);
       room.off(RoomEvent.ConnectionQualityChanged, handleQuality);
       room.off(RoomEvent.Reconnecting, handleReconnecting);
       room.off(RoomEvent.Reconnected, handleReconnected);

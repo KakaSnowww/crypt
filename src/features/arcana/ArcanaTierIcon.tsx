@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { getArcanaTierAsset } from './arcanaAssets';
 import './arcanaAssets.css';
 
@@ -17,11 +17,8 @@ export function ArcanaTierIcon({
   tierNumber,
 }: Props) {
   const asset = getArcanaTierAsset(tierNumber);
-  const [imageFailed, setImageFailed] = useState(false);
-
-  useEffect(() => {
-    setImageFailed(false);
-  }, [asset.imagePath]);
+  const [failedPath, setFailedPath] = useState<string>();
+  const imageFailed = failedPath === asset.imagePath;
 
   const style = {
     '--arcana-tier-color': asset.color,
@@ -40,7 +37,7 @@ export function ArcanaTierIcon({
           alt=""
           aria-hidden="true"
           draggable={false}
-          onError={() => setImageFailed(true)}
+          onError={() => setFailedPath(asset.imagePath)}
           src={asset.imagePath}
         />
       ) : (

@@ -1,5 +1,5 @@
 import { Gem } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getCommunityRuneImagePaths } from './arcanaAssets';
 import './arcanaAssets.css';
 
@@ -17,13 +17,18 @@ export function CommunityRuneIcon({
   slot,
 }: Props) {
   const candidates = useMemo(() => getCommunityRuneImagePaths(slot), [slot]);
-  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [failedPaths, setFailedPaths] = useState<ReadonlySet<string>>(() => new Set());
+  const currentPath = candidates.find((candidate) => !failedPaths.has(candidate));
 
-  useEffect(() => {
-    setCandidateIndex(0);
-  }, [candidates]);
+  function markCurrentPathFailed() {
+    if (!currentPath) return;
 
-  const currentPath = candidates[candidateIndex];
+    setFailedPaths((current) => {
+      const next = new Set(current);
+      next.add(currentPath);
+      return next;
+    });
+  }
   const label = slot ? `Runa de Comunidade ${slot}` : 'Runa de Comunidade';
 
   return (
@@ -38,7 +43,7 @@ export function CommunityRuneIcon({
           alt=""
           aria-hidden="true"
           draggable={false}
-          onError={() => setCandidateIndex((current) => current + 1)}
+          onError={markCurrentPathFailed}
           src={currentPath}
         />
       ) : (

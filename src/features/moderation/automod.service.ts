@@ -4,7 +4,7 @@ import type { ServerAutoModEvent, ServerAutoModSettings } from './automod.types'
 
 type RpcResponse = {
   data: unknown;
-  error: null | unknown;
+  error: unknown;
 };
 
 type UntypedRpc = (name: string, args?: Record<string, unknown>) => Promise<RpcResponse>;
@@ -93,7 +93,7 @@ export async function fetchServerAutoModSettings(serverId: string) {
     throw toModerationError(error);
   }
 
-  const row = Array.isArray(data) ? data[0] : data;
+  const row: unknown = Array.isArray(data) ? (data as unknown[])[0] : data;
 
   return settingsRow(row);
 }
@@ -108,9 +108,13 @@ export async function fetchServerAutoModEvents(serverId: string) {
     throw toModerationError(error);
   }
 
-  return Array.isArray(data)
-    ? data.map(eventRow).filter((event): event is ServerAutoModEvent => Boolean(event))
-    : [];
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return (data as unknown[])
+    .map(eventRow)
+    .filter((event): event is ServerAutoModEvent => Boolean(event));
 }
 
 export async function saveServerAutoModSettings(

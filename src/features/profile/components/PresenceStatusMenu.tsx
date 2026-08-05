@@ -49,11 +49,17 @@ export function PresenceStatusMenu({
   const [duration, setDuration] = useState('never');
 
   useEffect(() => {
-    if (!open || !query.data) return;
+    if (!open || !query.data) {
+      return;
+    }
 
-    setMode(normalizePresenceMode(query.data.mode));
-    setCustomStatus(query.data.customStatus ?? '');
-    setDuration(durationFromExpiration(query.data.customStatusExpiresAt) ?? 'never');
+    const synchronizeTimeout = window.setTimeout(() => {
+      setMode(normalizePresenceMode(query.data.mode));
+      setCustomStatus(query.data.customStatus ?? '');
+      setDuration(durationFromExpiration(query.data.customStatusExpiresAt) ?? 'never');
+    }, 0);
+
+    return () => window.clearTimeout(synchronizeTimeout);
   }, [open, query.data]);
 
   const selectedInformation = presenceModeInformation[mode];
