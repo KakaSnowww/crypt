@@ -1,0 +1,198 @@
+.server-icon-with-circle {
+  isolation: isolate;
+}
+
+.server-icon-with-circle::after {
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 20deg,
+    transparent,
+    var(--server-circle-color, #8b5cf6),
+    transparent 42%,
+    var(--server-circle-color, #8b5cf6),
+    transparent
+  );
+  content: '';
+  opacity: 0.72;
+  animation: server-circle-spin 7s linear infinite;
+}
+
+.server-icon__arcana-badge {
+  position: absolute;
+  z-index: 2;
+  right: -0.16rem;
+  bottom: -0.16rem;
+  display: grid;
+  width: 1.15rem;
+  height: 1.15rem;
+  place-items: center;
+  border: 2px solid #080b12;
+  border-radius: 999px;
+  background: var(--server-circle-color, #8b5cf6);
+  color: white;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 42%);
+}
+
+.server-arcana-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--server-circle-start) 38%, transparent);
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--server-circle-start) 15%, #0d101a),
+    color-mix(in srgb, var(--server-circle-end) 11%, #0a0d16)
+  );
+}
+
+.server-arcana-panel::before {
+  position: absolute;
+  inset: -35% auto auto 62%;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--server-circle-end) 34%, transparent),
+    transparent 68%
+  );
+  content: '';
+  pointer-events: none;
+}
+
+.server-arcana-panel__header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.server-arcana-panel__mark {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, var(--server-circle-start), var(--server-circle-end));
+  color: white;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--server-circle-start) 30%, transparent);
+}
+
+.server-arcana-panel__progress {
+  height: 0.48rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 8%);
+}
+
+.server-arcana-panel__progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--server-circle-start), var(--server-circle-end));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--server-circle-end) 48%, transparent);
+  transition: width 260ms ease;
+}
+
+.server-arcana-benefits {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.server-arcana-benefit {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.72rem;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 3%);
+}
+
+.server-arcana-benefit.is-unlocked {
+  border-color: color-mix(in srgb, var(--server-circle-start) 34%, transparent);
+  background: color-mix(in srgb, var(--server-circle-start) 8%, transparent);
+}
+
+.server-arcana-benefit > svg {
+  flex: 0 0 auto;
+  color: #68738b;
+}
+
+.server-arcana-benefit.is-unlocked > svg {
+  color: var(--server-circle-end);
+}
+
+.server-arcana-benefit span {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.server-arcana-benefit strong {
+  color: #eef1f8;
+  font-size: 0.7rem;
+}
+
+.server-arcana-benefit small {
+  color: #7f8aa2;
+  font-size: 0.61rem;
+  line-height: 1.45;
+}
+
+.server-arcana-gradient-preview {
+  min-height: 6rem;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 76% 25%, rgb(255 255 255 / 18%), transparent 22%),
+    linear-gradient(
+      var(--server-gradient-angle),
+      var(--server-gradient-start),
+      var(--server-gradient-end)
+    );
+  box-shadow: inset 0 0 50px rgb(0 0 0 / 12%);
+}
+
+.server-arcana-color-input {
+  width: 100%;
+  min-height: 2.75rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0.75rem;
+  background: #111522;
+  cursor: pointer;
+}
+
+.server-arcana-color-input::-webkit-color-swatch-wrapper {
+  padding: 0.25rem;
+}
+
+.server-arcana-color-input::-webkit-color-swatch {
+  border: 0;
+  border-radius: 0.5rem;
+}
+
+@keyframes server-circle-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .server-icon-with-circle::after {
+    animation: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .server-arcana-benefits {
+    grid-template-columns: 1fr;
+  }
+}

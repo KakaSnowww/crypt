@@ -1,6 +1,38 @@
-import type { ImagePosition } from '../../lib/imagePosition';
-import { Move, RotateCcw, ZoomIn } from 'lucide-react';
-import { useRef } from 'react';
+import { Grid3X3, Maximize2, Move, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { useRef, useState, type KeyboardEvent, type PointerEvent, type WheelEvent } from 'react';
+import {
+  centeredImagePosition,
+  moveImagePosition,
+  normalizeImagePosition,
+  type ImagePosition,
+  zoomImagePosition,
+} from '../../lib/imagePosition';
+import './image-position-editor.css';
+
+type FocusPreset = 'bottom' | 'center' | 'left' | 'right' | 'top';
+
+const presetPositions: Record<FocusPreset, Pick<ImagePosition, 'x' | 'y'>> = {
+  bottom: {
+    x: 50,
+    y: 100,
+  },
+  center: {
+    x: 50,
+    y: 50,
+  },
+  left: {
+    x: 0,
+    y: 50,
+  },
+  right: {
+    x: 100,
+    y: 50,
+  },
+  top: {
+    x: 50,
+    y: 0,
+  },
+};
 
 export function ImagePositionEditor({
   animated,
@@ -8,122 +40,278 @@ export function ImagePositionEditor({
   imageUrl,
   onChange,
   position,
+  shape,
 }: {
   animated: boolean;
   aspectRatio: number;
   imageUrl: string;
   onChange: (position: ImagePosition) => void;
   position: ImagePosition;
+  shape?: 'circle' | 'rounded';
 }) {
   const previewRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<
-    { pointerId: number; x: number; y: number; startX: number; startY: number } | undefined
+    | {
+        pointerId: number;
+        startClientX: number;
+        startClientY: number;
+        startPosition: Required<ImagePosition>;
+      }
+    | undefined
   >(undefined);
+  const [gridVisible, setGridVisible] = useState(true);
+  const normalized = normalizeImagePosition(position);
+  const visualShape = shape ?? (aspectRatio === 1 ? 'circle' : 'rounded');
+
+  function update(next: ImagePosition) {
+    onChange(normalizeImagePosition(next));
+  }
+
+  function beginDrag(event: PointerEvent<HTMLDivElement>) {
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startPosition: normalized,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function continueDrag(event: PointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current;
+    const preview = previewRef.current;
+
+    if (!drag || !preview || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const bounds = preview.getBoundingClientRect();
+    const sensitivity = 100 / Math.max(1, drag.startPosition.zoom);
+
+    update({
+      ...drag.startPosition,
+      x:
+        drag.startPosition.x -
+        ((event.clientX - drag.startClientX) / Math.max(1, bounds.width)) * sensitivity,
+      y:
+        drag.startPosition.y -
+        ((event.clientY - drag.startClientY) / Math.max(1, bounds.height)) * sensitivity,
+    });
+  }
+
+  function endDrag() {
+    dragRef.current = undefined;
+  }
+
+  function handleWheel(event: WheelEvent<HTMLDivElement>) {
+    event.preventDefault();
+    update(zoomImagePosition(normalized, event.deltaY < 0 ? 0.08 : -0.08));
+  }
+
+  function handleKeyboard(event: KeyboardEvent<HTMLDivElement>) {
+    const amount = event.shiftKey ? 5 : 1;
+    const key = event.key.toLocaleLowerCase('en-US');
+
+    if (key === 'arrowleft') {
+      event.preventDefault();
+      update(moveImagePosition(normalized, -amount, 0));
+    } else if (key === 'arrowright') {
+      event.preventDefault();
+      update(moveImagePosition(normalized, amount, 0));
+    } else if (key === 'arrowup') {
+      event.preventDefault();
+      update(moveImagePosition(normalized, 0, -amount));
+    } else if (key === 'arrowdown') {
+      event.preventDefault();
+      update(moveImagePosition(normalized, 0, amount));
+    } else if (key === '+' || key === '=') {
+      event.preventDefault();
+      update(zoomImagePosition(normalized, 0.05));
+    } else if (key === '-') {
+      event.preventDefault();
+      update(zoomImagePosition(normalized, -0.05));
+    } else if (key === 'r') {
+      event.preventDefault();
+      update(centeredImagePosition);
+    }
+  }
+
+  function applyPreset(preset: FocusPreset) {
+    update({
+      ...normalized,
+      ...presetPositions[preset],
+    });
+  }
+
   return (
-    <div className="mt-4 rounded-2xl border border-violet-400/20 bg-black/20 p-3">
+    <div className="crypt-image-editor mt-4">
       <div
-        className="relative mx-auto w-full max-w-md touch-none cursor-grab overflow-hidden rounded-xl bg-crypt-elevated active:cursor-grabbing"
-        onPointerDown={(event) => {
-          dragRef.current = {
-            pointerId: event.pointerId,
-            startX: position.x,
-            startY: position.y,
-            x: event.clientX,
-            y: event.clientY,
-          };
-          event.currentTarget.setPointerCapture(event.pointerId);
-        }}
-        onPointerMove={(event) => {
-          const drag = dragRef.current;
-          const preview = previewRef.current;
-          if (!drag || !preview || drag.pointerId !== event.pointerId) return;
-          const bounds = preview.getBoundingClientRect();
-          onChange({
-            ...position,
-            x: Math.max(
-              0,
-              Math.min(100, drag.startX + ((event.clientX - drag.x) / bounds.width) * 100),
-            ),
-            y: Math.max(
-              0,
-              Math.min(100, drag.startY + ((event.clientY - drag.y) / bounds.height) * 100),
-            ),
-          });
-        }}
-        onPointerUp={() => {
-          dragRef.current = undefined;
-        }}
+        aria-label="Editor de enquadramento. Arraste a imagem, use a roda para ampliar ou as setas para ajustar."
+        className={`crypt-image-editor__stage ${visualShape === 'circle' ? 'is-circle' : ''}`}
+        onKeyDown={handleKeyboard}
+        onLostPointerCapture={endDrag}
+        onPointerCancel={endDrag}
+        onPointerDown={beginDrag}
+        onPointerMove={continueDrag}
+        onPointerUp={endDrag}
+        onWheel={handleWheel}
         ref={previewRef}
+        role="application"
         style={{ aspectRatio }}
+        tabIndex={0}
       >
         <img
           alt="Prévia do enquadramento"
-          className="pointer-events-none size-full select-none object-cover"
+          className="crypt-image-editor__image"
           draggable={false}
           src={imageUrl}
           style={{
-            objectPosition: `${position.x}% ${position.y}%`,
-            transform: `scale(${position.zoom ?? 1})`,
+            objectPosition: `${normalized.x}% ` + `${normalized.y}%`,
+            transform: `scale(${normalized.zoom})`,
           }}
         />
-        <span className="pointer-events-none absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-lg bg-black/65 px-2 py-1 text-[11px] font-semibold text-white">
-          <Move size={12} /> Arraste para enquadrar
+        <span className="crypt-image-editor__shade" />
+        {gridVisible ? <span className="crypt-image-editor__grid" /> : null}
+        <span className="crypt-image-editor__hint">
+          <Move aria-hidden="true" size={12} />
+          Arraste · roda aplica zoom
         </span>
       </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <label className="text-xs font-medium text-crypt-muted">
-          Horizontal
+
+      <div className="crypt-image-editor__toolbar">
+        {(
+          [
+            ['left', 'Esquerda'],
+            ['center', 'Centro'],
+            ['right', 'Direita'],
+            ['top', 'Topo'],
+            ['bottom', 'Base'],
+          ] as const
+        ).map(([preset, label]) => (
+          <button
+            className="crypt-image-editor__tool"
+            key={preset}
+            onClick={() => applyPreset(preset)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
+
+        <button
+          aria-pressed={gridVisible}
+          className={`crypt-image-editor__tool ${gridVisible ? 'is-active' : ''}`}
+          onClick={() => setGridVisible((current) => !current)}
+          type="button"
+        >
+          <Grid3X3 size={13} />
+          Grade
+        </button>
+
+        <span className="crypt-image-editor__values">
+          X {Math.round(normalized.x)} · Y {Math.round(normalized.y)} · Zoom{' '}
+          {Math.round(normalized.zoom * 100)}%
+        </span>
+      </div>
+
+      <div className="crypt-image-editor__controls">
+        <label className="crypt-image-editor__control">
+          <span>
+            <Move size={13} />
+            Horizontal
+          </span>
           <input
             aria-label="Posição horizontal"
-            className="mt-2 w-full accent-violet-500"
-            max="100"
-            min="0"
-            onChange={(event) => onChange({ ...position, x: Number(event.target.value) })}
+            max={100}
+            min={0}
+            onChange={(event) =>
+              update({
+                ...normalized,
+                x: Number(event.target.value),
+              })
+            }
             type="range"
-            value={position.x}
+            value={normalized.x}
           />
+          <output>{Math.round(normalized.x)}%</output>
         </label>
-        <label className="text-xs font-medium text-crypt-muted">
-          Vertical
+
+        <label className="crypt-image-editor__control">
+          <span>
+            <Maximize2 size={13} />
+            Vertical
+          </span>
           <input
             aria-label="Posição vertical"
-            className="mt-2 w-full accent-violet-500"
-            max="100"
-            min="0"
-            onChange={(event) => onChange({ ...position, y: Number(event.target.value) })}
+            max={100}
+            min={0}
+            onChange={(event) =>
+              update({
+                ...normalized,
+                y: Number(event.target.value),
+              })
+            }
             type="range"
-            value={position.y}
+            value={normalized.y}
           />
+          <output>{Math.round(normalized.y)}%</output>
         </label>
-        <label className="text-xs font-medium text-crypt-muted">
-          <span className="flex items-center gap-1">
-            <ZoomIn size={13} /> Zoom
+
+        <label className="crypt-image-editor__control">
+          <span>
+            <ZoomIn size={13} />
+            Zoom
           </span>
           <input
             aria-label="Zoom da imagem"
-            className="mt-2 w-full accent-violet-500"
-            max="3"
-            min="1"
-            onChange={(event) => onChange({ ...position, zoom: Number(event.target.value) })}
-            step="0.05"
+            max={3}
+            min={1}
+            onChange={(event) =>
+              update({
+                ...normalized,
+                zoom: Number(event.target.value),
+              })
+            }
+            step={0.01}
             type="range"
-            value={position.zoom ?? 1}
+            value={normalized.zoom}
           />
+          <output>{Math.round(normalized.zoom * 100)}%</output>
         </label>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <p className="text-xs leading-5 text-crypt-subtle">
+
+      <div className="crypt-image-editor__footer">
+        <span>
+          Setas ajustam 1%. Shift + seta ajusta 5%. + e − alteram o zoom.
           {animated
-            ? 'O GIF será preservado com animação e com este enquadramento.'
-            : 'O arquivo original será preservado.'}
-        </p>
-        <button
-          className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-violet-300 hover:text-violet-200"
-          onClick={() => onChange({ x: 50, y: 50, zoom: 1 })}
-          type="button"
-        >
-          <RotateCcw size={13} /> Redefinir
-        </button>
+            ? ' A animação do GIF será preservada.'
+            : ' O recorte usa suavização de alta qualidade.'}
+        </span>
+
+        <div className="flex gap-2">
+          <button
+            className="crypt-image-editor__tool"
+            onClick={() => update(zoomImagePosition(normalized, -0.1))}
+            type="button"
+          >
+            <ZoomOut size={13} />
+          </button>
+          <button
+            className="crypt-image-editor__tool"
+            onClick={() => update(zoomImagePosition(normalized, 0.1))}
+            type="button"
+          >
+            <ZoomIn size={13} />
+          </button>
+          <button
+            className="crypt-image-editor__tool"
+            onClick={() => update(centeredImagePosition)}
+            type="button"
+          >
+            <RotateCcw size={13} />
+            Redefinir
+          </button>
+        </div>
       </div>
     </div>
   );

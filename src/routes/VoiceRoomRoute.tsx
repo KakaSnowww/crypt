@@ -2,6 +2,7 @@ import { Headphones, LogIn, Radio, ShieldCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { rememberServerChannel } from '../features/servers/serverNavigation';
 import { VoiceStage } from '../features/voice/VoiceStage';
 import { useVoiceCall } from '../features/voice/useVoiceCall';
 
@@ -16,6 +17,12 @@ export function VoiceRoomRoute() {
     setExpanded,
   } = useVoiceCall();
   const isThisCall = Boolean(connection && activeChannelId === channelId);
+
+  useEffect(() => {
+    if (serverId && channelId) {
+      rememberServerChannel(serverId, channelId);
+    }
+  }, [channelId, serverId]);
 
   useEffect(() => {
     if (isThisCall) setExpanded(true);

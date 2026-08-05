@@ -13,6 +13,7 @@ import {
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { ArcanaTierBadge } from '../features/arcana/ArcanaTierBadge';
 import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
 import { toConnectionActionError } from '../features/connections/connections.errors';
@@ -30,6 +31,12 @@ import { SpotifyEmbed } from '../features/profile/components/SpotifyEmbed';
 import { getProfileMediaUrl } from '../features/profile/profile.service';
 import { classNames } from '../lib/classNames';
 
+const publicPresenceLabels = {
+  away: 'Ausente',
+  busy: 'Ocupado',
+  offline: 'Offline',
+  online: 'Online',
+} as const;
 export function PublicProfileRoute() {
   const navigate = useNavigate();
   const { handle = '' } = useParams();
@@ -247,18 +254,29 @@ export function PublicProfileRoute() {
                   {profile.display_name}
                 </h1>
                 {profile.arcana_active ? (
-                  <span
-                    className="rounded-full border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.12em]"
-                    style={{
-                      borderColor: `${profile.arcana_tier_color}66`,
-                      color: profile.arcana_tier_color,
-                    }}
-                  >
-                    Arcana {profile.arcana_tier_name}
-                  </span>
+                  <ArcanaTierBadge
+                    tierColor={profile.arcana_tier_color}
+                    tierName={profile.arcana_tier_name}
+                    tierNumber={Math.max(1, profile.arcana_months)}
+                  />
                 ) : null}
               </div>
               <p className="mt-1 text-sm font-medium text-violet-300">@{profile.handle}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-crypt-subtle">
+                <span
+                  className={`size-2.5 rounded-full ${
+                    profile.presence_status === 'online'
+                      ? 'bg-emerald-400'
+                      : profile.presence_status === 'away'
+                        ? 'bg-amber-400'
+                        : profile.presence_status === 'busy'
+                          ? 'bg-red-400'
+                          : 'bg-slate-500'
+                  }`}
+                />
+                {publicPresenceLabels[profile.presence_status] ?? 'Offline'}
+                {profile.custom_status ? <span>Â· {profile.custom_status}</span> : null}
+              </div>
               <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-crypt-muted">
                 {profile.bio ?? 'Esta pessoa ainda não escreveu uma biografia.'}
               </p>

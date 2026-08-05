@@ -11,6 +11,7 @@ import type { TrackReference, TrackReferenceOrPlaceholder } from '@livekit/compo
 import { ConnectionState, Track, type Participant } from 'livekit-client';
 import {
   ChevronDown,
+  ExternalLink,
   FlipHorizontal2,
   Mic,
   MicOff,
@@ -21,12 +22,16 @@ import {
   Users,
   Video,
   VideoOff,
+  X,
 } from 'lucide-react';
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { useToast } from '../../components/common/ToastContext';
+import { isAndroidRuntime, isElectronRuntime } from '../../lib/platform';
+import { ArcanaTierBadge } from '../arcana/ArcanaTierBadge';
+import { ArcanaTierIcon } from '../arcana/ArcanaTierIcon';
 import { ProfileAvatar } from '../profile/components/ProfileAvatar';
 import { getProfileMediaUrl } from '../profile/profile.service';
-import { isAndroidRuntime, isElectronRuntime } from '../../lib/platform';
 import type { AndroidAudioOutput } from './androidCall';
 import { isAndroidScreenShareCompanion } from './androidCompanion';
 import { AndroidScreenShareModal } from './AndroidScreenShareModal';
@@ -34,6 +39,7 @@ import { NativeScreenShareModal } from './NativeScreenShareModal';
 import type { NativeScreenShareOptions } from './nativeScreenShare';
 import { getVoiceParticipantProfile } from './voice.participant';
 import { useVoiceCall } from './useVoiceCall';
+import './voice-identity.css';
 
 export function VoiceStage() {
   const { connection, isNativeScreenSharing, leave, startScreenShare, stopScreenShare } =
@@ -42,7 +48,12 @@ export function VoiceStage() {
   const participants = useParticipants().filter(
     (participant) => !isAndroidScreenShareCompanion(participant.identity, participant.metadata),
   );
-  const cameraTracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]).filter(
+  const cameraTracks = useTracks([
+    {
+      source: Track.Source.Camera,
+      withPlaceholder: true,
+    },
+  ]).filter(
     (track) =>
       !isAndroidScreenShareCompanion(track.participant.identity, track.participant.metadata),
   );
@@ -64,6 +75,7 @@ export function VoiceStage() {
 
   const run = async (name: string, action: () => Promise<unknown>) => {
     setBusy(name);
+
     try {
       await action();
     } catch (caughtError) {
@@ -95,6 +107,7 @@ export function VoiceStage() {
             {connectionState === ConnectionState.Connected ? 'Conectado' : 'Conectando…'}
           </p>
         </div>
+
         <div className="voice-stage__header-actions">
           <button
             onClick={() => setCameraFit((current) => (current === 'contain' ? 'cover' : 'contain'))}
@@ -111,7 +124,9 @@ export function VoiceStage() {
       </header>
 
       <div
-        className={`voice-stage__grid camera-fit-${cameraFit} ${screenTracks.length ? 'has-share' : ''} participant-count-${Math.min(participants.length, 4)}`}
+        className={`voice-stage__grid camera-fit-${cameraFit} ${
+          screenTracks.length ? 'has-share' : ''
+        } participant-count-${Math.min(participants.length, 4)}`}
       >
         {screenTracks.map((track) => (
           <article className="voice-stage__share" key={`${track.participant.identity}-share`}>
@@ -119,6 +134,7 @@ export function VoiceStage() {
             <span>{track.participant.name || track.participant.identity} está compartilhando</span>
           </article>
         ))}
+
         <div className="voice-stage__people">
           {cameraTracks.map((track) => (
             <ParticipantCard
@@ -137,19 +153,12 @@ export function VoiceStage() {
           active={isMicrophoneEnabled}
           label={isMicrophoneEnabled ? 'Silenciar' : 'Ativar microfone'}
           onClick={() =>
-            void run('microfone', () =>
-              localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled, {
-                autoGainControl: false,
-                channelCount: 1,
-                echoCancellation: false,
-                noiseSuppression: false,
-                sampleRate: 48_000,
-              }),
-            )
+            void run('microfone', () => localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled))
           }
         >
           {isMicrophoneEnabled ? <Mic /> : <MicOff />}
         </CallControl>
+
         <CallControl
           active={isCameraEnabled}
           label={isCameraEnabled ? 'Desligar câmera' : 'Ligar câmera'}
@@ -159,6 +168,7 @@ export function VoiceStage() {
         >
           {isCameraEnabled ? <Video /> : <VideoOff />}
         </CallControl>
+
         {androidRuntime && isCameraEnabled ? (
           <CallControl
             label="Virar câmera"
@@ -166,7 +176,10 @@ export function VoiceStage() {
               void run('câmera', async () => {
                 const publication = localParticipant.getTrackPublication(Track.Source.Camera);
                 const nextFacing = cameraFacing === 'user' ? 'environment' : 'user';
-                await publication?.videoTrack?.restartTrack({ facingMode: nextFacing });
+
+                await publication?.videoTrack?.restartTrack({
+                  facingMode: nextFacing,
+                });
                 setCameraFacing(nextFacing);
               })
             }
@@ -174,6 +187,7 @@ export function VoiceStage() {
             <FlipHorizontal2 />
           </CallControl>
         ) : null}
+
         <CallControl
           active={isScreenSharing}
           label={isScreenSharing ? 'Parar transmissão' : 'Compartilhar tela'}
@@ -189,6 +203,7 @@ export function VoiceStage() {
         >
           <MonitorUp />
         </CallControl>
+
         <CallControl
           active={showDevices}
           label="Dispositivos"
@@ -196,10 +211,12 @@ export function VoiceStage() {
         >
           <Settings2 />
         </CallControl>
+
         <CallControl danger label="Desconectar" onClick={() => void leave()}>
           <PhoneOff />
         </CallControl>
-        <span className="sr-only" aria-live="polite">
+
+        <span aria-live="polite" className="sr-only">
           {busy ? `Alterando ${busy}` : ''}
         </span>
       </footer>
@@ -212,6 +229,7 @@ export function VoiceStage() {
           open
         />
       ) : null}
+
       {androidRuntime && showNativeSharePicker ? (
         <AndroidScreenShareModal
           busy={busy === 'compartilhamento'}
@@ -232,20 +250,59 @@ function ParticipantCard({
   track: TrackReferenceOrPlaceholder;
 }) {
   const isSpeaking = useIsSpeaking(participant);
+  const [profileOpen, setProfileOpen] = useState(false);
   const hasVideo = Boolean(track.publication && !track.publication.isMuted);
+  const microphonePublication = participant.getTrackPublication(Track.Source.Microphone);
+  const microphoneMuted = !microphonePublication || microphonePublication.isMuted;
   const profile = getVoiceParticipantProfile(participant);
   const palette = getParticipantPalette(participant.identity);
   const bannerUrl = getProfileMediaUrl(profile.bannerPath);
+  const profileGradient =
+    profile.gradientStart && profile.gradientEnd
+      ? `linear-gradient(${profile.gradientAngle}deg, ${profile.gradientStart}, ${profile.gradientEnd})`
+      : palette;
+  const bannerPosition = `${profile.bannerPositionX}% ` + `${profile.bannerPositionY}%`;
+  const bannerSize = `${profile.bannerZoom * 100}%`;
+  const profilePath = participant.isLocal
+    ? '/app/perfil'
+    : profile.handle
+      ? `/app/pessoas/@${profile.handle}`
+      : null;
+
+  function toggleProfile() {
+    setProfileOpen((current) => !current);
+  }
+
+  function handleKeyboard(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleProfile();
+    }
+
+    if (event.key === 'Escape') {
+      setProfileOpen(false);
+    }
+  }
 
   return (
     <article
-      className={`voice-participant profile-effect-${profile.profileEffect} ${isSpeaking ? 'is-speaking' : ''}`}
+      aria-expanded={profileOpen}
+      aria-label={`Abrir perfil de ${profile.displayName}`}
+      className={`voice-participant profile-effect-${profile.profileEffect} ${
+        isSpeaking ? 'is-speaking' : ''
+      }`}
+      onClick={toggleProfile}
+      onKeyDown={handleKeyboard}
+      role="button"
       style={
         {
           '--voice-card-banner': bannerUrl ? `url("${bannerUrl}")` : 'none',
-          '--voice-card-gradient': palette,
+          '--voice-card-banner-position': bannerPosition,
+          '--voice-card-banner-size': bannerSize,
+          '--voice-card-gradient': profileGradient,
         } as CSSProperties
       }
+      tabIndex={0}
     >
       {hasVideo ? (
         <VideoTrack trackRef={track as TrackReference} />
@@ -254,19 +311,117 @@ function ParticipantCard({
           <ProfileAvatar
             avatarPath={profile.avatarPath}
             displayName={profile.displayName}
+            positionX={profile.avatarPositionX}
+            positionY={profile.avatarPositionY}
             size="lg"
+            zoom={profile.avatarZoom}
           />
         </div>
       )}
+
+      <div className="voice-participant__top-status">
+        {profile.arcanaActive ? (
+          <ArcanaTierIcon decorative size="xs" tierNumber={profile.arcanaTierNumber} />
+        ) : null}
+
+        <span className={microphoneMuted ? 'is-muted' : ''}>
+          {microphoneMuted ? (
+            <MicOff aria-hidden="true" size={12} />
+          ) : (
+            <Mic aria-hidden="true" size={12} />
+          )}
+          {microphoneMuted ? 'Silenciado' : 'Microfone'}
+        </span>
+      </div>
+
       <footer>
-        <span className="voice-participant__voice" aria-hidden="true">
+        <span aria-hidden="true" className="voice-participant__voice">
           <i />
           <i />
           <i />
         </span>
         <strong>{profile.displayName}</strong>
+        {profile.handle ? (
+          <span className="voice-participant__handle">@{profile.handle}</span>
+        ) : null}
         {participant.isLocal ? <small>Você</small> : null}
       </footer>
+
+      {profileOpen ? (
+        <section
+          aria-label={`Perfil compacto de ${profile.displayName}`}
+          className="voice-participant__profile-card"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          <div
+            className="voice-participant__profile-banner"
+            style={
+              {
+                '--voice-profile-banner': bannerUrl ? `url("${bannerUrl}")` : profileGradient,
+                '--voice-profile-banner-position': bannerPosition,
+                '--voice-profile-banner-size': bannerSize,
+                '--voice-profile-gradient': profileGradient,
+              } as CSSProperties
+            }
+          >
+            <button
+              aria-label="Fechar perfil compacto"
+              className="voice-participant__profile-close"
+              onClick={() => setProfileOpen(false)}
+              type="button"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          <div className="voice-participant__profile-content">
+            <ProfileAvatar
+              avatarPath={profile.avatarPath}
+              className="voice-participant__profile-avatar"
+              displayName={profile.displayName}
+              positionX={profile.avatarPositionX}
+              positionY={profile.avatarPositionY}
+              size="md"
+              zoom={profile.avatarZoom}
+            />
+
+            <div className="voice-participant__profile-heading">
+              <div>
+                <h3>{profile.displayName}</h3>
+                <p>{profile.handle ? `@${profile.handle}` : 'Participante da chamada'}</p>
+              </div>
+
+              {profile.arcanaActive ? (
+                <ArcanaTierBadge
+                  compact
+                  tierColor={profile.arcanaTierColor}
+                  tierName={profile.arcanaTierName}
+                  tierNumber={profile.arcanaTierNumber}
+                />
+              ) : null}
+            </div>
+
+            <div className={`voice-participant__profile-state ${isSpeaking ? 'is-speaking' : ''}`}>
+              <span />
+              {isSpeaking
+                ? 'Falando agora'
+                : microphoneMuted
+                  ? 'Microfone silenciado'
+                  : 'Conectado à chamada'}
+            </div>
+
+            {profilePath ? (
+              <div className="voice-participant__profile-actions">
+                <Link onClick={() => setProfileOpen(false)} to={profilePath}>
+                  <ExternalLink aria-hidden="true" size={13} />
+                  Abrir perfil completo
+                </Link>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
     </article>
   );
 }
@@ -279,11 +434,15 @@ function getParticipantPalette(identity: string) {
     'linear-gradient(145deg, #75602c 0%, #443719 56%, #17150f 100%)',
   ];
   const hash = [...identity].reduce((total, character) => total + character.charCodeAt(0), 0);
+
   return palettes[hash % palettes.length];
 }
 
 function DeviceSettings() {
-  if (isAndroidRuntime()) return <AndroidDeviceSettings />;
+  if (isAndroidRuntime()) {
+    return <AndroidDeviceSettings />;
+  }
+
   return <BrowserDeviceSettings />;
 }
 
@@ -294,22 +453,27 @@ function AndroidDeviceSettings() {
 
   useEffect(() => {
     let active = true;
+
     void listAndroidAudioOutputs()
       .then((nextOutputs) => {
         if (!active) return;
+
         setOutputs(nextOutputs);
         setSelected((current) => current || nextOutputs[0]?.id || '');
       })
       .catch(() => {
-        if (active) setOutputs([]);
+        if (active) {
+          setOutputs([]);
+        }
       });
+
     return () => {
       active = false;
     };
   }, [listAndroidAudioOutputs]);
 
   return (
-    <section className="voice-devices" aria-label="Configurações de áudio e vídeo">
+    <section aria-label="Configurações de áudio e vídeo" className="voice-devices">
       <label>
         <span>Saída de áudio</span>
         <div>
@@ -330,6 +494,7 @@ function AndroidDeviceSettings() {
           <ChevronDown aria-hidden="true" />
         </div>
       </label>
+
       <p>
         O Android alterna entre auricular, alto-falante, fone com fio e Bluetooth. O áudio usa 48
         kHz e permanece ativo ao minimizar o Crypt.
@@ -339,18 +504,24 @@ function AndroidDeviceSettings() {
 }
 
 function BrowserDeviceSettings() {
-  const microphone = useMediaDeviceSelect({ kind: 'audioinput' });
-  const speaker = useMediaDeviceSelect({ kind: 'audiooutput' });
-  const camera = useMediaDeviceSelect({ kind: 'videoinput' });
+  const microphone = useMediaDeviceSelect({
+    kind: 'audioinput',
+  });
+  const speaker = useMediaDeviceSelect({
+    kind: 'audiooutput',
+  });
+  const camera = useMediaDeviceSelect({
+    kind: 'videoinput',
+  });
 
   return (
-    <section className="voice-devices" aria-label="Configurações de áudio e vídeo">
+    <section aria-label="Configurações de áudio e vídeo" className="voice-devices">
       <DeviceSelect label="Microfone" select={microphone} />
       <DeviceSelect label="Saída de áudio" select={speaker} />
       <DeviceSelect label="Câmera" select={camera} />
       <p>
-        Modo natural ativo: 48 kHz, sem supressão, ganho automático ou cancelamento de eco.
-        Recomendamos usar fones de ouvido.
+        Use o painel de qualidade no canto da chamada para alternar entre Voz limpa e Natural. A
+        preferência é salva e reaplicada automaticamente.
       </p>
     </section>
   );

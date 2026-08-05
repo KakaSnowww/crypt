@@ -7,7 +7,10 @@ import { Input } from '../components/common/Input';
 import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
 import { Textarea } from '../components/common/Textarea';
+import { ServerOnboardingSettingsCard } from '../features/server-onboarding/components/ServerOnboardingSettingsCard';
 import { ServerIcon } from '../features/servers/components/ServerIcon';
+import { ServerArcanaSettingsCard } from '../features/servers/components/ServerArcanaSettingsCard';
+import { useServerArcanaStatus } from '../features/servers/serverArcana.queries';
 import { toServerActionError } from '../features/servers/servers.errors';
 import { useServerMembers, useServerOverview } from '../features/servers/servers.queries';
 import { serverSettingsSchema, validateServerMediaFile } from '../features/servers/servers.schemas';
@@ -224,6 +227,10 @@ function ServerSettingsContent({
         </form>
       </section>
 
+      <ServerArcanaSettingsCard serverId={server.server_id} />
+
+      <ServerOnboardingSettingsCard serverId={server.server_id} />
+
       <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="media-title">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-500/10 text-blue-200">
@@ -374,6 +381,8 @@ function ServerSettingsContent({
 function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: ServerOverview }) {
   const inputId = useId();
   const actions = useServerActions();
+  const arcanaStatusQuery = useServerArcanaStatus(server.server_id);
+  const animatedMediaUnlocked = arcanaStatusQuery.data?.animated_media_unlocked === true;
   const [selectionError, setSelectionError] = useState<string>();
   const [draftFile, setDraftFile] = useState<File>();
   const [draftUrl, setDraftUrl] = useState<string>();
@@ -453,7 +462,11 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
             )}
             {path ? 'Trocar imagem' : 'Enviar imagem'}
             <input
-              accept="image/gif,image/jpeg,image/png,image/webp"
+              accept={
+                animatedMediaUnlocked
+                  ? 'image/gif,image/jpeg,image/png,image/webp'
+                  : 'image/jpeg,image/png,image/webp'
+              }
               className="sr-only"
               disabled={isBusy}
               id={inputId}

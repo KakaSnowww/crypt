@@ -16,6 +16,7 @@ import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
 import { useAuth } from '../features/auth/useAuth';
 import { MessageAttachmentCard } from '../features/messages/components/MessageAttachmentCard';
+import { MessageContent } from '../features/messages/components/MessageContent';
 import { ConversationToolsModal } from '../features/messages/components/ConversationToolsModal';
 import {
   collectMessageMentionIds,
@@ -33,7 +34,10 @@ import {
 import { useChannelRealtime } from '../features/messages/useChannelRealtime';
 import { useMessageActions } from '../features/messages/useMessageActions';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
+import { useMessageSearchJump } from '../features/search/useMessageSearchJump';
+import { openMemberProfileCard } from '../features/profile/memberProfileCard.events';
 import { useCurrentProfile } from '../features/profile/profile.queries';
+import { rememberServerChannel } from '../features/servers/serverNavigation';
 import { useServerMembers, useServerOverview } from '../features/servers/servers.queries';
 import { hasPermission, serverPermission } from '../features/workspace/workspace.permissions';
 import { useServerChannels } from '../features/workspace/workspace.queries';
@@ -60,6 +64,13 @@ export function ChannelRoute() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const channel = channelsQuery.data?.find((item) => item.channel_id === channelId);
+
+  useEffect(() => {
+    if (channel) {
+      rememberServerChannel(serverId, channelId);
+    }
+  }, [channel, channelId, serverId]);
+
   const displayName = profileQuery.data?.display_name ?? 'Pessoa do Crypt';
   const { announceTyping, typingNames } = useChannelRealtime(
     serverId,
@@ -73,6 +84,12 @@ export function ChannelRoute() {
   );
   const latestMessage = messages.at(-1);
   const latestMessageId = latestMessage?.message_id;
+  const searchedMessageId = useMessageSearchJump({
+    fetchNextPage: messagesQuery.fetchNextPage,
+    hasNextPage: messagesQuery.hasNextPage,
+    isFetchingNextPage: messagesQuery.isFetchingNextPage,
+    messages,
+  });
   const activeMention = findActiveMention(content, caretPosition);
   const mentionSuggestions = mentionMenuDismissed
     ? []
@@ -90,8 +107,9 @@ export function ChannelRoute() {
   }, [channelId, latestMessageId]);
 
   useEffect(() => {
+    if (searchedMessageId) return;
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages.length]);
+  }, [messages.length, searchedMessageId]);
 
   useEffect(() => {
     const openTools = () => setToolsOpen(true);
@@ -480,11 +498,18 @@ function MessageItem({
       }`}
       id={`message-${message.message_id}`}
     >
-      <ProfileAvatar
-        avatarPath={message.author_avatar_path}
-        displayName={message.author_display_name}
-        size="sm"
-      />
+      <button
+        aria-label={`Abrir perfil de ${message.author_display_name}`}
+        className="h-fit shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+        onClick={() => openMemberProfileCard(message.author_handle)}
+        type="button"
+      >
+        <ProfileAvatar
+          avatarPath={message.author_avatar_path}
+          displayName={message.author_display_name}
+          size="sm"
+        />
+      </button>
       <div className="min-w-0 flex-1">
         {message.reply_to_id ? (
           <div className="mb-1 flex items-center gap-1.5 text-[0.7rem] text-crypt-subtle">
@@ -496,12 +521,13 @@ function MessageItem({
           </div>
         ) : null}
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <Link
+          <button
             className="text-sm font-semibold text-white hover:underline"
-            to={`/app/pessoas/${message.author_handle}`}
+            onClick={() => openMemberProfileCard(message.author_handle)}
+            type="button"
           >
             {message.author_display_name}
-          </Link>
+          </button>
           <span className="text-[0.68rem] text-crypt-subtle">
             {formatMessageTime(message.created_at)}
             {message.edited_at ? ' · editada' : ''}
@@ -512,9 +538,7 @@ function MessageItem({
             </span>
           ) : null}
         </div>
-        <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-crypt-text">
-          {message.content}
-        </p>
+        <MessageContent content={message.content ?? ''} />
         {attachments.map((attachment) => (
           <MessageAttachmentCard attachment={attachment} key={attachment.attachment_id} />
         ))}

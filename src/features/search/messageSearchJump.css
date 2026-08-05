@@ -1,0 +1,23 @@
+.crypt-message-search-hit {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(90deg, rgb(124 92 246 / 22%), rgb(77 190 255 / 10%)) !important;
+  box-shadow:
+    inset 3px 0 0 #a78bfa,
+    0 0 0 1px rgb(167 139 250 / 22%);
+  animation: crypt-message-search-pulse 850ms ease-in-out 2;
+}
+
+@keyframes crypt-message-search-pulse {
+  50% {
+    box-shadow:
+      inset 3px 0 0 #c4b5fd,
+      0 0 0 4px rgb(167 139 250 / 11%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crypt-message-search-hit {
+    animation: none;
+  }
+}

@@ -1,15 +1,26 @@
 import type { Json } from '../../types/database';
 import { getSupabaseClient } from '../../lib/supabase/client';
 import { toMessageActionError } from './messages.errors';
+import { fetchLatestAutoModBlock } from './automodClient.service';
 import { validateMessagePayload } from './messages.schemas';
-import type { SendMessageInput, UploadedAttachment } from './messages.types';
-import type { ChannelMessageRow } from './messages.types';
+import type { ChannelMessageRow, SendMessageInput, UploadedAttachment } from './messages.types';
 
 export const MESSAGE_ATTACHMENTS_BUCKET = 'message-attachments';
 
+type AttachmentLimitRpc = (
+  functionName: string,
+  args?: Record<string, unknown>,
+) => Promise<{
+  data: null | number | string;
+  error: null | unknown;
+}>;
+
 export async function fetchChannelMessages(
   channelId: string,
-  cursor?: { createdAt: string; messageId: string },
+  cursor?: {
+    createdAt: string;
+    messageId: string;
+  },
 ): Promise<ChannelMessageRow[]> {
   const { data, error } = await getSupabaseClient().rpc('get_channel_messages', {
     before_created_at: cursor?.createdAt ?? null,
@@ -27,14 +38,33 @@ export async function fetchChannelMessages(
 
 export async function sendChannelMessage(input: SendMessageInput) {
   const client = getSupabaseClient();
-  const limitResult = await client.rpc('get_my_attachment_limit');
-  if (limitResult.error) throw toMessageActionError(limitResult.error);
-  const content = validateMessagePayload(input.content, input.files, limitResult.data);
+  const limitResult = await (
+    client as unknown as {
+      rpc: AttachmentLimitRpc;
+    }
+  ).rpc('get_my_attachment_limit', {
+    target_server_id: input.serverId,
+  });
+
+  if (limitResult.error) {
+    throw toMessageActionError(limitResult.error);
+  }
+
+  const attachmentLimit = Number(limitResult.data);
+
+  if (!Number.isFinite(attachmentLimit) || attachmentLimit < 1) {
+    throw toMessageActionError(new Error('invalid_attachment_limit'));
+  }
+
+  const content = validateMessagePayload(input.content, input.files, attachmentLimit);
   const uploaded: UploadedAttachment[] = [];
 
   try {
     for (const file of input.files) {
-      const path = `${input.serverId}/${input.channelId}/${input.userId}/${crypto.randomUUID()}.${extensionForFile(file)}`;
+      const path =
+        `${input.serverId}/${input.channelId}/` +
+        `${input.userId}/${crypto.randomUUID()}.` +
+        extensionForFile(file);
       const { error } = await client.storage.from(MESSAGE_ATTACHMENTS_BUCKET).upload(path, file, {
         cacheControl: '3600',
         contentType: file.type,
@@ -64,6 +94,11 @@ export async function sendChannelMessage(input: SendMessageInput) {
 
     if (error) {
       throw error;
+    }
+
+    if (!data) {
+      const block = await fetchLatestAutoModBlock(input.serverId, input.channelId);
+      throw new Error(block?.rule_code ?? 'automod_blocked');
     }
 
     return data;

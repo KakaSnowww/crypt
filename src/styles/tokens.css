@@ -1,24 +1,44 @@
 @theme {
-  --color-crypt-background: #070914;
-  --color-crypt-deep: #050710;
-  --color-crypt-sidebar: #0b1020;
-  --color-crypt-panel: #101728;
-  --color-crypt-elevated: #172039;
-  --color-crypt-text: #f7f7ff;
-  --color-crypt-muted: #b7bfd4;
-  --color-crypt-subtle: #8290aa;
-  --color-crypt-purple: #8b5cf6;
-  --color-crypt-blue: #3b82f6;
-  --color-crypt-focus: #a78bfa;
+  --color-crypt-background: #05040d;
+  --color-crypt-deep: #03030a;
+  --color-crypt-sidebar: #090817;
+  --color-crypt-panel: #100d22;
+  --color-crypt-elevated: #18132f;
+  --color-crypt-text: #f8f5ff;
+  --color-crypt-muted: #c1bbd5;
+  --color-crypt-subtle: #8b84a4;
+  --color-crypt-purple: #9a68ff;
+  --color-crypt-blue: #54b7ff;
+  --color-crypt-focus: #c5a8ff;
 
   --font-sans:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --shadow-crypt-soft: 0 20px 55px rgb(0 0 0 / 24%);
-  --shadow-crypt-float: 0 30px 100px rgb(0 0 0 / 42%);
+  --shadow-crypt-soft: 0 22px 60px rgb(0 0 0 / 32%), 0 0 38px rgb(113 61 214 / 7%);
+  --shadow-crypt-float: 0 36px 120px rgb(0 0 0 / 56%), 0 0 70px rgb(108 64 220 / 12%);
 
-  --radius-crypt-sm: 0.75rem;
-  --radius-crypt-md: 1rem;
-  --radius-crypt-lg: 1.5rem;
-  --radius-crypt-xl: 1.75rem;
+  --radius-crypt-sm: 0.8rem;
+  --radius-crypt-md: 1.1rem;
+  --radius-crypt-lg: 1.6rem;
+  --radius-crypt-xl: 2rem;
+}
+
+:root {
+  --arcane-void: #03030a;
+  --arcane-night: #070511;
+  --arcane-surface: #0e0b1c;
+  --arcane-surface-2: #151027;
+  --arcane-surface-3: #1d1536;
+  --arcane-purple: #9667ff;
+  --arcane-violet: #bd88ff;
+  --arcane-blue: #52b6ff;
+  --arcane-cyan: #61e6ef;
+  --arcane-pink: #ee7bdc;
+  --arcane-gold: #f3ce77;
+  --arcane-success: #62ddb0;
+  --arcane-danger: #ff8294;
+  --arcane-border: rgb(195 164 255 / 13%);
+  --arcane-border-strong: rgb(195 164 255 / 26%);
+  --arcane-glow: 0 0 34px rgb(134 80 255 / 14%), 0 18px 60px rgb(0 0 0 / 30%);
+  --arcane-glow-strong: 0 0 52px rgb(134 80 255 / 23%), 0 28px 86px rgb(0 0 0 / 44%);
 }

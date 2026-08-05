@@ -30,6 +30,7 @@ import {
   isAllowedExternalUrl,
   isTrustedApplicationUrl,
 } from './security.js';
+import { createWindowsStartupOptions, toCryptStartupState } from './startupSettings.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectDirectory = path.resolve(currentDirectory, '..');
@@ -219,16 +220,31 @@ function registerDesktopIpc() {
   ipcMain.handle('crypt:clear-capture-source', () => {
     selectedCaptureSourceId = null;
   });
-  ipcMain.handle('crypt:startup:get', () => app.getLoginItemSettings().openAtLogin);
+  ipcMain.handle('crypt:startup:get', () => readWindowsStartupState());
   ipcMain.handle('crypt:startup:set', (_event, enabled: boolean) => {
+    if (typeof enabled !== 'boolean') throw new Error('Preferência de inicialização inválida.');
+
+    const options = createWindowsStartupOptions(app.isPackaged, process.execPath);
+    if (!options) return toCryptStartupState(false);
+
     app.setLoginItemSettings({
-      args: ['--hidden'],
+      ...options,
+      enabled,
       openAtLogin: enabled,
-      openAsHidden: enabled,
-      path: process.execPath,
     });
-    return app.getLoginItemSettings().openAtLogin;
+    return readWindowsStartupState();
   });
+}
+
+function readWindowsStartupState() {
+  const options = createWindowsStartupOptions(app.isPackaged, process.execPath);
+  if (!options) return toCryptStartupState(false);
+
+  const settings = app.getLoginItemSettings({
+    args: options.args,
+    path: options.path,
+  });
+  return toCryptStartupState(true, settings);
 }
 
 async function getDesktopSources(): Promise<DesktopCapturerSource[]> {

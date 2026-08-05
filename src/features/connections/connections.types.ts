@@ -23,6 +23,8 @@ export type PublicConnectionProfile = Omit<
   Functions['get_public_profile_by_handle']['Returns'][number],
   'relationship_status'
 > & {
+  custom_status: null | string;
+  presence_status: 'away' | 'busy' | 'offline' | 'online';
   relationship_status: RelationshipStatus;
 };
 

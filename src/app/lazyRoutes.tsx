@@ -58,6 +58,10 @@ export const ForgotPasswordRoute = lazy(async () => {
   const route = await import('../routes/ForgotPasswordRoute');
   return { default: route.ForgotPasswordRoute };
 });
+export const GlobalSearchRoute = lazy(async () => {
+  const route = await import('../routes/GlobalSearchRoute');
+  return { default: route.GlobalSearchRoute };
+});
 
 export const LoginRoute = lazy(async () => {
   const route = await import('../routes/LoginRoute');
@@ -107,6 +111,16 @@ export const ResetPasswordRoute = lazy(async () => {
 export const ServerInviteRoute = lazy(async () => {
   const route = await import('../routes/ServerInviteRoute');
   return { default: route.ServerInviteRoute };
+});
+
+export const ServerOnboardingRoute = lazy(async () => {
+  const route = await import('../routes/ServerOnboardingRoute');
+  return { default: route.ServerOnboardingRoute };
+});
+
+export const ServerOpenRoute = lazy(async () => {
+  const route = await import('../routes/ServerOpenRoute');
+  return { default: route.ServerOpenRoute };
 });
 
 export const ServerRoute = lazy(async () => {

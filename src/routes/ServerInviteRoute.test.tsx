@@ -49,13 +49,24 @@ describe('ServerInviteRoute', () => {
         <AppProviders authValue={authenticatedAuthValue}>
           <Routes>
             <Route element={<ServerInviteRoute />} path="/app/convite/:code" />
-            <Route element={<p>Servidor aberto</p>} path="/app/servidores/:serverId" />
+            <Route element={<p>Servidor aberto</p>} path="/app/servidores/:serverId/entrada" />
           </Routes>
         </AppProviders>
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Órbita do Snow' })).toBeVisible();
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: `Você foi convidado para entrar em ${preview.server_name}`,
+      }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('heading', {
+        level: 2,
+        name: preview.server_name,
+      }),
+    ).toBeVisible();
     expect(screen.getByText('Kaio Snow')).toBeVisible();
     expect(screen.getByText('3')).toBeVisible();
 

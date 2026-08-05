@@ -1,0 +1,222 @@
+.arcana-tier-icon {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: visible;
+  border-radius: 32%;
+  filter: drop-shadow(0 8px 16px color-mix(in srgb, var(--arcana-tier-color) 35%, transparent));
+  isolation: isolate;
+}
+
+.arcana-tier-icon::before {
+  position: absolute;
+  z-index: -1;
+  inset: 13%;
+  border-radius: 999px;
+  background: var(--arcana-tier-color);
+  content: '';
+  filter: blur(16px);
+  opacity: 0.32;
+}
+
+.arcana-tier-icon > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.arcana-tier-icon__fallback {
+  width: 52%;
+  height: 52%;
+  padding: 12%;
+  border: 1px solid color-mix(in srgb, var(--arcana-tier-color) 55%, white);
+  border-radius: 32%;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--arcana-tier-color) 82%, white),
+    color-mix(in srgb, var(--arcana-tier-color) 70%, #090b12)
+  );
+  color: white;
+}
+
+.arcana-tier-icon--xs {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.arcana-tier-icon--sm {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.arcana-tier-icon--md {
+  width: 2.8rem;
+  height: 2.8rem;
+}
+
+.arcana-tier-icon--lg {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.arcana-tier-icon--xl {
+  width: clamp(6rem, 16vw, 9rem);
+  height: clamp(6rem, 16vw, 9rem);
+}
+
+.arcana-tier-badge {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.22rem 0.65rem 0.22rem 0.3rem;
+  border: 1px solid color-mix(in srgb, var(--arcana-tier-color) 48%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--arcana-tier-color) 10%, rgb(10 13 21 / 90%));
+  color: var(--arcana-tier-color);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--arcana-tier-color) 8%, transparent);
+}
+
+.arcana-tier-badge.is-compact {
+  min-height: 1.65rem;
+  padding: 0.12rem 0.52rem 0.12rem 0.2rem;
+  font-size: 0.6rem;
+}
+
+.community-rune-icon {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  isolation: isolate;
+}
+
+.community-rune-icon::before {
+  position: absolute;
+  z-index: -1;
+  inset: 12%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+  content: '';
+  filter: blur(14px);
+  opacity: 0.28;
+}
+
+.community-rune-icon > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.community-rune-icon__fallback {
+  width: 62%;
+  height: 62%;
+  padding: 12%;
+  border: 1px solid rgb(167 139 250 / 48%);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgb(124 58 237 / 86%), rgb(14 116 144 / 78%));
+  color: white;
+}
+
+.community-rune-icon--sm {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.community-rune-icon--md {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.community-rune-icon--lg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.community-rune-icon--xl {
+  width: 6rem;
+  height: 6rem;
+}
+
+.arcana-tier-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 0.35rem;
+  overflow: hidden;
+  padding: 0.75rem 0.45rem;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 2.5%);
+  text-align: center;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.arcana-tier-card.is-earned {
+  border-color: color-mix(in srgb, var(--arcana-tier-color) 34%, transparent);
+  background: color-mix(in srgb, var(--arcana-tier-color) 7%, rgb(255 255 255 / 2.5%));
+}
+
+.arcana-tier-card.is-current {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--arcana-tier-color) 72%, white);
+  box-shadow:
+    0 10px 35px color-mix(in srgb, var(--arcana-tier-color) 18%, transparent),
+    inset 0 0 26px color-mix(in srgb, var(--arcana-tier-color) 9%, transparent);
+}
+
+.arcana-tier-card.is-locked .arcana-tier-icon,
+.arcana-tier-card.is-locked strong {
+  filter: grayscale(0.8);
+  opacity: 0.48;
+}
+
+.arcana-tier-card__state {
+  color: #737f97;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.arcana-tier-card.is-current .arcana-tier-card__state {
+  color: var(--arcana-tier-color);
+}
+
+.arcana-rune-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 7%);
+  background:
+    radial-gradient(circle at 50% -10%, rgb(139 92 246 / 17%), transparent 48%),
+    rgb(255 255 255 / 2.5%);
+}
+
+.arcana-rune-card__image {
+  margin-inline: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .arcana-tier-card.is-current .arcana-tier-icon {
+    animation: arcana-current-tier-float 3s ease-in-out infinite;
+  }
+}
+
+@keyframes arcana-current-tier-float {
+  50% {
+    transform: translateY(-0.22rem);
+  }
+}

@@ -1,5 +1,6 @@
 import {
   Ban,
+  Bot,
   ClipboardList,
   Flag,
   Gavel,
@@ -19,13 +20,14 @@ import {
   useServerModerationSettings,
   useServerReports,
 } from '../features/moderation/moderation.queries';
+import { AutoModPanel } from '../features/moderation/components/AutoModPanel';
 import { useModerationActions } from '../features/moderation/useModerationActions';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { useServerMembers, useServerOverview } from '../features/servers/servers.queries';
 import { hasPermission, serverPermission } from '../features/workspace/workspace.permissions';
 import { useMyServerPermissions } from '../features/workspace/workspace.queries';
 
-type Tab = 'audit' | 'bans' | 'members' | 'reports' | 'settings';
+type Tab = 'audit' | 'automod' | 'bans' | 'members' | 'reports' | 'settings';
 
 const actionLabels: Record<string, string> = {
   member_banned: 'baniu',
@@ -67,6 +69,7 @@ export function ServerModerationRoute() {
 
   const tabs: Array<{ icon: typeof Gavel; id: Tab; label: string }> = [
     { icon: Gavel, id: 'members', label: 'Membros' },
+    { icon: Bot, id: 'automod', label: 'AutoMod' },
     { icon: Ban, id: 'bans', label: 'Banimentos' },
     { icon: Flag, id: 'reports', label: 'Denúncias' },
     { icon: ClipboardList, id: 'audit', label: 'Auditoria' },
@@ -82,7 +85,6 @@ export function ServerModerationRoute() {
       <p className="mt-2 text-sm text-crypt-muted">
         Ações protegidas pela permissão e pela hierarquia de cargos, registradas na auditoria.
       </p>
-
       <div className="my-6 flex gap-2 overflow-x-auto pb-1">
         {tabs.map(({ icon: Icon, id, label }) => (
           <Button
@@ -95,8 +97,10 @@ export function ServerModerationRoute() {
           </Button>
         ))}
       </div>
-
-      {tab === 'members' ? <MembersPanel serverId={serverId} /> : null}
+      {tab === 'members' ? <MembersPanel serverId={serverId} /> : null}{' '}
+      {tab === 'automod' ? (
+        <AutoModPanel isOwner={overviewQuery.data.is_owner} serverId={serverId} />
+      ) : null}
       {tab === 'bans' ? <BansPanel serverId={serverId} /> : null}
       {tab === 'reports' ? <ReportsPanel serverId={serverId} /> : null}
       {tab === 'audit' ? <AuditPanel serverId={serverId} /> : null}

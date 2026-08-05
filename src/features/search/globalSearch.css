@@ -1,0 +1,233 @@
+.global-search-page {
+  --search-accent: #8b5cf6;
+}
+
+.global-search-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(139 92 246 / 20%);
+  border-radius: 1.65rem;
+  background:
+    radial-gradient(circle at 85% 15%, rgb(91 167 255 / 18%), transparent 30%),
+    linear-gradient(145deg, rgb(139 92 246 / 10%), rgb(10 13 22 / 94%));
+}
+
+.global-search-hero::after {
+  position: absolute;
+  inset: auto -6rem -8rem auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: rgb(139 92 246 / 12%);
+  filter: blur(60px);
+  content: '';
+  pointer-events: none;
+}
+
+.global-search-input {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 1rem;
+  background: rgb(7 10 17 / 76%);
+  padding: 0.72rem 0.85rem;
+  box-shadow: 0 16px 45px rgb(0 0 0 / 20%);
+}
+
+.global-search-input:focus-within {
+  border-color: rgb(139 92 246 / 62%);
+  box-shadow:
+    0 16px 45px rgb(0 0 0 / 20%),
+    0 0 0 3px rgb(139 92 246 / 10%);
+}
+
+.global-search-input svg {
+  flex: 0 0 auto;
+  color: #a995ff;
+}
+
+.global-search-input input {
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  color: white;
+  font-size: 0.92rem;
+  outline: none;
+}
+
+.global-search-input input::placeholder {
+  color: #68738a;
+}
+
+.global-search-input kbd {
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 0.45rem;
+  background: rgb(255 255 255 / 5%);
+  padding: 0.2rem 0.4rem;
+  color: #8792a9;
+  font-size: 0.58rem;
+}
+
+.global-search-filter {
+  display: flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 3%);
+  padding: 0 0.72rem;
+  color: #8994aa;
+  font-size: 0.68rem;
+  font-weight: 680;
+}
+
+.global-search-filter.is-active {
+  border-color: rgb(139 92 246 / 44%);
+  background: rgb(139 92 246 / 13%);
+  color: #e5dfff;
+}
+
+.global-search-select {
+  min-height: 2.35rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 0.75rem;
+  background: #111521;
+  padding: 0 0.72rem;
+  color: #d8deea;
+  font-size: 0.68rem;
+  outline: none;
+}
+
+.global-search-select:focus {
+  border-color: rgb(139 92 246 / 55%);
+}
+
+.global-search-result {
+  position: relative;
+  display: grid;
+  gap: 0.8rem;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 2.5%);
+  padding: 1rem;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    transform 130ms ease;
+}
+
+.global-search-result:hover {
+  border-color: rgb(139 92 246 / 32%);
+  background: rgb(139 92 246 / 5%);
+  transform: translateY(-1px);
+}
+
+.global-search-result__context {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+  color: #9ba6ba;
+  font-size: 0.66rem;
+}
+
+.global-search-result__context strong {
+  overflow: hidden;
+  color: #e9ecf4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-search-result__context span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-search-result__message {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.global-search-result__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.global-search-result__author {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.global-search-result__author strong {
+  color: #f4f6fa;
+  font-size: 0.78rem;
+}
+
+.global-search-result__author span,
+.global-search-result__author time {
+  color: #707b91;
+  font-size: 0.62rem;
+}
+
+.global-search-result__preview {
+  margin-top: 0.42rem;
+  overflow-wrap: anywhere;
+  color: #aab3c6;
+  font-size: 0.74rem;
+  line-height: 1.62;
+  white-space: pre-wrap;
+}
+
+.global-search-result__preview mark {
+  border-radius: 0.25rem;
+  background: rgb(167 139 250 / 23%);
+  padding: 0.05rem 0.13rem;
+  color: #eeeaff;
+}
+
+.global-search-result__attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  border-radius: 0.55rem;
+  background: rgb(255 255 255 / 4%);
+  padding: 0.35rem 0.5rem;
+  color: #909bb1;
+  font-size: 0.62rem;
+}
+
+.global-search-result__open {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  color: #8372c6;
+}
+
+.global-search-empty {
+  display: grid;
+  min-height: 18rem;
+  place-items: center;
+  border: 1px dashed rgb(255 255 255 / 9%);
+  border-radius: 1.35rem;
+  color: #778298;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .global-search-input kbd {
+    display: none;
+  }
+
+  .global-search-result__open {
+    display: none;
+  }
+}

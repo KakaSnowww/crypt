@@ -21,6 +21,44 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.10.0': {
+    highlights: [
+      {
+        description:
+          'Toda a interface recebeu constelações, runas, profundidade, animações e uma identidade mágica e tecnológica própria.',
+        title: 'O Crypt renasceu',
+      },
+      {
+        description:
+          'Arcana ganhou assinatura recorrente, doze níveis mensais, símbolos próprios, benefícios premium e Runas de Comunidade.',
+        title: 'A jornada Arcana',
+      },
+      {
+        description:
+          'Servidores evoluem por Círculos, recebem identidade ampliada, arquivos maiores e uma entrada guiada com regras.',
+        title: 'Comunidades que evoluem',
+      },
+      {
+        description:
+          'Chamadas, áudio, vídeo, compartilhamento de tela e cartões de participantes ficaram mais estáveis e integrados aos perfis.',
+        title: 'Presença mais viva',
+      },
+      {
+        description:
+          'Busca global, AutoMod, antispam, hierarquia de cargos, menções e navegação inteligente tornam o dia a dia mais completo.',
+        title: 'Mais poder e controle',
+      },
+      {
+        description:
+          'Texto ajustável, contraste, atalhos, redução de movimento e melhorias para o teclado Android tornam o Crypt mais acessível.',
+        title: 'Feito para mais pessoas',
+      },
+    ],
+    summary:
+      'A versão 0.10.0 é a Ascensão Arcana: uma reconstrução visual e funcional do Crypt no Windows e no Android.',
+    title: 'A Ascensão Arcana',
+    version: '0.10.0',
+  },
   '0.9.0': {
     highlights: [
       {

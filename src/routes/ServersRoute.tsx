@@ -7,6 +7,7 @@ import { Modal } from '../components/common/Modal';
 import { Spinner } from '../components/common/Spinner';
 import { Textarea } from '../components/common/Textarea';
 import { ServerIcon } from '../features/servers/components/ServerIcon';
+import { useMyServerArcanaStatuses } from '../features/servers/serverArcana.queries';
 import { toServerActionError } from '../features/servers/servers.errors';
 import { useMyServers } from '../features/servers/servers.queries';
 import { createServerSchema, inviteCodeSchema } from '../features/servers/servers.schemas';
@@ -16,6 +17,7 @@ export function ServersRoute() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const serversQuery = useMyServers();
+  const serverArcanaStatusesQuery = useMyServerArcanaStatuses();
   const actions = useServerActions();
   const [createOpen, setCreateOpen] = useState(searchParams.get('criar') === '1');
   const [name, setName] = useState('');
@@ -24,7 +26,9 @@ export function ServersRoute() {
   const [descriptionError, setDescriptionError] = useState<string>();
   const [inviteValue, setInviteValue] = useState('');
   const [inviteError, setInviteError] = useState<string>();
-
+  const serverArcanaStatusById = new Map(
+    (serverArcanaStatusesQuery.data ?? []).map((status) => [status.server_id, status]),
+  );
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNameError(undefined);
@@ -46,7 +50,7 @@ export function ServersRoute() {
       setCreateOpen(false);
       setName('');
       setDescription('');
-      void navigate(`/app/servidores/${serverId}`);
+      void navigate(`/app/servidores/${serverId}/abrir`);
     }
   }
 
@@ -132,10 +136,16 @@ export function ServersRoute() {
             <Link
               className="group panel flex min-h-44 flex-col p-5 transition hover:-translate-y-0.5 hover:border-violet-400/25 hover:bg-white/[0.055]"
               key={server.server_id}
-              to={`/app/servidores/${server.server_id}`}
+              to={`/app/servidores/${server.server_id}/abrir`}
             >
               <div className="flex items-start gap-4">
-                <ServerIcon iconPath={server.icon_path} name={server.server_name} size="md" />
+                <ServerIcon
+                  circleColor={serverArcanaStatusById.get(server.server_id)?.circle_color}
+                  circleLevel={serverArcanaStatusById.get(server.server_id)?.circle_level ?? 0}
+                  iconPath={server.icon_path}
+                  name={server.server_name}
+                  size="md"
+                />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="truncate font-semibold text-white">{server.server_name}</h2>

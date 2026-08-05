@@ -1,56 +1,72 @@
 import { describe, expect, it } from 'vitest';
-import type { Participant } from 'livekit-client';
-import { getVoiceParticipantProfile } from './voice.participant';
+import { parseVoiceParticipantMetadata } from './voice.participant';
 
-function participant(values: Partial<Participant>) {
-  return values as Participant;
-}
-
-describe('getVoiceParticipantProfile', () => {
-  it('usa nome, avatar e identificador enviados no token da chamada', () => {
+describe('metadata visual de participantes', () => {
+  it('lê enquadramento, gradiente e Arcana', () => {
     expect(
-      getVoiceParticipantProfile(
-        participant({
-          identity: 'profile-id',
-          metadata: JSON.stringify({
-            avatar_path: 'profile-id/avatar.jpg',
-            banner_path: 'profile-id/banner.jpg',
-            handle: 'kaiosnow',
-            profile_effect: 'aurora',
-          }),
-          name: 'Kaio Snow',
+      parseVoiceParticipantMetadata(
+        JSON.stringify({
+          arcana_active: true,
+          arcana_tier_color: '#6366f1',
+          arcana_tier_name: 'Runa',
+          arcana_tier_number: 2,
+          avatar_position_x: 31,
+          avatar_position_y: 64,
+          avatar_zoom: 1.8,
+          banner_position_x: 71,
+          banner_position_y: 22,
+          banner_zoom: 1.4,
+          profile_gradient_angle: 220,
+          profile_gradient_end: '#654321',
+          profile_gradient_start: '#123456',
         }),
       ),
-    ).toEqual({
-      avatarPath: 'profile-id/avatar.jpg',
-      bannerPath: 'profile-id/banner.jpg',
-      displayName: 'Kaio Snow',
-      handle: 'kaiosnow',
-      profileEffect: 'aurora',
+    ).toMatchObject({
+      arcanaActive: true,
+      arcanaTierColor: '#6366F1',
+      arcanaTierName: 'Runa',
+      arcanaTierNumber: 2,
+      avatarPositionX: 31,
+      avatarPositionY: 64,
+      avatarZoom: 1.8,
+      bannerPositionX: 71,
+      bannerPositionY: 22,
+      bannerZoom: 1.4,
+      gradientAngle: 220,
+      gradientEnd: '#654321',
+      gradientStart: '#123456',
     });
   });
 
-  it('mantém os novos temas de cor dentro da chamada', () => {
-    expect(
-      getVoiceParticipantProfile({
-        identity: 'profile-id',
-        metadata: JSON.stringify({ profile_effect: 'ocean' }),
-        name: 'Kaio',
-      } as Participant),
-    ).toMatchObject({ profileEffect: 'ocean' });
+  it('usa valores seguros quando o JSON é inválido', () => {
+    expect(parseVoiceParticipantMetadata('{')).toMatchObject({
+      arcanaActive: false,
+      avatarPositionX: 50,
+      avatarPositionY: 50,
+      avatarZoom: 1,
+      bannerPositionX: 50,
+      bannerPositionY: 50,
+      bannerZoom: 1,
+      gradientAngle: 135,
+      profileEffect: 'none',
+    });
   });
 
-  it('continua seguro quando os metadados estiverem ausentes ou inválidos', () => {
+  it('recusa valores fora das faixas públicas', () => {
     expect(
-      getVoiceParticipantProfile(
-        participant({ identity: 'profile-id', metadata: '{inválido', name: undefined }),
+      parseVoiceParticipantMetadata(
+        JSON.stringify({
+          arcana_tier_number: 99,
+          avatar_position_x: -1,
+          avatar_zoom: 8,
+          profile_gradient_start: 'javascript:alert(1)',
+        }),
       ),
-    ).toEqual({
-      avatarPath: null,
-      bannerPath: null,
-      displayName: 'profile-id',
-      handle: null,
-      profileEffect: 'none',
+    ).toMatchObject({
+      arcanaTierNumber: 1,
+      avatarPositionX: 50,
+      avatarZoom: 1,
+      gradientStart: null,
     });
   });
 });

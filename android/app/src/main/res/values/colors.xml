@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#7C3AED</color>
-    <color name="colorPrimaryDark">#070B16</color>
-    <color name="colorAccent">#2563EB</color>
-    <color name="cryptBackground">#070B16</color>
+    <color name="colorPrimary">#9667FF</color>
+    <color name="colorPrimaryDark">#05040D</color>
+    <color name="colorAccent">#54B7FF</color>
+    <color name="cryptBackground">#05040D</color>
 </resources>

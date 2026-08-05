@@ -12,24 +12,33 @@ export function Brand({ className, compact = false, to = '/app' }: BrandProps) {
     <Link
       aria-label="Crypt — página inicial"
       className={classNames(
-        'flex items-center gap-3 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus',
+        'crypt-brand flex items-center rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus',
+        compact ? 'gap-2.5' : 'gap-3',
         className,
       )}
       to={to}
     >
-      <img
-        alt=""
-        aria-hidden="true"
-        className={compact ? 'size-9' : 'size-11'}
-        src="/crypt-mark.svg"
-      />
       <span
-        className={classNames(
-          'font-bold tracking-[-0.04em] text-white',
-          compact ? 'text-lg' : 'text-xl',
-        )}
+        aria-hidden="true"
+        className={classNames('crypt-brand__mark', compact ? 'size-9' : 'size-11')}
       >
-        Crypt
+        <img alt="" className="size-full" src="/crypt-mark.svg" />
+      </span>
+
+      <span className="min-w-0">
+        <span
+          className={classNames(
+            'crypt-brand__name block font-black tracking-[-0.055em]',
+            compact ? 'text-lg' : 'text-xl',
+          )}
+        >
+          Crypt
+        </span>
+        {!compact ? (
+          <span className="crypt-brand__subtitle block text-[0.52rem] font-bold uppercase tracking-[0.24em]">
+            Arcane Network
+          </span>
+        ) : null}
       </span>
     </Link>
   );

@@ -2,8 +2,9 @@ import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { classNames } from '../../lib/classNames';
 import { Spinner } from './Spinner';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonVariant = 'danger' | 'ghost' | 'primary' | 'secondary';
+
+type ButtonSize = 'lg' | 'md' | 'sm';
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
@@ -14,13 +15,10 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-950/25 hover:from-violet-500 hover:to-blue-500',
-  secondary:
-    'border border-white/10 bg-white/[0.07] text-crypt-text hover:border-white/20 hover:bg-white/[0.11]',
-  ghost: 'text-crypt-muted hover:bg-white/[0.07] hover:text-white',
-  danger:
-    'border border-red-400/20 bg-red-500/10 text-red-200 hover:border-red-400/30 hover:bg-red-500/15',
+  primary: 'bg-gradient-to-r from-violet-600 to-blue-600 text-white',
+  secondary: 'border border-white/10 bg-white/[0.06] text-crypt-text',
+  ghost: 'text-crypt-muted',
+  danger: 'border border-red-400/20 bg-red-500/10 text-red-200',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -46,13 +44,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   return (
     <button
       className={classNames(
-        'inline-flex items-center justify-center font-semibold transition duration-150',
+        'crypt-button inline-flex items-center justify-center font-semibold',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus',
         'disabled:cursor-not-allowed disabled:opacity-50',
         variantClasses[variant],
         sizeClasses[size],
         className,
       )}
+      data-size={size}
+      data-variant={variant}
       disabled={disabled || loading}
       ref={ref}
       type={type}

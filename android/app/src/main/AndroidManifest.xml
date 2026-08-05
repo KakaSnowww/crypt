@@ -60,6 +60,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
+                    android:host="arcana"
+                    android:pathPrefix="/callback"
+                    android:scheme="crypt" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
                     android:host="invite"
                     android:scheme="crypt" />
             </intent-filter>
@@ -87,8 +97,6 @@
             android:foregroundServiceType="mediaProjection"
             tools:replace="android:foregroundServiceType" />
     </application>
-
-    <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

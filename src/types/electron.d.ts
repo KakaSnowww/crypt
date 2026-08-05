@@ -12,6 +12,12 @@ declare global {
     width: number;
   };
 
+  type CryptDesktopStartupState = {
+    available: boolean;
+    enabled: boolean;
+    reason?: string;
+  };
+
   type CryptDesktopUpdateState = {
     currentVersion: string;
     message?: string;
@@ -38,7 +44,10 @@ declare global {
         selectSource: (sourceId: string) => Promise<void>;
       };
       onDeepLink: (listener: (url: string) => void) => () => void;
-      startup?: { get: () => Promise<boolean>; set: (enabled: boolean) => Promise<boolean> };
+      startup?: {
+        get: () => Promise<CryptDesktopStartupState>;
+        set: (enabled: boolean) => Promise<CryptDesktopStartupState>;
+      };
       updates: {
         check: () => Promise<CryptDesktopUpdateState>;
         getState: () => Promise<CryptDesktopUpdateState>;

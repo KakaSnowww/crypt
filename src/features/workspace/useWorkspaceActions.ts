@@ -12,6 +12,7 @@ import {
   moveCategory,
   moveChannel,
   moveRole,
+  reorderRoles,
   savePermissionOverride,
   setMemberRoles,
   updateCategory,
@@ -118,15 +119,10 @@ export function useWorkspaceActions(serverId: string) {
       'Ordem atualizada',
       'O canal foi movido para a nova posição.',
     ),
-    reorderRole: useWorkspaceMutation(
-      async ({ roleId, steps }: { roleId: string; steps: number }) => {
-        const direction = steps < 0 ? -1 : 1;
-        for (let index = 0; index < Math.abs(steps); index += 1) {
-          await moveRole(roleId, direction);
-        }
-      },
+    reorderRoles: useWorkspaceMutation(
+      ({ orderedRoleIds }: { orderedRoleIds: string[] }) => reorderRoles(serverId, orderedRoleIds),
       'Hierarquia atualizada',
-      'O cargo foi movido para a nova posição.',
+      'Todos os cargos foram salvos em uma única operação.',
     ),
     saveOverride: useWorkspaceMutation(
       savePermissionOverride,
@@ -137,7 +133,7 @@ export function useWorkspaceActions(serverId: string) {
       ({ profileId, roleIds }: { profileId: string; roleIds: string[] }) =>
         setMemberRoles(serverId, profileId, roleIds),
       'Cargos atualizados',
-      'As novas permissões já estão ativas.',
+      'As novas permissões e o agrupamento já estão ativos.',
     ),
     updateCategory: useWorkspaceMutation(
       ({ categoryId, name }: { categoryId: string; name: string }) =>

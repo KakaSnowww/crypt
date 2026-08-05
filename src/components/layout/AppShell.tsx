@@ -35,9 +35,11 @@ import {
   useNotifications,
 } from '../../features/notifications/notifications.queries';
 import { useNotificationsRealtime } from '../../features/notifications/useNotificationsRealtime';
-import { ProfileAvatar } from '../../features/profile/components/ProfileAvatar';
+import { MemberProfileCardHost } from '../../features/profile/components/MemberProfileCardHost';
+import { PresenceStatusMenu } from '../../features/profile/components/PresenceStatusMenu';
 import { useCurrentProfile } from '../../features/profile/profile.queries';
 import { ServerIcon } from '../../features/servers/components/ServerIcon';
+import { useMyServerArcanaStatuses } from '../../features/servers/serverArcana.queries';
 import {
   useMyServers,
   useServerMembers,
@@ -65,6 +67,7 @@ import type {
 import { classNames } from '../../lib/classNames';
 import { isSupabaseConfigured } from '../../lib/supabase/client';
 import { isElectronRuntime } from '../../lib/platform';
+import { ExperienceSettingsButton } from '../../features/experience/ExperienceSettingsButton';
 import { IconButton } from '../common/IconButton';
 
 const channelLinks = [
@@ -80,6 +83,12 @@ const channelLinks = [
     icon: MessageCircle,
     label: 'Mensagens',
     to: '/app/mensagens',
+  },
+  {
+    end: true,
+    icon: Search,
+    label: 'Buscar',
+    to: '/app/busca',
   },
   {
     end: false,
@@ -124,6 +133,7 @@ export function AppShell() {
   const desktopRuntime = isElectronRuntime();
   const profileQuery = useCurrentProfile(user?.id ?? null, appDataEnabled);
   const serversQuery = useMyServers(appDataEnabled);
+  const serverArcanaStatusesQuery = useMyServerArcanaStatuses(appDataEnabled);
   const serverOverviewQuery = useServerOverview(selectedServerId, appDataEnabled);
   const serverMembersQuery = useServerMembers(selectedServerId, appDataEnabled);
   const serverCategoriesQuery = useServerCategories(selectedServerId, appDataEnabled);
@@ -156,6 +166,20 @@ export function AppShell() {
       document.body.classList.remove('app-shell-active');
     };
   }, []);
+  useEffect(() => {
+    const handleGlobalSearchShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase('en-US') === 'k') {
+        event.preventDefault();
+        void navigate('/app/busca');
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalSearchShortcut);
+
+    return () => {
+      window.removeEventListener('keydown', handleGlobalSearchShortcut);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     if (!voicePresenceQuery.error) {
@@ -172,6 +196,9 @@ export function AppShell() {
       tone: 'error',
     });
   }, [addToast, voicePresenceQuery.error]);
+  const serverArcanaStatusById = new Map(
+    (serverArcanaStatusesQuery.data ?? []).map((status) => [status.server_id, status]),
+  );
   const currentServer =
     serverOverviewQuery.data ??
     serversQuery.data?.find((server) => server.server_id === selectedServerId);
@@ -252,53 +279,59 @@ export function AppShell() {
             icon: UserRound,
             title: 'Convite',
           }
-        : location.pathname.startsWith('/app/notificacoes')
+        : location.pathname.startsWith('/app/busca')
           ? {
-              description: 'Mensagens, menções, amizades e moderação',
-              icon: Bell,
-              title: 'Notificações',
+              description: 'Mensagens, anexos, servidores e conversas privadas',
+              icon: Search,
+              title: 'Busca global',
             }
-          : location.pathname.startsWith('/app/mensagens')
+          : location.pathname.startsWith('/app/notificacoes')
             ? {
-                description: 'Conversas individuais protegidas',
-                icon: MessageCircle,
-                title: 'Mensagens privadas',
+                description: 'Mensagens, menções, amizades e moderação',
+                icon: Bell,
+                title: 'Notificações',
               }
-            : location.pathname.startsWith('/app/conexoes')
+            : location.pathname.startsWith('/app/mensagens')
               ? {
-                  description: 'Amigos, pedidos e pessoas para conhecer',
-                  icon: Users,
-                  title: 'Conexões',
+                  description: 'Conversas individuais protegidas',
+                  icon: MessageCircle,
+                  title: 'Mensagens privadas',
                 }
-              : location.pathname.startsWith('/app/pessoas/')
+              : location.pathname.startsWith('/app/conexoes')
                 ? {
-                    description: 'Perfil público e informações compartilhadas',
-                    icon: UserRound,
-                    title: 'Perfil',
+                    description: 'Amigos, pedidos e pessoas para conhecer',
+                    icon: Users,
+                    title: 'Conexões',
                   }
-                : location.pathname.startsWith('/app/perfil/editar')
+                : location.pathname.startsWith('/app/pessoas/')
                   ? {
-                      description: 'Avatar, interesses, privacidade e música',
-                      icon: Settings,
-                      title: 'Editar perfil',
+                      description: 'Perfil público e informações compartilhadas',
+                      icon: UserRound,
+                      title: 'Perfil',
                     }
-                  : location.pathname.startsWith('/app/perfil')
+                  : location.pathname.startsWith('/app/perfil/editar')
                     ? {
-                        description: 'Sua identidade e as escolhas que você decidiu compartilhar',
-                        icon: UserRound,
-                        title: 'Meu perfil',
+                        description: 'Avatar, interesses, privacidade e música',
+                        icon: Settings,
+                        title: 'Editar perfil',
                       }
-                    : location.pathname.startsWith('/app/conta')
+                    : location.pathname.startsWith('/app/perfil')
                       ? {
-                          description: 'Sessão, senha e exclusão da conta',
-                          icon: Settings,
-                          title: 'Conta e segurança',
+                          description: 'Sua identidade e as escolhas que você decidiu compartilhar',
+                          icon: UserRound,
+                          title: 'Meu perfil',
                         }
-                      : {
-                          description: 'Seu ponto de partida no Crypt',
-                          icon: Home,
-                          title: 'Início',
-                        };
+                      : location.pathname.startsWith('/app/conta')
+                        ? {
+                            description: 'Sessão, senha e exclusão da conta',
+                            icon: Settings,
+                            title: 'Conta e segurança',
+                          }
+                        : {
+                            description: 'Seu ponto de partida no Crypt',
+                            icon: Home,
+                            title: 'Início',
+                          };
   const HeaderIcon = pageHeader.icon;
 
   async function handleSignOut() {
@@ -344,11 +377,17 @@ export function AppShell() {
               aria-label={server.server_name}
               className="group relative rounded-2xl transition hover:rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
               key={server.server_id}
-              to={`/app/servidores/${server.server_id}`}
+              to={`/app/servidores/${server.server_id}/abrir`}
             >
               {({ isActive }) => (
                 <>
-                  <ServerIcon iconPath={server.icon_path} name={server.server_name} size="sm" />
+                  <ServerIcon
+                    circleColor={serverArcanaStatusById.get(server.server_id)?.circle_color}
+                    circleLevel={serverArcanaStatusById.get(server.server_id)?.circle_level ?? 0}
+                    iconPath={server.icon_path}
+                    name={server.server_name}
+                    size="sm"
+                  />
                   {isActive ? (
                     <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white" />
                   ) : null}
@@ -523,15 +562,15 @@ export function AppShell() {
         <VoiceCallPanel />
 
         <div className="m-3 flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.045] p-3 shadow-lg shadow-black/10">
-          <ProfileAvatar
+          <PresenceStatusMenu
             avatarPath={profileQuery.data?.avatar_path ?? null}
             displayName={displayName}
-            size="sm"
+            fallbackLabel={identityLabel}
+            handle={profileQuery.data?.handle ?? ''}
+            positionX={profileQuery.data?.avatar_position_x}
+            positionY={profileQuery.data?.avatar_position_y}
+            zoom={profileQuery.data?.avatar_zoom}
           />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-white">{displayName}</p>
-            <p className="truncate text-xs text-emerald-300">{identityLabel}</p>
-          </div>
           <div className="ml-auto flex">
             <NavLink
               aria-label="Abrir conta e segurança"
@@ -577,6 +616,13 @@ export function AppShell() {
             </span>
           ) : null}
           <div className="ml-auto flex items-center gap-1">
+            {!isConversationRoute ? (
+              <IconButton
+                icon={<Search aria-hidden="true" size={18} />}
+                label="Busca global (Ctrl + K)"
+                onClick={() => void navigate('/app/busca')}
+              />
+            ) : null}
             {isConversationRoute ? (
               <IconButton
                 icon={<Search aria-hidden="true" size={18} />}
@@ -584,6 +630,7 @@ export function AppShell() {
                 onClick={() => window.dispatchEvent(new Event('crypt:open-conversation-search'))}
               />
             ) : null}
+            <ExperienceSettingsButton />
             <DesktopUpdateHeaderButton />
             <AndroidUpdateHeaderButton />
             <NavLink
@@ -805,6 +852,7 @@ export function AppShell() {
           </div>
         )}
       </aside>
+      <MemberProfileCardHost />
     </div>
   );
 }

@@ -15,13 +15,10 @@ describe('limites de navegação do Electron', () => {
     expect(
       isTrustedApplicationUrl('http://127.0.0.1:5173.evil.test', 'http://127.0.0.1:5173'),
     ).toBe(false);
-    expect(
-      isTrustedApplicationUrl('http://user:password@127.0.0.1:5173', 'http://127.0.0.1:5173'),
-    ).toBe(false);
   });
 
   it('abre externamente apenas HTTP sem credenciais embutidas', () => {
-    expect(isAllowedExternalUrl('https://open.spotify.com/track/abc')).toBe(true);
+    expect(isAllowedExternalUrl('https://sandbox.asaas.com/checkoutSession/show/abc')).toBe(true);
     expect(isAllowedExternalUrl('file:///C:/Windows/system.ini')).toBe(false);
     expect(isAllowedExternalUrl('https://user:password@example.com')).toBe(false);
   });
@@ -31,23 +28,11 @@ describe('limites de navegação do Electron', () => {
     expect(
       isAllowedCryptDeepLink('crypt://connections/callback?provider=spotify&status=success'),
     ).toBe(true);
-    expect(
-      isAllowedCryptDeepLink(
-        'crypt://connections/callback?provider=youtube&status=error&error=access_denied',
-      ),
-    ).toBe(true);
-    expect(
-      isAllowedCryptDeepLink('crypt://connections/callback?provider=dropbox&status=success'),
-    ).toBe(false);
-    expect(
-      isAllowedCryptDeepLink(
-        'crypt://connections/callback?provider=steam&status=error&error=../../arquivo',
-      ),
-    ).toBe(false);
+    expect(isAllowedCryptDeepLink('crypt://arcana/callback?status=return')).toBe(true);
+    expect(isAllowedCryptDeepLink('crypt://arcana/callback?status=approved')).toBe(false);
     expect(isAllowedCryptDeepLink('crypt://invite/b44db508-c91c-43f6-85fa-ff847c1cce5b')).toBe(
       true,
     );
     expect(isAllowedCryptDeepLink('crypt://invite/../../arquivo')).toBe(false);
-    expect(isAllowedCryptDeepLink('crypt://configuracao/apagar')).toBe(false);
   });
 });

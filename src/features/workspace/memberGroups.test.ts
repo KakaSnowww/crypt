@@ -1,88 +1,83 @@
 import { describe, expect, it } from 'vitest';
 import type { ServerMember } from '../servers/servers.types';
-import { buildServerMemberGroups, getHighestMemberRole } from './memberGroups';
 import type { ServerMemberRoles, ServerRole } from './workspace.types';
+import { buildServerMemberGroups, getMemberRoles } from './memberGroups';
 
-const members = [
-  {
-    display_name: 'Dona',
-    handle: 'dona',
-    is_online: true,
-    is_owner: true,
-    profile_id: 'owner',
-  },
-  {
-    display_name: 'Mod',
-    handle: 'mod',
-    is_online: true,
-    is_owner: false,
-    profile_id: 'mod',
-  },
-  {
-    display_name: 'Pessoa',
-    handle: 'pessoa',
-    is_online: false,
-    is_owner: false,
-    profile_id: 'person',
-  },
-] as ServerMember[];
+function member(
+  profileId: string,
+  displayName: string,
+  online = true,
+  owner = false,
+): ServerMember {
+  return {
+    avatar_path: null,
+    display_name: displayName,
+    handle: profileId,
+    is_online: online,
+    is_owner: owner,
+    joined_at: '2026-08-04T00:00:00.000Z',
+    profile_id: profileId,
+  } as ServerMember;
+}
 
-const roles = [
-  {
-    color: '#A855F7',
-    display_separately: true,
+function role(roleId: string, position: number, separated = false): ServerRole {
+  return {
+    color: roleId === 'admin' ? '#EF4444' : '#3B82F6',
+    display_separately: separated,
     is_default: false,
     is_system: false,
-    member_count: 1,
+    member_count: 0,
     permissions: 0,
-    role_id: 'admin',
-    role_name: 'Administração',
-    role_position: 3,
-  },
-  {
-    color: '#3B82F6',
-    display_separately: true,
-    is_default: false,
-    is_system: false,
-    member_count: 2,
-    permissions: 0,
-    role_id: 'moderator',
-    role_name: 'Moderação',
-    role_position: 2,
-  },
-  {
-    color: '#94A3B8',
-    display_separately: false,
-    is_default: true,
-    is_system: true,
-    member_count: 3,
-    permissions: 0,
-    role_id: 'everyone',
-    role_name: '@everyone',
-    role_position: 0,
-  },
-] as ServerRole[];
+    role_id: roleId,
+    role_name: roleId,
+    role_position: position,
+  };
+}
 
-const assignments = [
-  { profile_id: 'owner', role_ids: ['admin', 'moderator'] },
-  { profile_id: 'mod', role_ids: ['moderator'] },
-  { profile_id: 'person', role_ids: [] },
-] as ServerMemberRoles[];
+describe('grupos de membros por cargo', () => {
+  it('coloca cada pessoa somente no cargo separado mais alto', () => {
+    const roles = [role('admin', 3, true), role('mod', 2, true)];
+    const assignments: ServerMemberRoles[] = [
+      { profile_id: 'kaio', role_ids: ['admin', 'mod'] },
+      { profile_id: 'teste', role_ids: ['mod'] },
+    ];
 
-describe('agrupamento dos membros por cargo', () => {
-  it('usa somente o cargo separado mais alto e mantém os demais por presença', () => {
-    const groups = buildServerMemberGroups(members, roles, assignments);
+    const groups = buildServerMemberGroups(
+      [member('kaio', 'Kaio'), member('teste', 'Tester')],
+      roles,
+      assignments,
+    );
 
-    expect(
-      groups.map((group) => [group.label, group.members.map((member) => member.profile_id)]),
-    ).toEqual([
-      ['Administração', ['owner']],
-      ['Moderação', ['mod']],
-      ['Offline', ['person']],
+    expect(groups.map((group) => [group.label, group.members.length])).toEqual([
+      ['admin', 1],
+      ['mod', 1],
     ]);
   });
 
-  it('usa o cargo mais alto para a cor do nome', () => {
-    expect(getHighestMemberRole('owner', roles, assignments)?.role_id).toBe('admin');
+  it('permite que o proprietário apareça no cargo visual atribuído', () => {
+    const roles = [role('admin', 3, true)];
+    const assignments: ServerMemberRoles[] = [{ profile_id: 'owner', role_ids: ['admin'] }];
+
+    const groups = buildServerMemberGroups(
+      [member('owner', 'Kaio', true, true)],
+      roles,
+      assignments,
+    );
+
+    expect(groups[0]?.label).toBe('admin');
+    expect(groups[0]?.members[0]?.is_owner).toBe(true);
+  });
+
+  it('retorna todos os cargos do membro do maior para o menor', () => {
+    const roles = [role('baixo', 1), role('alto', 4), role('medio', 2)];
+    const assignments: ServerMemberRoles[] = [
+      { profile_id: 'kaio', role_ids: ['baixo', 'alto', 'medio'] },
+    ];
+
+    expect(getMemberRoles('kaio', roles, assignments).map((item) => item.role_id)).toEqual([
+      'alto',
+      'medio',
+      'baixo',
+    ]);
   });
 });

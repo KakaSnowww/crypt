@@ -68,6 +68,9 @@ jobs:
       - name: Instalar dependências reproduzíveis
         run: npm ci
 
+      - name: Conferir metadados da release
+        run: npm run release:verify
+
       - name: Conferir configuração do Firebase Android
         run: npm run android:push:check
 
@@ -99,7 +102,10 @@ jobs:
           mkdir -p release-android
           cp android/app/build/outputs/apk/release/app-release.apk "release-android/Crypt-Android-$version.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "release-android/Crypt-Android-$version.aab"
-          sha256sum "release-android/Crypt-Android-$version.apk" > "release-android/Crypt-Android-$version.sha256"
+          (
+            cd release-android
+            sha256sum "Crypt-Android-$version.apk" "Crypt-Android-$version.aab" > "Crypt-Android-$version.sha256"
+          )
 
       - name: Publicar e verificar arquivos da Release
         shell: bash
@@ -109,6 +115,7 @@ jobs:
           version="$(node -p "require('./package.json').version")"
           tag="v$version"
           repository="$GITHUB_REPOSITORY"
+          notes_path="docs/releases/v$version.md"
           assets=(
             "release-android/Crypt-Android-$version.apk"
             "release-android/Crypt-Android-$version.aab"
@@ -116,9 +123,13 @@ jobs:
           )
 
           if ! gh release view "$tag" --repo "$repository" >/dev/null 2>&1; then
-            gh release create "$tag" --repo "$repository" --title "Crypt $tag" --generate-notes || true
+            if [ -f "$notes_path" ]; then
+              gh release create "$tag" --repo "$repository" --title "Crypt v$version — A Ascensão Arcana" --notes-file "$notes_path"
+            else
+              gh release create "$tag" --repo "$repository" --title "Crypt v$version" --generate-notes
+            fi
           fi
-          gh release view "$tag" --repo "$repository" >/dev/null
+
           gh release upload "$tag" "${assets[@]}" --repo "$repository" --clobber
 
           published_names="$(gh release view "$tag" --repo "$repository" --json assets --jq '.assets[].name')"

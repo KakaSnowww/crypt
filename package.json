@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.10.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -33,7 +33,7 @@
     "preview": "vite preview",
     "security:check": "node scripts/security-audit.mjs",
     "supabase:db:push": "supabase db push",
-    "supabase:functions:deploy": "supabase functions deploy delete-account --no-verify-jwt && supabase functions deploy livekit-token --no-verify-jwt && supabase functions deploy push-notifications --no-verify-jwt && supabase functions deploy external-oauth --no-verify-jwt",
+    "supabase:functions:deploy": "supabase functions deploy delete-account --no-verify-jwt && supabase functions deploy livekit-token --no-verify-jwt && supabase functions deploy push-notifications --no-verify-jwt && supabase functions deploy external-oauth --no-verify-jwt && supabase functions deploy arcana-billing --no-verify-jwt",
     "supabase:link": "supabase link",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
@@ -41,10 +41,15 @@
     "supabase:types": "supabase gen types typescript --linked > src/types/database.generated.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "text:audit": "node scripts/text-encoding-audit.mjs",
+    "text:repair": "node scripts/repair-text-encoding.mjs",
     "typecheck": "tsc -b --pretty false",
-    "validate": "npm run typecheck && npm run lint && npm run security:check && npm run test && npm run format:check && npm run build",
+    "validate": "npm run typecheck && npm run text:audit && npm run lint && npm run security:check && npm run test && npm run format:check && npm run build",
     "validate:android": "npm run validate && npm run android:push:check && cap sync android",
-    "validate:desktop": "npm run validate && npm run desktop:check"
+    "validate:desktop": "npm run validate && npm run desktop:check",
+    "release:verify": "node scripts/verify-release.mjs",
+    "release:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-release-local.ps1",
+    "release:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-release-v0.10.0.ps1"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",

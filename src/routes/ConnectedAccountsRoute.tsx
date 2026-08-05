@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ExternalLink, Gamepad2, Music2, RefreshCw, Tv, Unplug } from 'lucide-react';
+import { Clock3, ExternalLink, Gamepad2, Music2, RefreshCw, Tv, Unplug } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -20,24 +20,28 @@ import { SettingsNavigation } from '../features/profile/components/SettingsNavig
 
 const providers = [
   {
+    available: true,
     description: 'Identidade e música reproduzida no momento.',
     icon: Music2,
     id: 'spotify',
     name: 'Spotify',
   },
   {
+    available: true,
     description: 'Perfil público, avatar e jogos visíveis na Steam.',
     icon: Gamepad2,
     id: 'steam',
     name: 'Steam',
   },
   {
+    available: false,
     description: 'Canal, avatar e números públicos do YouTube.',
     icon: Tv,
     id: 'youtube',
     name: 'YouTube',
   },
 ] as const satisfies ReadonlyArray<{
+  available: boolean;
   description: string;
   icon: typeof Music2;
   id: ExternalProvider;
@@ -132,6 +136,11 @@ export function ConnectedAccountsRoute() {
 
   const start = useMutation({
     mutationFn: async (provider: ExternalProvider) => {
+      const providerConfig = providers.find((item) => item.id === provider);
+      if (!providerConfig?.available) {
+        throw new Error('Essa integração está temporariamente indisponível.');
+      }
+
       const url = await startExternalConnection(provider);
       openExternalAuthorization(url);
       return provider;
@@ -203,8 +212,9 @@ export function ConnectedAccountsRoute() {
       <p className="eyebrow">Contas conectadas</p>
       <h1 className="mt-3 text-3xl font-bold text-white">Sua identidade, em um só lugar</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-        A autorização acontece diretamente no Spotify, Google ou Steam. O Crypt não recebe sua senha
-        e os tokens ficam cifrados no backend.
+        A autorização acontece diretamente no Spotify ou na Steam. O Crypt não recebe sua senha e os
+        tokens ficam cifrados no backend. A conexão com o YouTube voltará depois da liberação
+        pública pelo Google.
       </p>
 
       {query.error ? (
@@ -214,21 +224,32 @@ export function ConnectedAccountsRoute() {
       ) : null}
 
       <div className="mt-8 grid gap-4">
-        {providers.map(({ description, icon: Icon, id, name }) => {
+        {providers.map(({ available, description, icon: Icon, id, name }) => {
           const connection = query.data?.find((item) => item.provider === id);
           const isStarting = start.isPending && start.variables === id;
           const isRefreshing = synchronize.isPending && synchronize.variables === id;
           const isRemoving = remove.isPending && remove.variables === id;
 
           return (
-            <section className="panel p-5" key={id}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <section className="panel relative overflow-hidden p-5" key={id}>
+              {!available && !connection ? (
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.12),transparent_42%)]" />
+              ) : null}
+              <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 gap-3">
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/[0.06] text-violet-200">
                     <Icon aria-hidden="true" size={20} />
                   </span>
                   <div className="min-w-0">
-                    <h2 className="font-semibold text-white">{name}</h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-semibold text-white">{name}</h2>
+                      {!available && !connection ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-violet-300/15 bg-violet-500/10 px-2 py-0.5 text-[0.65rem] font-semibold text-violet-200">
+                          <Clock3 aria-hidden="true" size={11} />
+                          Em breve
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-1 text-xs leading-5 text-crypt-subtle">
                       {connection ? `Conectado como ${connection.display_name}` : description}
                     </p>
@@ -277,19 +298,20 @@ export function ConnectedAccountsRoute() {
                     </>
                   ) : (
                     <Button
-                      leadingIcon={<ExternalLink size={15} />}
+                      disabled={!available}
+                      leadingIcon={available ? <ExternalLink size={15} /> : <Clock3 size={15} />}
                       loading={isStarting}
                       onClick={() => start.mutate(id)}
                       size="sm"
                     >
-                      Conectar
+                      {available ? 'Conectar' : 'Em breve'}
                     </Button>
                   )}
                 </div>
               </div>
 
               {connection ? (
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
                   <Toggle
                     checked={connection.show_on_profile}
                     description="Exibe a identidade e os dados públicos desta conta."
@@ -310,9 +332,10 @@ export function ConnectedAccountsRoute() {
                   ) : null}
                 </div>
               ) : (
-                <p className="mt-4 rounded-xl bg-violet-400/[0.06] px-4 py-3 text-xs leading-5 text-violet-100/80">
-                  Ao clicar em Conectar, o navegador oficial do provedor será aberto. Depois da
-                  autorização, você voltará automaticamente ao Crypt.
+                <p className="relative mt-4 rounded-xl bg-violet-400/[0.06] px-4 py-3 text-xs leading-5 text-violet-100/80">
+                  {available
+                    ? 'Ao clicar em Conectar, o navegador oficial do provedor será aberto. Depois da autorização, você voltará automaticamente ao Crypt.'
+                    : 'A integração está preservada, mas novas conexões permanecerão desligadas até concluirmos a verificação pública necessária.'}
                 </p>
               )}
             </section>

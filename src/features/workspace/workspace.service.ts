@@ -11,7 +11,10 @@ import type {
   ServerRole,
 } from './workspace.types';
 
-async function rpc<T>(request: PromiseLike<{ data: T | null; error: unknown }>): Promise<T> {
+type RpcResponse<T> = PromiseLike<{ data: T | null; error: unknown }>;
+type UntypedRpc = <T>(functionName: string, args?: Record<string, unknown>) => RpcResponse<T>;
+
+async function rpc<T>(request: RpcResponse<T>): Promise<T> {
   const { data, error } = await request;
 
   if (error) {
@@ -19,6 +22,11 @@ async function rpc<T>(request: PromiseLike<{ data: T | null; error: unknown }>):
   }
 
   return data as T;
+}
+
+function untypedRpc<T>(functionName: string, args: Record<string, unknown>) {
+  const client = getSupabaseClient() as unknown as { rpc: UntypedRpc };
+  return rpc<T>(client.rpc<T>(functionName, args));
 }
 
 export function fetchServerCategories(serverId: string): Promise<ServerCategory[]> {
@@ -209,6 +217,13 @@ export function moveRole(roleId: string, direction: -1 | 1) {
       target_role_id: roleId,
     }),
   );
+}
+
+export function reorderRoles(serverId: string, orderedRoleIds: string[]) {
+  return untypedRpc<void>('reorder_server_roles', {
+    ordered_role_ids: orderedRoleIds,
+    target_server_id: serverId,
+  });
 }
 
 export function setMemberRoles(serverId: string, profileId: string, roleIds: string[]) {

@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-do
 import { AuthLayout } from '../components/layout/AuthLayout';
 import { RouteErrorFallback } from '../routes/RouteErrorFallback';
 import { OnboardingGate } from '../features/onboarding/OnboardingGate';
+import { ServerOnboardingGate } from '../features/server-onboarding/ServerOnboardingGate';
 import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { PublicOnlyRoute } from '../features/auth/PublicOnlyRoute';
 import {
@@ -17,6 +18,7 @@ import {
   DirectConversationRoute,
   DirectMessagesRoute,
   ForgotPasswordRoute,
+  GlobalSearchRoute,
   LazyRoute,
   LoginRoute,
   NotFoundRoute,
@@ -28,6 +30,8 @@ import {
   RegisterRoute,
   ResetPasswordRoute,
   ServerInviteRoute,
+  ServerOnboardingRoute,
+  ServerOpenRoute,
   ServerManageRoute,
   ServerModerationRoute,
   ServerRoute,
@@ -158,6 +162,14 @@ export const appRoutes: RouteObject[] = [
         ),
       },
       {
+        path: 'busca',
+        element: (
+          <LazyRoute>
+            <GlobalSearchRoute />
+          </LazyRoute>
+        ),
+      },
+      {
         path: 'mensagens',
         element: (
           <LazyRoute>
@@ -198,10 +210,30 @@ export const appRoutes: RouteObject[] = [
         ),
       },
       {
+        path: 'servidores/:serverId/abrir',
+        element: (
+          <ServerOnboardingGate>
+            <LazyRoute>
+              <ServerOpenRoute />
+            </LazyRoute>
+          </ServerOnboardingGate>
+        ),
+      },
+      {
         path: 'servidores/:serverId',
         element: (
+          <ServerOnboardingGate>
+            <LazyRoute>
+              <ServerRoute />
+            </LazyRoute>
+          </ServerOnboardingGate>
+        ),
+      },
+      {
+        path: 'servidores/:serverId/entrada',
+        element: (
           <LazyRoute>
-            <ServerRoute />
+            <ServerOnboardingRoute />
           </LazyRoute>
         ),
       },
@@ -232,17 +264,21 @@ export const appRoutes: RouteObject[] = [
       {
         path: 'servidores/:serverId/canais/:channelId',
         element: (
-          <LazyRoute>
-            <ChannelRoute />
-          </LazyRoute>
+          <ServerOnboardingGate>
+            <LazyRoute>
+              <ChannelRoute />
+            </LazyRoute>
+          </ServerOnboardingGate>
         ),
       },
       {
         path: 'servidores/:serverId/chamadas/:channelId',
         element: (
-          <LazyRoute>
-            <VoiceRoomRoute />
-          </LazyRoute>
+          <ServerOnboardingGate>
+            <LazyRoute>
+              <VoiceRoomRoute />
+            </LazyRoute>
+          </ServerOnboardingGate>
         ),
       },
       {

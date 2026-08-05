@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { Sparkles, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type ModalProps = {
@@ -15,12 +15,19 @@ export function Modal({ children, description, footer, onOpenChange, open, title
   return (
     <Dialog.Root onOpenChange={onOpenChange} open={open}>
       <Dialog.Portal>
-        <Dialog.Overlay className="modal-overlay fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm" />
-        <Dialog.Content className="modal-content fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[1.75rem] border border-white/10 bg-crypt-panel p-6 shadow-2xl shadow-black/50 focus:outline-none sm:p-7">
-          <div className="pr-10">
+        <Dialog.Overlay className="modal-overlay fixed inset-0 z-50 bg-[#020208]/80 backdrop-blur-md" />
+        <Dialog.Content className="crypt-modal modal-content fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[1.75rem] border p-6 focus:outline-none sm:p-7">
+          <span aria-hidden="true" className="crypt-modal__sigil" />
+
+          <div className="relative pr-10">
+            <p className="mb-2 flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-violet-300">
+              <Sparkles size={11} />
+              Crypt
+            </p>
             <Dialog.Title className="text-xl font-bold tracking-tight text-white">
               {title}
             </Dialog.Title>
+
             {description ? (
               <Dialog.Description className="mt-2 text-sm leading-6 text-crypt-muted">
                 {description}
@@ -31,17 +38,17 @@ export function Modal({ children, description, footer, onOpenChange, open, title
           <Dialog.Close asChild>
             <button
               aria-label="Fechar janela"
-              className="absolute right-5 top-5 grid size-10 place-items-center rounded-xl text-crypt-muted transition hover:bg-white/[0.07] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+              className="crypt-icon-button absolute right-5 top-5 grid size-10 place-items-center rounded-xl text-crypt-muted"
               type="button"
             >
               <X aria-hidden="true" size={18} />
             </button>
           </Dialog.Close>
 
-          <div className="mt-6">{children}</div>
+          <div className="relative mt-6">{children}</div>
 
           {footer ? (
-            <div className="mt-7 flex flex-col-reverse gap-3 border-t border-white/10 pt-5 sm:flex-row sm:justify-end">
+            <div className="relative mt-7 flex flex-col-reverse gap-3 border-t border-white/10 pt-5 sm:flex-row sm:justify-end">
               {footer}
             </div>
           ) : null}

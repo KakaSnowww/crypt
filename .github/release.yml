@@ -1,0 +1,21 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+      - internal
+  categories:
+    - title: Novidades
+      labels:
+        - feature
+        - enhancement
+    - title: Correções
+      labels:
+        - bug
+        - fix
+    - title: Segurança e estabilidade
+      labels:
+        - security
+        - performance
+    - title: Outras mudanças
+      labels:
+        - '*'

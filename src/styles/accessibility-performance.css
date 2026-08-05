@@ -1,0 +1,333 @@
+/* =========================================================
+   CRYPT 0.10.0 — ACESSIBILIDADE, PERFORMANCE E MOBILE
+   ========================================================= */
+
+:root {
+  --crypt-visual-viewport-height: 100dvh;
+  --crypt-visual-viewport-width: 100vw;
+  --crypt-visual-viewport-top: 0px;
+  --crypt-keyboard-height: 0px;
+  --crypt-min-touch-target: 2.75rem;
+}
+
+.crypt-sr-only {
+  position: fixed !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+
+.crypt-skip-links {
+  position: fixed;
+  z-index: 1000;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+.crypt-skip-links a {
+  border: 2px solid #fff;
+  border-radius: 0.65rem;
+  background: #1d103d;
+  padding: 0.7rem 0.9rem;
+  color: #fff;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 45%);
+  font-size: 0.8rem;
+  font-weight: 750;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-160%);
+}
+
+.crypt-skip-links a:focus {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+html[data-input-method='keyboard'] :focus-visible {
+  outline: 3px solid var(--color-crypt-focus) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgb(155 105 255 / 13%);
+}
+
+#crypt-main-content:focus,
+#crypt-primary-navigation:focus {
+  outline: none;
+}
+
+html[data-crypt-text-scale='large'] {
+  font-size: 106.25%;
+}
+
+html[data-crypt-text-scale='extra'] {
+  font-size: 112.5%;
+}
+
+html[data-crypt-contrast='high'] {
+  --color-crypt-muted: #dfdaea;
+  --color-crypt-subtle: #bbb3ce;
+  --arcane-border: rgb(224 205 255 / 25%);
+  --arcane-border-strong: rgb(235 220 255 / 48%);
+}
+
+html[data-crypt-contrast='high'] .panel,
+html[data-crypt-contrast='high'] .crypt-modal,
+html[data-crypt-contrast='high'] .crypt-field,
+html[data-crypt-contrast='high'] .crypt-toggle,
+html[data-crypt-contrast='high'] .rounded-2xl.border,
+html[data-crypt-contrast='high'] .rounded-3xl.border {
+  border-color: rgb(230 212 255 / 28%) !important;
+}
+
+html[data-crypt-contrast='high'] .text-crypt-subtle {
+  color: #c5bdd5 !important;
+}
+
+html[data-crypt-contrast='high'] .text-crypt-muted {
+  color: #e1dce9 !important;
+}
+
+html[data-crypt-contrast='high'] a[aria-current='page'] {
+  text-decoration: underline 2px;
+  text-underline-offset: 0.28rem;
+}
+
+/* Visual Viewport e teclado móvel */
+
+.app-shell,
+.crypt-auth-layout {
+  height: var(--crypt-visual-viewport-height, 100dvh) !important;
+  max-height: var(--crypt-visual-viewport-height, 100dvh);
+}
+
+html[data-runtime='android'] body.app-shell-active {
+  height: var(--crypt-visual-viewport-height, 100dvh);
+}
+
+html[data-runtime='android'] .app-shell {
+  top: var(--crypt-visual-viewport-top, 0px);
+}
+
+html[data-keyboard-open='true'] .app-shell__content {
+  padding-bottom: 0 !important;
+}
+
+html[data-keyboard-open='true'] nav[aria-label='Navegação principal'] {
+  display: none !important;
+}
+
+html[data-keyboard-open='true'] .chat-fixed:last-of-type {
+  padding-bottom: max(0.55rem, env(safe-area-inset-bottom)) !important;
+}
+
+html[data-keyboard-open='true'] .app-shell__header {
+  min-height: 3.55rem;
+}
+
+html[data-keyboard-open='true'] .app-shell__header p {
+  display: none !important;
+}
+
+input,
+textarea,
+select,
+[contenteditable='true'] {
+  scroll-margin-block: 5rem;
+}
+
+.chat-fixed:last-of-type {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+nav[aria-label='Navegação principal'] {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Áreas de toque */
+
+html[data-runtime='android'] button:not(.server-entry-check),
+html[data-runtime='android'] a,
+html[data-runtime='android'] [role='button'] {
+  min-width: var(--crypt-min-touch-target);
+  min-height: var(--crypt-min-touch-target);
+}
+
+html[data-runtime='android'] input[type='checkbox'],
+html[data-runtime='android'] input[type='radio'],
+html[data-runtime='android'] input[type='range'] {
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+}
+
+html[data-runtime='android'] .crypt-field {
+  min-height: 3rem;
+}
+
+html[data-runtime='android'] textarea.crypt-field {
+  min-height: 7rem;
+}
+
+html[data-runtime='android'] .chat-scroll {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Performance das listas */
+
+article[id^='message-'] {
+  content-visibility: auto;
+  contain-intrinsic-size: 84px;
+}
+
+.app-shell__sidebar nav,
+.app-shell__members,
+.chat-scroll {
+  contain: layout style;
+}
+
+.arcane-atmosphere {
+  contain: strict;
+}
+
+html[data-page-visibility='hidden'] .arcane-atmosphere *,
+html[data-page-visibility='hidden'] .profile-effect-aurora::after,
+html[data-page-visibility='hidden'] .profile-effect-pulse,
+html[data-page-visibility='hidden'] .voice-participant.is-speaking::after {
+  animation-play-state: paused !important;
+}
+
+html[data-page-visibility='hidden'] .arcane-atmosphere {
+  visibility: hidden;
+}
+
+html[data-crypt-performance='limited'] .arcane-atmosphere__particles i:nth-child(odd),
+html[data-crypt-performance='limited'] .arcane-atmosphere__sigil--two {
+  display: none;
+}
+
+html[data-crypt-performance='limited'] .arcane-atmosphere__aurora {
+  filter: blur(110px);
+  opacity: 0.075;
+}
+
+html[data-crypt-performance='limited'] .panel,
+html[data-crypt-performance='limited'] .app-shell__sidebar,
+html[data-crypt-performance='limited'] .app-shell__members,
+html[data-crypt-performance='limited'] .app-shell__header,
+html[data-crypt-performance='limited'] .voice-stage__header,
+html[data-crypt-performance='limited'] .voice-stage__controls {
+  backdrop-filter: blur(10px);
+}
+
+html[data-crypt-performance='limited'] article[id^='message-'] {
+  transition: none;
+}
+
+/* Ajustes pequenos de legibilidade */
+
+p,
+li,
+dd,
+label,
+button,
+a {
+  overflow-wrap: break-word;
+}
+
+code,
+pre,
+[data-code-block] {
+  overflow-wrap: normal;
+}
+
+[aria-disabled='true'],
+:disabled {
+  cursor: not-allowed;
+}
+
+[aria-busy='true'] {
+  cursor: progress;
+}
+
+/* Landscape móvel */
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .app-shell__header {
+    min-height: 3.5rem;
+  }
+
+  .app-shell__header [class*='size-10'] {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .chat-fixed:first-of-type {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .chat-fixed:last-of-type {
+    padding-top: 0.45rem;
+  }
+
+  .auth-surface {
+    margin-block: 0.75rem;
+  }
+}
+
+/* Alto contraste do sistema */
+
+@media (forced-colors: active) {
+  .panel,
+  .crypt-modal,
+  .auth-surface,
+  .crypt-button,
+  .crypt-field,
+  .crypt-toggle {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+    color: CanvasText !important;
+    box-shadow: none !important;
+  }
+
+  .crypt-button[data-variant='primary'] {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  .arcane-atmosphere,
+  body::before {
+    display: none !important;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .panel,
+  .crypt-modal,
+  .auth-surface,
+  .app-shell__sidebar,
+  .app-shell__members,
+  .app-shell__header {
+    backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  article[id^='message-'] {
+    transition: none !important;
+  }
+}

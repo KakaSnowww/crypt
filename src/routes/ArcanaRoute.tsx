@@ -1,81 +1,375 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Gem, HardDriveUpload, Radio, Sparkles, Trash2, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import {
+  CalendarDays,
+  CreditCard,
+  HardDriveUpload,
+  Radio,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  XCircle,
+  Zap,
+} from 'lucide-react';
+import { useEffect, type CSSProperties } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
-import { useArcanaMembership } from '../features/arcana/arcana.queries';
+import { ArcanaTierIcon } from '../features/arcana/ArcanaTierIcon';
+import { CommunityRuneIcon } from '../features/arcana/CommunityRuneIcon';
+import { useToast } from '../components/common/ToastContext';
+import { arcanaKeys, useArcanaMembership } from '../features/arcana/arcana.queries';
+import {
+  cancelArcanaSubscription,
+  openArcanaCheckout,
+  startArcanaCheckout,
+  syncArcanaBilling,
+} from '../features/arcana/arcanaBilling.service';
 import {
   applyArcanaRune,
   fetchMyArcanaRunes,
   removeArcanaRune,
 } from '../features/arcana/arcana.service';
-import { arcanaTiers } from '../features/arcana/arcana.types';
+import { arcanaMembershipStatusLabels, arcanaTiers } from '../features/arcana/arcana.types';
 import { useAuth } from '../features/auth/useAuth';
 import { useMyServers } from '../features/servers/servers.queries';
+
 const benefits = [
   {
     icon: Radio,
     title: 'Transmissão Windows HD a 60 FPS',
     text: 'Mais fluidez ao compartilhar jogos no aplicativo Windows.',
   },
-  { icon: HardDriveUpload, title: 'Arquivos maiores', text: 'Envios de até 25 MB.' },
-  { icon: Zap, title: '3 Runas de Comunidade', text: 'Fortaleça até três servidores.' },
-  { icon: Sparkles, title: 'Identidade avançada', text: 'GIF, efeitos e gradiente exclusivo.' },
+  {
+    icon: HardDriveUpload,
+    title: 'Arquivos maiores',
+    text: 'Envios de até 25 MB.',
+  },
+  {
+    icon: Zap,
+    title: '3 Runas de Comunidade',
+    text: 'Fortaleça até três servidores.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Identidade avançada',
+    text: 'GIF, efeitos e gradiente exclusivo.',
+  },
 ] as const;
+
+function formatDate(value: null | string) {
+  if (!value) return null;
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'long',
+  }).format(new Date(value));
+}
+
 export function ArcanaRoute() {
   const membership = useArcanaMembership();
   const { user } = useAuth();
+  const { addToast } = useToast();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const servers = useMyServers();
   const runesKey = ['arcana', 'runes', user?.id] as const;
+
   const runes = useQuery({
     enabled: Boolean(user),
     queryFn: () => fetchMyArcanaRunes(user!.id),
     queryKey: runesKey,
   });
+
+  async function refreshArcana() {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: arcanaKeys.membership,
+      }),
+      queryClient.invalidateQueries({ queryKey: runesKey }),
+      queryClient.invalidateQueries({ queryKey: ['server-arcana'] }),
+    ]);
+  }
+
+  const startBilling = useMutation({
+    mutationFn: startArcanaCheckout,
+    onError: (error: Error) => {
+      addToast({
+        message: error.message,
+        title: 'Não foi possível abrir a assinatura',
+        tone: 'error',
+      });
+    },
+    onSuccess: async ({ alreadyActive, checkoutUrl }) => {
+      if (alreadyActive) {
+        await refreshArcana();
+        addToast({
+          message: 'Os benefícios já estão disponíveis nesta conta.',
+          title: 'Arcana ativa',
+          tone: 'success',
+        });
+        return;
+      }
+
+      if (checkoutUrl) {
+        openArcanaCheckout(checkoutUrl);
+        addToast({
+          message: 'Conclua a assinatura no Checkout Asaas. O Crypt será reaberto ao terminar.',
+          title: 'Checkout aberto',
+          tone: 'info',
+        });
+      }
+    },
+  });
+
+  const synchronizeBilling = useMutation({
+    mutationFn: syncArcanaBilling,
+    onError: (error: Error) => {
+      addToast({
+        message: error.message,
+        title: 'Não foi possível verificar a assinatura',
+        tone: 'error',
+      });
+    },
+    onSuccess: async () => {
+      await refreshArcana();
+      addToast({
+        message: 'O estado mais recente foi consultado diretamente no Asaas.',
+        title: 'Arcana atualizada',
+        tone: 'success',
+      });
+    },
+  });
+
+  const cancelBilling = useMutation({
+    mutationFn: cancelArcanaSubscription,
+    onError: (error: Error) => {
+      addToast({
+        message: error.message,
+        title: 'Não foi possível cancelar',
+        tone: 'error',
+      });
+    },
+    onSuccess: async (result) => {
+      await refreshArcana();
+      const accessUntil =
+        typeof result.access_until === 'string' ? formatDate(result.access_until) : null;
+
+      addToast({
+        message: accessUntil
+          ? `Não haverá nova cobrança. Seus benefícios continuam até ${accessUntil}.`
+          : 'A cobrança recorrente foi cancelada.',
+        title: 'Assinatura cancelada',
+        tone: 'info',
+      });
+    },
+  });
+
   const applyRune = useMutation({
     mutationFn: ({ serverId, slot }: { serverId: string; slot: number }) =>
       applyArcanaRune(serverId, slot),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: runesKey }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: runesKey }),
+        queryClient.invalidateQueries({ queryKey: ['server-arcana'] }),
+      ]);
+    },
   });
+
   const clearRune = useMutation({
     mutationFn: removeArcanaRune,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: runesKey }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: runesKey }),
+        queryClient.invalidateQueries({ queryKey: ['server-arcana'] }),
+      ]);
+    },
   });
-  if (membership.isPending)
+
+  const callbackStatus = searchParams.get('billing_status');
+
+  useEffect(() => {
+    if (callbackStatus !== 'return') return;
+
+    const next = new URLSearchParams(searchParams);
+    next.delete('billing_status');
+    setSearchParams(next, { replace: true });
+
+    let active = true;
+
+    void syncArcanaBilling()
+      .then(async () => {
+        if (!active) return;
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: arcanaKeys.membership,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['arcana', 'runes', user?.id],
+          }),
+        ]);
+        addToast({
+          message:
+            'O Asaas foi consultado. A Arcana será liberada somente depois da confirmação financeira.',
+          title: 'Retorno do Checkout',
+          tone: 'success',
+        });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        addToast({
+          message:
+            error instanceof Error ? error.message : 'Abra a Arcana novamente e use Atualizar.',
+          title: 'Verificação pendente',
+          tone: 'error',
+        });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [addToast, callbackStatus, queryClient, searchParams, setSearchParams, user?.id]);
+
+  if (membership.isPending) {
     return (
       <div className="grid min-h-72 place-items-center">
         <Spinner />
       </div>
     );
-  const active = membership.data?.is_active === true;
+  }
+
+  const data = membership.data;
+  const active = data?.is_active === true;
+  const pending = data?.status === 'pending';
+  const canceledWithAccess = data?.status === 'canceled' && active;
+  const periodEnd = formatDate(data?.current_period_ends_at ?? null);
+  const asaasSubscription = data?.provider === 'asaas';
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <section className="relative overflow-hidden rounded-[2rem] border border-violet-400/20 bg-[#0d1020] p-6 sm:p-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,.28),transparent_38%)]" />
         <div className="relative">
           <p className="eyebrow flex items-center gap-2">
-            <Gem size={15} /> Arcana
+            <ArcanaTierIcon decorative size="xs" tierNumber={active ? data?.tier_number : 1} />
+            Arcana
           </p>
           <h1 className="mt-3 text-4xl font-black text-white">Seu Crypt, elevado.</h1>
-          <p className="mt-4 max-w-2xl text-sm text-crypt-muted">
-            R$ 5 por mês com identidade avançada, transmissão aprimorada e Runas.
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-crypt-muted">
+            R$ 5 por mês. A assinatura é concluída no ambiente seguro do Asaas e pode ser cancelada
+            nesta página.
           </p>
+
+          {membership.error ? (
+            <p className="mt-5 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">
+              {membership.error.message}
+            </p>
+          ) : null}
+
           {active ? (
-            <div className="mt-6 inline-flex items-center gap-3 rounded-2xl bg-emerald-400/10 px-4 py-3">
-              <BadgeCheck className="text-emerald-300" />
-              <strong className="text-white">Arcana {membership.data?.tier_name}</strong>
+            <div className="mt-6 inline-flex flex-wrap items-center gap-3 rounded-2xl bg-emerald-400/10 px-4 py-3">
+              <ArcanaTierIcon decorative size="md" tierNumber={data?.tier_number} />
+              <strong className="text-white">Arcana {data?.tier_name}</strong>
+              <span className="text-xs text-emerald-100/75">
+                {canceledWithAccess ? 'cancelada, ainda ativa' : 'ativa'}
+              </span>
+            </div>
+          ) : pending ? (
+            <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-500/[0.08] p-4">
+              <strong className="text-sm text-amber-100">
+                Aguardando confirmação do pagamento
+              </strong>
+              <p className="mt-1 text-xs leading-5 text-amber-100/70">
+                Continue no Checkout Asaas ou use Atualizar caso o pagamento já tenha sido
+                confirmado.
+              </p>
             </div>
           ) : (
             <div className="mt-6">
-              <Button disabled>Assinar por R$ 5/mês</Button>
-              <p className="mt-2 text-xs text-amber-200">
-                A compra será liberada após configurar o provedor de pagamentos.
-              </p>
+              <Button
+                leadingIcon={<CreditCard aria-hidden="true" size={16} />}
+                loading={startBilling.isPending}
+                onClick={() => startBilling.mutate()}
+              >
+                Assinar por R$ 5/mês
+              </Button>
             </div>
           )}
         </div>
       </section>
+
+      {(asaasSubscription || pending) && data ? (
+        <section className="panel mt-6 p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="eyebrow">Assinatura Asaas</p>
+              <h2 className="mt-2 text-xl font-bold text-white">Gerenciar Arcana</h2>
+              <div className="mt-4 grid gap-2 text-sm text-crypt-muted">
+                <p className="flex items-center gap-2">
+                  <ShieldCheck className="text-violet-300" size={16} />
+                  Estado: {arcanaMembershipStatusLabels[data.status]}
+                </p>
+                {periodEnd ? (
+                  <p className="flex items-center gap-2">
+                    <CalendarDays className="text-violet-300" size={16} />
+                    {data.status === 'canceled'
+                      ? `Benefícios até ${periodEnd}`
+                      : `Próxima renovação em ${periodEnd}`}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {pending ? (
+                <Button
+                  leadingIcon={<CreditCard size={15} />}
+                  loading={startBilling.isPending}
+                  onClick={() => startBilling.mutate()}
+                  size="sm"
+                >
+                  Continuar pagamento
+                </Button>
+              ) : null}
+
+              <Button
+                leadingIcon={<RefreshCw size={15} />}
+                loading={synchronizeBilling.isPending}
+                onClick={() => synchronizeBilling.mutate()}
+                size="sm"
+                variant="secondary"
+              >
+                Atualizar
+              </Button>
+
+              {data.status !== 'canceled' &&
+              data.status !== 'expired' &&
+              data.status !== 'inactive' ? (
+                <Button
+                  leadingIcon={<XCircle size={15} />}
+                  loading={cancelBilling.isPending}
+                  onClick={() => {
+                    if (
+                      window.confirm('Cancelar a renovação da Arcana? Não haverá nova cobrança.')
+                    ) {
+                      cancelBilling.mutate();
+                    }
+                  }}
+                  size="sm"
+                  variant="danger"
+                >
+                  Cancelar renovação
+                </Button>
+              ) : null}
+            </div>
+          </div>
+
+          <p className="mt-5 border-t border-white/[0.07] pt-4 text-xs leading-5 text-crypt-subtle">
+            O Crypt não recebe dados do cartão. A confirmação financeira é feita por Webhook e
+            também consultada diretamente na API do Asaas.
+          </p>
+        </section>
+      ) : null}
+
       <section className="mt-6 grid gap-3 sm:grid-cols-2">
         {benefits.map(({ icon: Icon, title, text }) => (
           <article className="panel p-5" key={title}>
@@ -85,32 +379,61 @@ export function ArcanaRoute() {
           </article>
         ))}
       </section>
+
       <section className="panel mt-6 p-5">
         <h2 className="text-xl font-bold text-white">Jornada Arcana</h2>
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-          {arcanaTiers.map(([name, color], index) => (
-            <div className="rounded-xl bg-white/[0.025] p-3" key={name}>
-              <span className="block size-2 rounded-full" style={{ backgroundColor: color }} />
-              <strong className="mt-2 block text-xs text-white">
-                {index + 1}. {name}
-              </strong>
-            </div>
-          ))}
+          {arcanaTiers.map(([name, color], index) => {
+            const tierNumber = index + 1;
+            const currentTier = active ? Math.max(1, Math.min(12, data?.tier_number ?? 1)) : 0;
+            const current = tierNumber === currentTier;
+            const earned = active && tierNumber <= currentTier;
+
+            return (
+              <article
+                className={`arcana-tier-card ${
+                  current ? 'is-current' : earned ? 'is-earned' : 'is-locked'
+                }`}
+                key={name}
+                style={
+                  {
+                    '--arcana-tier-color': color,
+                  } as CSSProperties
+                }
+              >
+                <ArcanaTierIcon decorative size="lg" tierNumber={tierNumber} />
+                <strong className="block text-xs text-white">
+                  {tierNumber}. {name}
+                </strong>
+                <span className="arcana-tier-card__state">
+                  {current ? 'Seu nível' : earned ? 'Conquistado' : `${tierNumber}º mês`}
+                </span>
+              </article>
+            );
+          })}
         </div>
       </section>
+
       {active ? (
         <section className="panel mt-6 p-5">
           <h2 className="text-xl font-bold text-white">Runas de Comunidade</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[1, 2, 3].map((slot) => {
               const rune = runes.data?.find((item) => item.rune_slot === slot);
+
               return (
-                <div className="rounded-2xl bg-white/[0.025] p-4" key={slot}>
-                  <p className="text-xs font-bold text-violet-300">Runa {slot}</p>
+                <div className="arcana-rune-card rounded-2xl p-4" key={slot}>
+                  <CommunityRuneIcon className="arcana-rune-card__image" size="lg" slot={slot} />
+                  <p className="mt-3 text-center text-xs font-bold text-violet-300">Runa {slot}</p>
                   <select
                     className="mt-3 min-h-10 w-full rounded-xl bg-[#111522] text-white"
-                    onChange={(e) => {
-                      if (e.target.value) applyRune.mutate({ serverId: e.target.value, slot });
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        applyRune.mutate({
+                          serverId: event.target.value,
+                          slot,
+                        });
+                      }
                     }}
                     value={rune?.server_id ?? ''}
                   >
@@ -138,6 +461,7 @@ export function ArcanaRoute() {
           </div>
         </section>
       ) : null}
+
       <p className="mt-5 text-center text-xs text-crypt-subtle">
         Personalize em{' '}
         <Link className="text-violet-300" to="/app/perfil/editar">

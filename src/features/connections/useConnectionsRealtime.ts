@@ -4,7 +4,7 @@ import { useToast } from '../../components/common/ToastContext';
 import { isAndroidRuntime } from '../../lib/platform';
 import { getSupabaseClient, isSupabaseConfigured } from '../../lib/supabase/client';
 import { connectionKeys } from './connections.queries';
-import { setMyPresence } from './connections.service';
+import { heartbeatMyPresence } from './presence.service';
 
 export function useConnectionsRealtime(userId: null | string) {
   const queryClient = useQueryClient();
@@ -106,7 +106,7 @@ export function usePresenceHeartbeat(userId: null | string) {
       let removeAppListener: (() => Promise<void>) | undefined;
 
       const updateAndroidPresence = () => {
-        void setMyPresence(appIsActive ? 'online' : 'away').catch(() => undefined);
+        void heartbeatMyPresence(appIsActive).catch(() => undefined);
       };
 
       void import('@capacitor/app')
@@ -136,28 +136,24 @@ export function usePresenceHeartbeat(userId: null | string) {
         active = false;
         window.clearInterval(heartbeat);
         void removeAppListener?.();
-        void setMyPresence('offline').catch(() => undefined);
+        void heartbeatMyPresence(false).catch(() => undefined);
       };
     }
 
     const updatePresence = () => {
-      const status = document.visibilityState === 'hidden' ? 'away' : 'online';
-      void setMyPresence(status).catch(() => undefined);
-    };
-    const markOffline = () => {
-      void setMyPresence('offline').catch(() => undefined);
+      void heartbeatMyPresence(document.visibilityState !== 'hidden').catch(() => undefined);
     };
 
     updatePresence();
     document.addEventListener('visibilitychange', updatePresence);
-    window.addEventListener('pagehide', markOffline);
+    window.addEventListener('pagehide', updatePresence);
     const heartbeat = window.setInterval(updatePresence, 60_000);
 
     return () => {
       window.clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', updatePresence);
-      window.removeEventListener('pagehide', markOffline);
-      markOffline();
+      window.removeEventListener('pagehide', updatePresence);
+      void heartbeatMyPresence(false).catch(() => undefined);
     };
   }, [userId]);
 }

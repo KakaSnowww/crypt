@@ -1,5 +1,6 @@
 export type ServerErrorCode =
   | 'already_member'
+  | 'arcana_level_required'
   | 'banner_too_large'
   | 'configuration'
   | 'icon_too_large'
@@ -20,8 +21,10 @@ export type ServerErrorCode =
 
 const messages: Record<ServerErrorCode, string> = {
   already_member: 'Você já participa deste servidor.',
+  arcana_level_required:
+    'Este recurso ainda não foi desbloqueado pelas Runas de Comunidade do servidor.',
   banner_too_large: 'O banner deve possuir no máximo 5 MB.',
-  configuration: 'A estrutura da Fase 6 ainda não foi aplicada ao Supabase.',
+  configuration: 'A estrutura necessária ainda não foi aplicada ao Supabase.',
   icon_too_large: 'O ícone deve possuir no máximo 2 MB.',
   invite_expired: 'Este convite expirou.',
   invite_exhausted: 'Este convite atingiu o limite de usos.',
@@ -59,7 +62,10 @@ export function toServerActionError(error: unknown) {
   }
 
   if (typeof error === 'object' && error !== null) {
-    const possibleError = error as { code?: string; message?: string };
+    const possibleError = error as {
+      code?: string;
+      message?: string;
+    };
     const code = possibleError.code?.toLocaleLowerCase('en-US') ?? '';
     const message = possibleError.message?.toLocaleLowerCase('en-US') ?? '';
 
@@ -67,9 +73,17 @@ export function toServerActionError(error: unknown) {
       code.includes('pgrst202') ||
       code.includes('42p01') ||
       message.includes('could not find the function') ||
-      message.includes('does not exist')
+      message.includes('does not exist') ||
+      message.includes('arcana_base_required')
     ) {
       return new ServerActionError('configuration', error);
+    }
+
+    if (
+      message.includes('server_arcana_level_required') ||
+      message.includes('server_arcana_gradient_required')
+    ) {
+      return new ServerActionError('arcana_level_required', error);
     }
 
     if (message.includes('already_server_member')) {

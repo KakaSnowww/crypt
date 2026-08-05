@@ -30,6 +30,7 @@ import {
   useServerMemberRoles,
   useServerRoles,
 } from '../features/workspace/workspace.queries';
+import { buildRoleOrderAfterDrop } from '../features/workspace/roleHierarchy';
 import { categorySchema, channelSchema, roleSchema } from '../features/workspace/workspace.schemas';
 import type {
   ChannelInput,
@@ -640,18 +641,10 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
                   id={item.role_id}
                   label={`Arrastar ${item.role_name} na hierarquia`}
                   onDrop={(targetId) => {
-                    const movableRoles = roles.filter(
-                      (roleItem) => !roleItem.is_system && !roleItem.is_default,
-                    );
-                    const from = movableRoles.findIndex(
-                      (roleItem) => roleItem.role_id === item.role_id,
-                    );
-                    const to = movableRoles.findIndex((roleItem) => roleItem.role_id === targetId);
-                    if (from >= 0 && to >= 0) {
-                      actions.reorderRole.mutate({
-                        roleId: item.role_id,
-                        steps: to - from,
-                      });
+                    const orderedRoleIds = buildRoleOrderAfterDrop(roles, item.role_id, targetId);
+
+                    if (orderedRoleIds) {
+                      actions.reorderRoles.mutate({ orderedRoleIds });
                     }
                   }}
                 />

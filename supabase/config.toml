@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.external-oauth]
 verify_jwt = false
+
+[functions.arcana-billing]
+verify_jwt = false

@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   android: {
     allowMixedContent: false,
-    backgroundColor: '#070b16',
+    backgroundColor: '#05040d',
   },
   appId: 'com.kakasnowww.crypt',
   appName: 'Crypt',
@@ -13,19 +13,19 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true,
     },
     LocalNotifications: {
-      iconColor: '#7C3AED',
+      iconColor: '#9667FF',
       smallIcon: 'ic_stat_crypt',
     },
     PushNotifications: {
       presentationOptions: [],
     },
     SplashScreen: {
-      backgroundColor: '#070b16',
+      backgroundColor: '#05040d',
       launchAutoHide: false,
       showSpinner: false,
     },
     StatusBar: {
-      backgroundColor: '#070b16',
+      backgroundColor: '#05040d',
       overlaysWebView: false,
       style: 'LIGHT',
     },

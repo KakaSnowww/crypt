@@ -10,7 +10,15 @@ export class RequestBodyError extends Error {
 export function parseAllowedOrigins(value: string | undefined) {
   return (
     value ??
-    'http://127.0.0.1:5173,http://localhost,http://localhost:5173,crypt-app://app,https://crypt.local'
+    [
+      'http://127.0.0.1:5173',
+      'http://localhost',
+      'http://localhost:5173',
+      'crypt-app://app',
+      'https://crypt.local',
+      'https://localhost',
+      'capacitor://localhost',
+    ].join(',')
   )
     .split(',')
     .map((origin) => origin.trim().replace(/\/$/u, ''))

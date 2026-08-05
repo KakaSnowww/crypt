@@ -1,13 +1,34 @@
+export type ArcanaMembershipStatus =
+  'active' | 'canceled' | 'expired' | 'inactive' | 'past_due' | 'paused' | 'pending' | 'trialing';
+
 export type ArcanaMembership = {
   available_runes: number;
+  canceled_at: null | string;
+  checkout_expires_at: null | string;
   consecutive_months: number;
   current_period_ends_at: null | string;
   is_active: boolean;
-  status: string;
+  last_payment_at: null | string;
+  last_payment_status: null | string;
+  provider: 'asaas' | 'manual' | 'mercado_pago' | 'stripe' | string;
+  started_at: null | string;
+  status: ArcanaMembershipStatus;
   tier_color: string;
   tier_name: string;
   tier_number: number;
 };
+
+export const arcanaMembershipStatusLabels: Record<ArcanaMembershipStatus, string> = {
+  active: 'Ativa',
+  canceled: 'Cancelada',
+  expired: 'Expirada',
+  inactive: 'Inativa',
+  past_due: 'Pagamento pendente',
+  paused: 'Pausada',
+  pending: 'Aguardando pagamento',
+  trialing: 'Período de teste',
+};
+
 export const arcanaTiers = [
   ['Centelha', '#8B5CF6'],
   ['Runa', '#6366F1'],

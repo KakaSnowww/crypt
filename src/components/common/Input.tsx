@@ -19,8 +19,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const describedBy = [helperId, errorId].filter(Boolean).join(' ') || undefined;
 
   return (
-    <div className={classNames('grid gap-2', className)}>
-      <label className="text-sm font-medium text-crypt-text" htmlFor={inputId}>
+    <div className={classNames('crypt-field-group grid gap-2', className)}>
+      <label className="crypt-field-label text-sm font-medium text-crypt-text" htmlFor={inputId}>
         {label}
         {required ? (
           <span aria-hidden="true" className="ml-1 text-violet-300">
@@ -28,23 +28,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           </span>
         ) : null}
       </label>
+
       <div className="relative">
         {leadingIcon ? (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center text-crypt-subtle"
+            className="crypt-field-icon pointer-events-none absolute inset-y-0 left-0 flex w-11 items-center justify-center text-crypt-subtle"
           >
             {leadingIcon}
           </span>
         ) : null}
+
         <input
           aria-describedby={describedBy}
           aria-invalid={errorText ? true : undefined}
           className={classNames(
-            'min-h-11 w-full rounded-2xl border bg-crypt-elevated/70 px-3.5 text-sm text-white outline-none',
-            'placeholder:text-crypt-subtle transition',
-            'focus:border-violet-400/70 focus:ring-4 focus:ring-violet-500/10',
-            errorText ? 'border-red-400/60' : 'border-white/10 hover:border-white/20',
+            'crypt-field min-h-11 w-full rounded-2xl border px-3.5 text-sm text-white outline-none',
+            'placeholder:text-crypt-subtle',
+            errorText ? 'is-invalid border-red-400/60' : 'border-white/10',
             leadingIcon ? 'pl-11' : undefined,
           )}
           id={inputId}
@@ -53,13 +54,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {...props}
         />
       </div>
+
       {helperText ? (
-        <p className="text-xs leading-5 text-crypt-subtle" id={helperId}>
+        <p className="crypt-field-helper text-xs leading-5 text-crypt-subtle" id={helperId}>
           {helperText}
         </p>
       ) : null}
+
       {errorText ? (
-        <p className="text-xs leading-5 text-red-300" id={errorId}>
+        <p className="crypt-field-error text-xs leading-5 text-red-300" id={errorId}>
           {errorText}
         </p>
       ) : null}

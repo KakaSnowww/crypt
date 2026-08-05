@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, Trash2, Upload } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { Crop, ImagePlus, Save, Trash2, X } from 'lucide-react';
+import { useEffect, useId, useState, type DragEvent } from 'react';
 import { Button } from '../../../components/common/Button';
 import { ImagePositionEditor } from '../../../components/common/ImagePositionEditor';
 import { useToast } from '../../../components/common/ToastContext';
@@ -9,7 +9,12 @@ import { useAuth } from '../../auth/useAuth';
 import { toProfileActionError } from '../profile.errors';
 import { profileKeys } from '../profile.queries';
 import { validateAvatarFile } from '../profile.schemas';
-import { removeAvatar, uploadAvatar } from '../profile.service';
+import {
+  getProfileMediaUrl,
+  removeAvatar,
+  updateProfileRow,
+  uploadAvatar,
+} from '../profile.service';
 import type { Profile } from '../profile.types';
 import { ProfileAvatar } from './ProfileAvatar';
 
@@ -25,48 +30,123 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
   const { user } = useAuth();
   const [file, setFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState<string>();
+  const [editing, setEditing] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [selectionError, setSelectionError] = useState<string>();
-  const [position, setPosition] = useState<ImagePosition>(centeredImagePosition);
+  const [position, setPosition] = useState<ImagePosition>({
+    x: profile.avatar_position_x,
+    y: profile.avatar_position_y,
+    zoom: profile.avatar_zoom,
+  });
+  const currentUrl = getProfileMediaUrl(profile.avatar_path);
+  const editorUrl = previewUrl ?? currentUrl;
 
   useEffect(() => {
-    return () => {
+    if (!editing) {
+      setPosition({
+        x: profile.avatar_position_x,
+        y: profile.avatar_position_y,
+        zoom: profile.avatar_zoom,
+      });
+    }
+  }, [editing, profile.avatar_position_x, profile.avatar_position_y, profile.avatar_zoom]);
+
+  useEffect(
+    () => () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
-    };
-  }, [previewUrl]);
+    },
+    [previewUrl],
+  );
 
-  const uploadMutation = useMutation({
-    mutationFn: async (selectedFile: File) => {
-      if (!user) {
-        return;
+  async function refresh() {
+    if (!user) return;
+
+    await queryClient.invalidateQueries({
+      queryKey: profileKeys.current(user.id),
+    });
+  }
+
+  function clearPreviewUrl() {
+    setPreviewUrl((current) => {
+      if (current) {
+        URL.revokeObjectURL(current);
       }
 
+      return undefined;
+    });
+  }
+
+  function cancelEditing() {
+    clearPreviewUrl();
+    setFile(undefined);
+    setEditing(false);
+    setSelectionError(undefined);
+    setPosition({
+      x: profile.avatar_position_x,
+      y: profile.avatar_position_y,
+      zoom: profile.avatar_zoom,
+    });
+  }
+
+  function selectFile(selectedFile: File) {
+    try {
       validateAvatarFile(selectedFile);
-      await uploadAvatar(user.id, selectedFile, profile.avatar_path, position);
-    },
-    onMutate: () => {
-      onBusyChange?.(true);
-    },
-    onSuccess: async () => {
-      if (!user) {
-        return;
-      }
-
-      setFile(undefined);
-      setPreviewUrl(undefined);
+      clearPreviewUrl();
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
       setPosition(centeredImagePosition);
-      await queryClient.invalidateQueries({ queryKey: profileKeys.current(user.id) });
+      setEditing(true);
+      setSelectionError(undefined);
+      saveMutation.reset();
+    } catch (error) {
+      setSelectionError(toProfileActionError(error).message);
+    }
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragging(false);
+
+    const selectedFile = event.dataTransfer.files[0];
+
+    if (selectedFile) {
+      selectFile(selectedFile);
+    }
+  }
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+
+      if (file) {
+        await uploadAvatar(user.id, file, profile.avatar_path, position);
+      } else {
+        await updateProfileRow(user.id, {
+          avatar_position_x: position.x,
+          avatar_position_y: position.y,
+          avatar_zoom: position.zoom ?? 1,
+        });
+      }
+    },
+    onMutate: () => onBusyChange?.(true),
+    onSuccess: async () => {
+      clearPreviewUrl();
+      setFile(undefined);
+      setEditing(false);
+      await refresh();
       addToast({
-        message: 'A nova imagem já aparece no seu perfil.',
+        message: file
+          ? 'A nova imagem e o enquadramento já aparecem em todo o Crypt.'
+          : 'O novo enquadramento foi salvo sem reenviar a imagem.',
         title: 'Avatar atualizado',
         tone: 'success',
       });
     },
-    onSettled: () => {
-      onBusyChange?.(false);
-    },
+    onSettled: () => onBusyChange?.(false),
   });
+
   const removeMutation = useMutation({
     mutationFn: async () => {
       if (!user || !profile.avatar_path) {
@@ -76,11 +156,8 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
       await removeAvatar(user.id, profile.avatar_path);
     },
     onSuccess: async () => {
-      if (!user) {
-        return;
-      }
-
-      await queryClient.invalidateQueries({ queryKey: profileKeys.current(user.id) });
+      cancelEditing();
+      await refresh();
       addToast({
         message: 'Voltamos a mostrar suas iniciais.',
         title: 'Avatar removido',
@@ -88,59 +165,80 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
       });
     },
   });
-  const actionError = uploadMutation.error ?? removeMutation.error;
+
+  const actionError = saveMutation.error ?? removeMutation.error;
 
   return (
-    <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-      {previewUrl ? (
-        <span className="grid size-28 overflow-hidden rounded-[2rem] bg-crypt-elevated">
-          <img alt="Prévia do novo avatar" className="size-full object-cover" src={previewUrl} />
-        </span>
-      ) : (
-        <ProfileAvatar
-          avatarPath={profile.avatar_path}
-          displayName={profile.display_name}
-          positionX={profile.avatar_position_x}
-          positionY={profile.avatar_position_y}
-          size="lg"
-          zoom={profile.avatar_zoom}
-        />
-      )}
+    <div
+      className={`crypt-image-drop-zone grid gap-5 p-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start ${
+        dragging ? 'is-dragging' : ''
+      }`}
+      onDragEnter={(event) => {
+        event.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+          setDragging(false);
+        }
+      }}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={handleDrop}
+    >
+      <div className="grid justify-items-center gap-2">
+        {previewUrl ? (
+          <span className="grid size-28 overflow-hidden rounded-[2rem] bg-crypt-elevated">
+            <img
+              alt="Prévia do novo avatar"
+              className="size-full object-cover"
+              src={previewUrl}
+              style={{
+                objectPosition: `${position.x}% ${position.y}%`,
+                transform: `scale(${position.zoom ?? 1})`,
+              }}
+            />
+          </span>
+        ) : (
+          <ProfileAvatar
+            avatarPath={profile.avatar_path}
+            displayName={profile.display_name}
+            positionX={editing ? position.x : profile.avatar_position_x}
+            positionY={editing ? position.y : profile.avatar_position_y}
+            size="lg"
+            zoom={editing ? position.zoom : profile.avatar_zoom}
+          />
+        )}
 
-      <div>
+        {editing ? (
+          <span className="rounded-full bg-violet-500/10 px-2.5 py-1 text-[0.62rem] font-semibold text-violet-200">
+            Prévia não salva
+          </span>
+        ) : null}
+      </div>
+
+      <div className="min-w-0">
         <p className="text-sm font-semibold text-white">Sua imagem no Crypt</p>
         <p className="mt-1 max-w-xl text-xs leading-5 text-crypt-subtle">
-          JPG, PNG, WebP ou GIF de até 2 MB. Imagens estáticas podem ser reposicionadas antes do
-          envio.
+          Arraste um arquivo para esta área ou escolha JPG, PNG, WebP ou GIF de até 2 MB.
         </p>
+
         <div className="mt-4 flex flex-wrap gap-2">
           <label
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 text-xs font-semibold text-white transition hover:bg-white/[0.11] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-crypt-focus"
+            className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 text-xs font-semibold text-white transition hover:bg-white/[0.11] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-crypt-focus"
             htmlFor={inputId}
           >
             <ImagePlus aria-hidden="true" size={16} />
-            Escolher imagem
+            {profile.avatar_path ? 'Trocar imagem' : 'Escolher imagem'}
             <input
               accept="image/gif,image/jpeg,image/png,image/webp"
               className="sr-only"
-              disabled={uploadMutation.isPending}
+              disabled={saveMutation.isPending}
               id={inputId}
               onChange={(event) => {
                 const selectedFile = event.target.files?.[0];
-                setSelectionError(undefined);
 
                 if (selectedFile) {
-                  try {
-                    validateAvatarFile(selectedFile);
-                    setFile(selectedFile);
-                    setPreviewUrl(URL.createObjectURL(selectedFile));
-                    setPosition(centeredImagePosition);
-                    uploadMutation.reset();
-                  } catch (error) {
-                    setFile(undefined);
-                    setPreviewUrl(undefined);
-                    setSelectionError(toProfileActionError(error).message);
-                  }
+                  selectFile(selectedFile);
                 }
 
                 event.target.value = '';
@@ -148,24 +246,48 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
               type="file"
             />
           </label>
-          {file && !uploadMutation.isPending ? (
+
+          {profile.avatar_path && !editing ? (
             <Button
-              leadingIcon={<Upload aria-hidden="true" size={16} />}
-              onClick={() => uploadMutation.mutate(file)}
+              leadingIcon={<Crop aria-hidden="true" size={16} />}
+              onClick={() => {
+                setFile(undefined);
+                clearPreviewUrl();
+                setPosition({
+                  x: profile.avatar_position_x,
+                  y: profile.avatar_position_y,
+                  zoom: profile.avatar_zoom,
+                });
+                setEditing(true);
+              }}
               size="sm"
+              variant="secondary"
             >
-              Salvar enquadramento
+              Reenquadrar atual
             </Button>
           ) : null}
-          {uploadMutation.isPending ? (
-            <span
-              aria-live="polite"
-              className="inline-flex min-h-10 items-center gap-2 px-2 text-xs font-semibold text-violet-200"
-            >
-              <Upload aria-hidden="true" className="animate-pulse" size={16} />
-              Enviando avatar…
-            </span>
+
+          {editing && editorUrl ? (
+            <>
+              <Button
+                leadingIcon={<Save aria-hidden="true" size={16} />}
+                loading={saveMutation.isPending}
+                onClick={() => saveMutation.mutate()}
+                size="sm"
+              >
+                Salvar enquadramento
+              </Button>
+              <Button
+                leadingIcon={<X aria-hidden="true" size={16} />}
+                onClick={cancelEditing}
+                size="sm"
+                variant="ghost"
+              >
+                Cancelar
+              </Button>
+            </>
           ) : null}
+
           {profile.avatar_path && !file ? (
             <Button
               leadingIcon={<Trash2 aria-hidden="true" size={16} />}
@@ -178,16 +300,26 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
             </Button>
           ) : null}
         </div>
-        {file && previewUrl ? (
+
+        {editing && editorUrl ? (
           <ImagePositionEditor
-            animated={file.type === 'image/gif'}
+            animated={file?.type === 'image/gif'}
             aspectRatio={1}
-            imageUrl={previewUrl}
+            imageUrl={editorUrl}
             onChange={setPosition}
             position={position}
+            shape="circle"
           />
         ) : null}
+
+        {dragging ? (
+          <p className="mt-3 text-xs font-semibold text-violet-200">
+            Solte a imagem para abrir o editor.
+          </p>
+        ) : null}
+
         {selectionError ? <p className="mt-3 text-xs text-red-300">{selectionError}</p> : null}
+
         {actionError ? (
           <p className="mt-3 text-xs text-red-300">{toProfileActionError(actionError).message}</p>
         ) : null}

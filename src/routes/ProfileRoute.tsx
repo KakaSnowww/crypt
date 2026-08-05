@@ -2,6 +2,8 @@ import { CalendarDays, EyeOff, Pencil, ShieldCheck, Sparkles } from 'lucide-reac
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
+import { ArcanaTierBadge } from '../features/arcana/ArcanaTierBadge';
+import { useArcanaMembership } from '../features/arcana/arcana.queries';
 import { useAuth } from '../features/auth/useAuth';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
 import { SpotifyEmbed } from '../features/profile/components/SpotifyEmbed';
@@ -16,6 +18,7 @@ import {
 
 export function ProfileRoute() {
   const { user } = useAuth();
+  const arcanaMembership = useArcanaMembership();
   const profileQuery = useCurrentProfile(user?.id ?? null);
   const settingsQuery = useProfileSettings(user?.id ?? null);
   const catalogQuery = useInterestCatalog();
@@ -86,9 +89,18 @@ export function ProfileRoute() {
           />
           <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h1 className="truncate text-3xl font-bold tracking-tight text-white">
-                {profile.display_name}
-              </h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-3xl font-bold tracking-tight text-white">
+                  {profile.display_name}
+                </h1>
+                {arcanaMembership.data?.is_active ? (
+                  <ArcanaTierBadge
+                    tierColor={arcanaMembership.data.tier_color}
+                    tierName={arcanaMembership.data.tier_name}
+                    tierNumber={arcanaMembership.data.tier_number}
+                  />
+                ) : null}
+              </div>
               <p className="mt-1 text-sm font-medium text-violet-300">@{profile.handle}</p>
               <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm leading-6 text-crypt-muted">
                 {profile.bio ?? 'Esta pessoa ainda não escreveu uma biografia.'}

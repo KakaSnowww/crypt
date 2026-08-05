@@ -32,12 +32,15 @@ import type { DirectMessageRow } from '../features/directMessages/directMessages
 import { useDirectMessageActions } from '../features/directMessages/useDirectMessageActions';
 import { useDirectMessagesRealtime } from '../features/directMessages/useDirectMessagesRealtime';
 import { MessageAttachmentCard } from '../features/messages/components/MessageAttachmentCard';
+import { MessageContent } from '../features/messages/components/MessageContent';
 import { ConversationToolsModal } from '../features/messages/components/ConversationToolsModal';
 import {
   parseMessageAttachments,
   parseMessageReactions,
 } from '../features/messages/messages.types';
 import { ProfileAvatar } from '../features/profile/components/ProfileAvatar';
+import { useMessageSearchJump } from '../features/search/useMessageSearchJump';
+import { openMemberProfileCard } from '../features/profile/memberProfileCard.events';
 import { useCurrentProfile } from '../features/profile/profile.queries';
 import { useVoiceCall } from '../features/voice/useVoiceCall';
 
@@ -73,6 +76,12 @@ export function DirectConversationRoute() {
     [messagesQuery.data?.pages],
   );
   const latestMessageId = messages.at(-1)?.message_id;
+  const searchedMessageId = useMessageSearchJump({
+    fetchNextPage: messagesQuery.fetchNextPage,
+    hasNextPage: messagesQuery.hasNextPage,
+    isFetchingNextPage: messagesQuery.isFetchingNextPage,
+    messages,
+  });
 
   useEffect(() => {
     if (latestMessageId) {
@@ -81,8 +90,9 @@ export function DirectConversationRoute() {
   }, [conversationId, latestMessageId]);
 
   useEffect(() => {
+    if (searchedMessageId) return;
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages.length]);
+  }, [messages.length, searchedMessageId]);
 
   useEffect(() => {
     const openTools = () => setToolsOpen(true);
@@ -393,11 +403,18 @@ function DirectMessageItem({
       className="group relative flex gap-3 rounded-2xl px-3 py-3 hover:bg-white/[0.035]"
       id={`message-${message.message_id}`}
     >
-      <ProfileAvatar
-        avatarPath={message.author_avatar_path}
-        displayName={message.author_display_name}
-        size="sm"
-      />
+      <button
+        aria-label={`Abrir perfil de ${message.author_display_name}`}
+        className="h-fit shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crypt-focus"
+        onClick={() => openMemberProfileCard(message.author_handle)}
+        type="button"
+      >
+        <ProfileAvatar
+          avatarPath={message.author_avatar_path}
+          displayName={message.author_display_name}
+          size="sm"
+        />
+      </button>
       <div className="min-w-0 flex-1">
         {message.reply_to_id ? (
           <div className="mb-1 flex items-center gap-1.5 text-[0.7rem] text-crypt-subtle">
@@ -409,20 +426,19 @@ function DirectMessageItem({
           </div>
         ) : null}
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <Link
+          <button
             className="text-sm font-semibold text-white hover:underline"
-            to={`/app/pessoas/${message.author_handle}`}
+            onClick={() => openMemberProfileCard(message.author_handle)}
+            type="button"
           >
             {message.author_display_name}
-          </Link>
+          </button>
           <span className="text-[0.68rem] text-crypt-subtle">
             {formatMessageTime(message.created_at)}
             {message.edited_at ? ' · editada' : ''}
           </span>
         </div>
-        <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-crypt-text">
-          {message.content}
-        </p>
+        <MessageContent content={message.content ?? ''} />
         {attachments.map((attachment) => (
           <MessageAttachmentCard
             attachment={attachment}

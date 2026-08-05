@@ -61,6 +61,9 @@ jobs:
       - name: Instalar dependências reproduzíveis
         run: npm ci
 
+      - name: Conferir metadados da release
+        run: npm run release:verify
+
       - name: Conferir sons do aplicativo
         shell: pwsh
         run: |
@@ -89,14 +92,10 @@ jobs:
       - name: Criar instalador e metadados de atualização
         run: npm run desktop:build
 
-      - name: Publicar e verificar arquivos da Release
+      - name: Criar checksum do Windows
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $version = node -p "require('./package.json').version"
-          $tag = "v$version"
-          $repository = $env:GITHUB_REPOSITORY
           $assets = @(
             "release/Crypt-Setup-$version.exe",
             "release/Crypt-Setup-$version.exe.blockmap",
@@ -109,9 +108,40 @@ jobs:
             }
           }
 
+          $lines = foreach ($asset in $assets) {
+            $hash = (Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $(Split-Path $asset -Leaf)"
+          }
+
+          [System.IO.File]::WriteAllLines(
+            "release/Crypt-Windows-$version.sha256",
+            $lines,
+            [System.Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Publicar e verificar arquivos da Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $repository = $env:GITHUB_REPOSITORY
+          $notesPath = "docs/releases/v$version.md"
+          $assets = @(
+            "release/Crypt-Setup-$version.exe",
+            "release/Crypt-Setup-$version.exe.blockmap",
+            "release/latest.yml",
+            "release/Crypt-Windows-$version.sha256"
+          )
+
           gh release view $tag --repo $repository *> $null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --repo $repository --title "Crypt $tag" --generate-notes
+            if (Test-Path $notesPath) {
+              gh release create $tag --repo $repository --title "Crypt v$version — A Ascensão Arcana" --notes-file $notesPath
+            } else {
+              gh release create $tag --repo $repository --title "Crypt v$version" --generate-notes
+            }
           }
 
           $PSNativeCommandUseErrorActionPreference = $true

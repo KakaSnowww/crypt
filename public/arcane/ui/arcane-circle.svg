@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" fill="none">
+  <g stroke="#c7a5ff" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="400" cy="400" r="348" stroke-opacity=".34" stroke-width="2"/>
+    <circle cx="400" cy="400" r="301" stroke-opacity=".22" stroke-width="2"/>
+    <circle cx="400" cy="400" r="232" stroke-opacity=".31" stroke-width="2"/>
+    <circle cx="400" cy="400" r="108" stroke-opacity=".24" stroke-width="2"/>
+    <path d="M400 53 486 202l171 37-116 130 18 174-159-71-159 71 18-174-116-130 171-37L400 53Z" stroke-opacity=".26" stroke-width="2"/>
+    <path d="m400 167 65 113 130 28-88 99 14 132-121-54-121 54 14-132-88-99 130-28 65-113Z" stroke-opacity=".38" stroke-width="2"/>
+    <path d="M400 264 478 449H322L400 264Z" stroke-opacity=".58" stroke-width="5"/>
+    <path d="m351 392 49-73 49 73M400 319v130" stroke-opacity=".58" stroke-width="5"/>
+    <path d="M400 52v38M400 710v38M52 400h38M710 400h38M153 153l27 27M620 620l27 27M647 153l-27 27M180 620l-27 27" stroke-opacity=".44" stroke-width="4"/>
+  </g>
+  <g fill="#d9c4ff">
+    <circle cx="400" cy="52" r="5" fill-opacity=".5"/>
+    <circle cx="748" cy="400" r="5" fill-opacity=".5"/>
+    <circle cx="400" cy="748" r="5" fill-opacity=".5"/>
+    <circle cx="52" cy="400" r="5" fill-opacity=".5"/>
+    <circle cx="400" cy="400" r="11" fill-opacity=".38"/>
+  </g>
+</svg>

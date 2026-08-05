@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, Sparkles, Trash2, Upload } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { Crop, ImagePlus, Save, Sparkles, Trash2, X } from 'lucide-react';
+import { useEffect, useId, useState, type DragEvent } from 'react';
 import { Button } from '../../../components/common/Button';
 import { ImagePositionEditor } from '../../../components/common/ImagePositionEditor';
 import { useToast } from '../../../components/common/ToastContext';
@@ -20,13 +20,41 @@ import type { Profile } from '../profile.types';
 import { ProfileAvatar } from './ProfileAvatar';
 
 const effects = [
-  { id: 'none', label: 'Limpo', description: 'Sem animação adicional.' },
-  { id: 'aurora', label: 'Aurora', description: 'Luzes roxas e azuis em movimento.' },
-  { id: 'neon', label: 'Neon', description: 'Contorno luminoso no seu cartão.' },
-  { id: 'pulse', label: 'Pulso', description: 'Brilho suave e ritmado.' },
-  { id: 'ocean', label: 'Oceano', description: 'Azul profundo com brilho ciano.' },
-  { id: 'sunset', label: 'Pôr do sol', description: 'Rosa, laranja e violeta aquecem o cartão.' },
-  { id: 'emerald', label: 'Esmeralda', description: 'Verde escuro com reflexos luminosos.' },
+  {
+    description: 'Sem animação adicional.',
+    id: 'none',
+    label: 'Limpo',
+  },
+  {
+    description: 'Luzes roxas e azuis em movimento.',
+    id: 'aurora',
+    label: 'Aurora',
+  },
+  {
+    description: 'Contorno luminoso no seu cartão.',
+    id: 'neon',
+    label: 'Neon',
+  },
+  {
+    description: 'Brilho suave e ritmado.',
+    id: 'pulse',
+    label: 'Pulso',
+  },
+  {
+    description: 'Azul profundo com brilho ciano.',
+    id: 'ocean',
+    label: 'Oceano',
+  },
+  {
+    description: 'Rosa, laranja e violeta aquecem o cartão.',
+    id: 'sunset',
+    label: 'Pôr do sol',
+  },
+  {
+    description: 'Verde escuro com reflexos luminosos.',
+    id: 'emerald',
+    label: 'Esmeralda',
+  },
 ] as const;
 
 export function ProfileVisualEditor({ profile }: { profile: Profile }) {
@@ -37,6 +65,8 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
   const [selectionError, setSelectionError] = useState('');
   const [bannerFile, setBannerFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState<string>();
+  const [editing, setEditing] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState<ImagePosition>({
     x: profile.banner_position_x,
     y: profile.banner_position_y,
@@ -44,44 +74,146 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
   });
   const bannerUrl = getProfileMediaUrl(profile.banner_path);
   const displayedBannerUrl = previewUrl ?? bannerUrl;
+  const displayedPosition = editing
+    ? position
+    : {
+        x: profile.banner_position_x,
+        y: profile.banner_position_y,
+        zoom: profile.banner_zoom,
+      };
 
   useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-  const refresh = async () => {
-    if (user) await queryClient.invalidateQueries({ queryKey: profileKeys.current(user.id) });
-  };
-  const bannerMutation = useMutation({
-    mutationFn: async (file: File) => {
+    if (!editing) {
+      setPosition({
+        x: profile.banner_position_x,
+        y: profile.banner_position_y,
+        zoom: profile.banner_zoom,
+      });
+    }
+  }, [editing, profile.banner_position_x, profile.banner_position_y, profile.banner_zoom]);
+
+  useEffect(
+    () => () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    },
+    [previewUrl],
+  );
+
+  async function refresh() {
+    if (user) {
+      await queryClient.invalidateQueries({
+        queryKey: profileKeys.current(user.id),
+      });
+    }
+  }
+
+  function clearPreviewUrl() {
+    setPreviewUrl((current) => {
+      if (current) {
+        URL.revokeObjectURL(current);
+      }
+
+      return undefined;
+    });
+  }
+
+  function cancelEditing() {
+    clearPreviewUrl();
+    setBannerFile(undefined);
+    setEditing(false);
+    setSelectionError('');
+    setPosition({
+      x: profile.banner_position_x,
+      y: profile.banner_position_y,
+      zoom: profile.banner_zoom,
+    });
+  }
+
+  function selectBanner(file: File) {
+    try {
       validateBannerFile(file);
-      if (user) await uploadBanner(user.id, file, profile.banner_path, position);
+      clearPreviewUrl();
+      setBannerFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setPosition(centeredImagePosition);
+      setEditing(true);
+      setSelectionError('');
+      bannerMutation.reset();
+    } catch (caught) {
+      setSelectionError(toProfileActionError(caught).message);
+    }
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragging(false);
+
+    const file = event.dataTransfer.files[0];
+
+    if (file) {
+      selectBanner(file);
+    }
+  }
+
+  const bannerMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+
+      if (bannerFile) {
+        await uploadBanner(user.id, bannerFile, profile.banner_path, position);
+      } else {
+        await updateProfileRow(user.id, {
+          banner_position_x: position.x,
+          banner_position_y: position.y,
+          banner_zoom: position.zoom ?? 1,
+        });
+      }
     },
     onSuccess: async () => {
+      clearPreviewUrl();
       setBannerFile(undefined);
-      setPreviewUrl(undefined);
-      setPosition(centeredImagePosition);
+      setEditing(false);
       await refresh();
       addToast({
-        message: 'O banner também será usado quando sua câmera estiver desligada na call.',
+        message: bannerFile
+          ? 'A imagem e o enquadramento já aparecem no perfil e nas chamadas.'
+          : 'O enquadramento atual foi salvo sem reenviar o banner.',
         title: 'Banner atualizado',
         tone: 'success',
       });
     },
   });
+
   const removeMutation = useMutation({
     mutationFn: async () => {
-      if (user && profile.banner_path) await removeBanner(user.id, profile.banner_path);
+      if (user && profile.banner_path) {
+        await removeBanner(user.id, profile.banner_path);
+      }
     },
-    onSuccess: refresh,
+    onSuccess: async () => {
+      cancelEditing();
+      await refresh();
+      addToast({
+        message: 'O perfil voltou a usar o fundo padrão ou seu gradiente.',
+        title: 'Banner removido',
+        tone: 'info',
+      });
+    },
   });
+
   const effectMutation = useMutation({
     mutationFn: async (effect: Profile['profile_effect']) => {
-      if (user) await updateProfileRow(user.id, { profile_effect: effect });
+      if (user) {
+        await updateProfileRow(user.id, {
+          profile_effect: effect,
+        });
+      }
     },
     onSuccess: refresh,
   });
+
   const error = bannerMutation.error ?? removeMutation.error ?? effectMutation.error;
 
   return (
@@ -95,9 +227,9 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
           displayedBannerUrl
             ? {
                 backgroundImage: `url("${displayedBannerUrl}")`,
-                backgroundPosition: `${previewUrl ? position.x : profile.banner_position_x}% ${previewUrl ? position.y : profile.banner_position_y}%`,
+                backgroundPosition: `${displayedPosition.x}% ` + `${displayedPosition.y}%`,
                 backgroundRepeat: 'no-repeat',
-                backgroundSize: `${(previewUrl ? (position.zoom ?? 1) : profile.banner_zoom) * 100}%`,
+                backgroundSize: `${(displayedPosition.zoom ?? 1) * 100}%`,
               }
             : undefined
         }
@@ -118,12 +250,33 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
             <p className="text-xs text-white/70">@{profile.handle}</p>
           </div>
         </div>
+
+        {editing ? (
+          <span className="absolute right-3 top-3 z-20 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[0.62rem] font-semibold text-white backdrop-blur-md">
+            Prévia não salva
+          </span>
+        ) : null}
       </div>
-      <div>
-        <p className="text-sm font-semibold text-white">Banner do perfil e da call</p>
+
+      <div
+        className={`crypt-image-drop-zone p-4 ${dragging ? 'is-dragging' : ''}`}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+            setDragging(false);
+          }
+        }}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={handleDrop}
+      >
+        <p className="text-sm font-semibold text-white">Banner do perfil e da chamada</p>
         <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-          JPG, PNG, WebP ou GIF de até 5 MB. Use uma imagem horizontal.
+          Arraste uma imagem horizontal para esta área ou escolha JPG, PNG, WebP ou GIF de até 5 MB.
         </p>
+
         <div className="mt-3 flex flex-wrap gap-2">
           <label
             className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-3 text-xs font-semibold text-white hover:bg-white/[0.11]"
@@ -137,34 +290,59 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
               id={inputId}
               onChange={(event) => {
                 const file = event.target.files?.[0];
-                setSelectionError('');
+
                 if (file) {
-                  try {
-                    validateBannerFile(file);
-                    setBannerFile(file);
-                    setPreviewUrl(URL.createObjectURL(file));
-                    setPosition(centeredImagePosition);
-                    bannerMutation.reset();
-                  } catch (caught) {
-                    setSelectionError(toProfileActionError(caught).message);
-                  }
+                  selectBanner(file);
                 }
+
                 event.target.value = '';
               }}
               type="file"
             />
           </label>
-          {bannerFile ? (
+
+          {profile.banner_path && !editing ? (
             <Button
-              leadingIcon={<Upload size={15} />}
-              loading={bannerMutation.isPending}
-              onClick={() => bannerMutation.mutate(bannerFile)}
+              leadingIcon={<Crop size={15} />}
+              onClick={() => {
+                setBannerFile(undefined);
+                clearPreviewUrl();
+                setPosition({
+                  x: profile.banner_position_x,
+                  y: profile.banner_position_y,
+                  zoom: profile.banner_zoom,
+                });
+                setEditing(true);
+              }}
               size="sm"
+              variant="secondary"
             >
-              Salvar enquadramento
+              Reenquadrar atual
             </Button>
           ) : null}
-          {profile.banner_path ? (
+
+          {editing && displayedBannerUrl ? (
+            <>
+              <Button
+                leadingIcon={<Save size={15} />}
+                loading={bannerMutation.isPending}
+                onClick={() => bannerMutation.mutate()}
+                size="sm"
+              >
+                Salvar enquadramento
+              </Button>
+              <Button
+                leadingIcon={<X size={15} />}
+                onClick={cancelEditing}
+                size="sm"
+                variant="ghost"
+              >
+                Cancelar
+              </Button>
+            </>
+          ) : null}
+
+          {profile.banner_path && !bannerFile ? (
             <Button
               leadingIcon={<Trash2 size={15} />}
               loading={removeMutation.isPending}
@@ -176,19 +354,29 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
             </Button>
           ) : null}
         </div>
-        {bannerFile && previewUrl ? (
+
+        {editing && displayedBannerUrl ? (
           <ImagePositionEditor
-            animated={bannerFile.type === 'image/gif'}
+            animated={bannerFile?.type === 'image/gif'}
             aspectRatio={3.2}
-            imageUrl={previewUrl}
+            imageUrl={displayedBannerUrl}
             onChange={setPosition}
             position={position}
+            shape="rounded"
           />
         ) : null}
+
+        {dragging ? (
+          <p className="mt-3 text-xs font-semibold text-violet-200">
+            Solte a imagem para abrir o editor.
+          </p>
+        ) : null}
       </div>
+
       <fieldset>
         <legend className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Sparkles size={16} /> Cor e efeito do perfil
+          <Sparkles size={16} />
+          Cor e efeito do perfil
         </legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {effects.map((effect) => (
@@ -213,7 +401,9 @@ export function ProfileVisualEditor({ profile }: { profile: Profile }) {
           ))}
         </div>
       </fieldset>
+
       {selectionError ? <p className="text-xs text-red-300">{selectionError}</p> : null}
+
       {error ? <p className="text-xs text-red-300">{toProfileActionError(error).message}</p> : null}
     </div>
   );

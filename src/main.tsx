@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App';
+import { ArcaneAtmosphere } from './components/arcane/ArcaneAtmosphere';
+import { AppExperienceCoordinator } from './features/experience/AppExperienceCoordinator';
 import { configureAndroidRuntime, hideAndroidSplashScreen } from './lib/androidRuntime';
 import { configureDesktopDeepLinks } from './lib/desktopDeepLinks';
 import { configureRuntimeDocument } from './lib/platform';
@@ -19,6 +21,8 @@ void Promise.all([configureDesktopDeepLinks(), configureAndroidRuntime()])
   .finally(() => {
     createRoot(rootElement).render(
       <StrictMode>
+        <AppExperienceCoordinator />
+        <ArcaneAtmosphere />
         <App />
       </StrictMode>,
     );

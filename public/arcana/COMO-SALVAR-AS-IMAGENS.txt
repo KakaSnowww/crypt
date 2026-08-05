@@ -1,0 +1,32 @@
+IMAGENS DA ARCANA
+
+NÍVEIS
+Pasta: public\arcana\tiers
+Formato: PNG transparente, quadrado, recomendado 1024x1024.
+
+arcana-01-centelha.png
+arcana-02-runa.png
+arcana-03-orbe.png
+arcana-04-prisma.png
+arcana-05-eter.png
+arcana-06-eclipse.png
+arcana-07-astral.png
+arcana-08-arcano.png
+arcana-09-celestial.png
+arcana-10-ancestral.png
+arcana-11-lendario.png
+arcana-12-eterno.png
+
+RUNA DE COMUNIDADE
+Pasta: public\arcana\runes
+
+Opção simples:
+community-rune.png
+
+Opção com uma arte por espaço:
+community-rune-01.png
+community-rune-02.png
+community-rune-03.png
+
+Quando uma variante não existe, o Crypt tenta community-rune.png.
+Se nenhuma imagem existir, usa um símbolo interno e não quebra.

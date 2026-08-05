@@ -8,21 +8,46 @@ export type ServerMemberGroup = {
   members: ServerMember[];
 };
 
+function compareMembers(left: ServerMember, right: ServerMember) {
+  if (left.is_online !== right.is_online) {
+    return left.is_online ? -1 : 1;
+  }
+
+  return left.display_name.localeCompare(right.display_name, 'pt-BR', {
+    sensitivity: 'base',
+  });
+}
+
+export function getMemberRoles(
+  profileId: string,
+  roles: ServerRole[],
+  assignments: ServerMemberRoles[],
+) {
+  const memberRoleIds =
+    assignments.find((assignment) => assignment.profile_id === profileId)?.role_ids ?? [];
+
+  return roles
+    .filter((role) => memberRoleIds.includes(role.role_id) && !role.is_default && !role.is_system)
+    .sort((left, right) => right.role_position - left.role_position);
+}
+
 export function buildServerMemberGroups(
   members: ServerMember[],
   roles: ServerRole[],
   assignments: ServerMemberRoles[],
 ): ServerMemberGroup[] {
+  const orderedMembers = [...members].sort(compareMembers);
   const assignmentsByProfile = new Map(
     assignments.map((assignment) => [assignment.profile_id, new Set(assignment.role_ids)]),
   );
-  const orderedRoles = [...roles].sort((left, right) => right.role_position - left.role_position);
-  const separatedRoles = orderedRoles.filter((role) => role.display_separately && !role.is_default);
+  const separatedRoles = [...roles]
+    .filter((role) => role.display_separately && !role.is_default && !role.is_system)
+    .sort((left, right) => right.role_position - left.role_position);
   const groupedProfiles = new Set<string>();
   const groups: ServerMemberGroup[] = [];
 
   for (const role of separatedRoles) {
-    const roleMembers = members.filter((member) => {
+    const roleMembers = orderedMembers.filter((member) => {
       const memberRoles = assignmentsByProfile.get(member.profile_id);
       const highestSeparatedRole = separatedRoles.find((candidate) =>
         memberRoles?.has(candidate.role_id),
@@ -42,7 +67,9 @@ export function buildServerMemberGroups(
     }
   }
 
-  const remainingMembers = members.filter((member) => !groupedProfiles.has(member.profile_id));
+  const remainingMembers = orderedMembers.filter(
+    (member) => !groupedProfiles.has(member.profile_id),
+  );
   const onlineMembers = remainingMembers.filter((member) => member.is_online);
   const offlineMembers = remainingMembers.filter((member) => !member.is_online);
 
@@ -72,10 +99,5 @@ export function getHighestMemberRole(
   roles: ServerRole[],
   assignments: ServerMemberRoles[],
 ) {
-  const memberRoleIds =
-    assignments.find((assignment) => assignment.profile_id === profileId)?.role_ids ?? [];
-
-  return roles
-    .filter((role) => memberRoleIds.includes(role.role_id) && !role.is_default)
-    .sort((left, right) => right.role_position - left.role_position)[0];
+  return getMemberRoles(profileId, roles, assignments)[0];
 }

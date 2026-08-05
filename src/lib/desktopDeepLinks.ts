@@ -23,6 +23,7 @@ export function openCryptAppPath(value: string, replace = false) {
   } else {
     window.history.pushState({}, '', target);
   }
+
   window.dispatchEvent(new PopStateEvent('popstate'));
   return true;
 }
@@ -51,16 +52,29 @@ export function openCryptDeepLink(value: string) {
     const status = url.searchParams.get('status') ?? '';
     const error = url.searchParams.get('error') ?? '';
 
-    if (!externalProviders.has(provider) || !externalStatuses.has(status)) return;
+    if (!externalProviders.has(provider) || !externalStatuses.has(status)) {
+      return;
+    }
 
     const search = new URLSearchParams({
       oauth_provider: provider,
       oauth_status: status,
     });
+
     if (status === 'error' && /^[a-z0-9_]{1,64}$/u.test(error)) {
       search.set('oauth_error', error);
     }
+
     openCryptAppPath(`/app/configuracoes/conexoes?${search.toString()}`, true);
+    return;
+  }
+
+  if (url.hostname === 'arcana' && url.pathname === '/callback') {
+    const status = url.searchParams.get('status');
+
+    if (status === 'return') {
+      openCryptAppPath('/app/arcana?billing_status=return', true);
+    }
     return;
   }
 
@@ -73,7 +87,9 @@ export function openCryptDeepLink(value: string) {
 }
 
 export function configureDesktopDeepLinks() {
-  if (!isElectronRuntime() || !window.cryptDesktop) return Promise.resolve();
+  if (!isElectronRuntime() || !window.cryptDesktop) {
+    return Promise.resolve();
+  }
 
   window.cryptDesktop.onDeepLink(openCryptDeepLink);
   return Promise.resolve();

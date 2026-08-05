@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileAvatar } from '../profile/components/ProfileAvatar';
+import { openMemberProfileCard } from '../profile/memberProfileCard.events';
 import { useVoiceCall } from './useVoiceCall';
 import type { VoiceChannelPresence as VoicePresenceEntry } from './voice.types';
 
@@ -109,7 +110,17 @@ export function VoiceChannelPresence({
   return (
     <div className="voice-channel-presence">
       {members.map((member) => (
-        <div className="voice-presence-person" key={`${channelId}-${member.profile_id}`}>
+        <button
+          className="voice-presence-person w-full text-left"
+          key={`${channelId}-${member.profile_id}`}
+          onClick={() =>
+            openMemberProfileCard({
+              handle: member.handle,
+              presenceStatus: 'online',
+            })
+          }
+          type="button"
+        >
           <ProfileAvatar
             avatarPath={member.avatar_path}
             displayName={member.display_name}
@@ -117,7 +128,7 @@ export function VoiceChannelPresence({
           />
           <span>{member.display_name}</span>
           {member.microphone_muted ? <MicOff size={13} /> : <Headphones size={13} />}
-        </div>
+        </button>
       ))}
     </div>
   );
