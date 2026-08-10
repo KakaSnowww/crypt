@@ -1,99 +1,118 @@
-import { ArrowRight, MessageCircle, Server, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpenText,
+  FlaskConical,
+  MessageCircle,
+  Search,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const quickActions = [
+const collections = [
   {
-    description: 'Entre em uma comunidade, abra um canal ou continue uma chamada.',
+    description: 'Percorra comunidades, salas e conversas reunidas nos seus acervos.',
     icon: Server,
-    label: 'Abrir servidores',
+    label: 'Abrir acervos',
+    meta: 'Comunidades e salas',
     to: '/app/servidores',
   },
   {
-    description: 'Continue conversas individuais ou crie um grupo com seus amigos.',
+    description: 'Retome cartas individuais ou reúna um pequeno círculo de pessoas.',
     icon: MessageCircle,
-    label: 'Ver mensagens',
+    label: 'Correspondências',
+    meta: 'Mensagens diretas',
     to: '/app/mensagens',
   },
   {
-    description: 'Encontre pessoas, responda pedidos e veja novas sugestões.',
+    description: 'Encontre pessoas, responda solicitações e amplie sua rede de vínculos.',
     icon: Users,
-    label: 'Gerenciar conexões',
+    label: 'Vínculos',
+    meta: 'Pessoas e conexões',
     to: '/app/conexoes',
   },
 ] as const;
 
 export function AppHomeRoute() {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-7 sm:py-10">
-      <section className="relative isolate overflow-hidden rounded-[2rem] border border-violet-400/15 bg-[#0e1527] p-6 shadow-2xl shadow-black/20 sm:p-9">
-        <div className="pointer-events-none absolute -right-20 -top-28 size-80 rounded-full bg-violet-500/20 blur-[90px]" />
-        <div className="pointer-events-none absolute -bottom-40 left-1/3 size-96 rounded-full bg-blue-500/15 blur-[110px]" />
+    <main className="alchemy-home mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-9">
+      <section className="alchemy-hero relative isolate overflow-hidden px-6 py-8 sm:px-10 sm:py-12">
+        <div className="alchemy-hero__seal" aria-hidden="true">
+          <FlaskConical size={30} strokeWidth={1.35} />
+        </div>
         <div className="relative max-w-3xl">
-          <span className="grid size-12 place-items-center rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500 to-blue-600 text-white shadow-lg shadow-violet-950/30">
-            <Sparkles aria-hidden="true" size={21} />
-          </span>
-          <p className="eyebrow mt-7">Seu espaço no Crypt</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-[-0.035em] text-white sm:text-5xl">
-            Tudo o que importa, sem menus desnecessários.
+          <p className="alchemy-kicker">Catálogo particular · Crypt</p>
+          <h1 className="alchemy-display mt-4 text-4xl leading-[0.98] sm:text-6xl">
+            Sua biblioteca de pessoas, ideias e círculos.
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-crypt-muted sm:text-base">
-            Acesse servidores, mensagens e amizades diretamente. As ferramentas administrativas
-            aparecem somente quando você realmente precisa delas.
+          <p className="mt-6 max-w-2xl text-sm leading-7 text-crypt-muted sm:text-base">
+            Um lugar silencioso para encontrar conversas, organizar comunidades e cultivar vínculos
+            — sem ruído, sem corredores infinitos, no seu próprio ritmo.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-[#0b1020] transition hover:-translate-y-0.5 hover:bg-violet-50"
-              to="/app/servidores"
-            >
-              Continuar no Crypt <ArrowRight aria-hidden="true" size={16} />
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link className="alchemy-button alchemy-button--primary" to="/app/servidores">
+              Consultar acervos <ArrowRight aria-hidden="true" size={16} />
             </Link>
-            <Link
-              className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.055] px-4 text-sm font-semibold text-white transition hover:bg-white/[0.09]"
-              to="/app/perfil/editar"
-            >
-              Personalizar perfil
+            <Link className="alchemy-button" to="/app/busca">
+              <Search aria-hidden="true" size={16} /> Buscar no catálogo
             </Link>
           </div>
+        </div>
+        <div className="alchemy-hero__folio" aria-hidden="true">
+          <span>I</span>
+          <BookOpenText size={18} />
+          <span>MMXXVI</span>
         </div>
       </section>
 
-      <section aria-labelledby="quick-actions-title" className="mt-8">
-        <div className="flex items-end justify-between gap-4">
+      <section aria-labelledby="collections-title" className="mt-10">
+        <div className="alchemy-section-heading">
           <div>
-            <p className="eyebrow">Atalhos</p>
-            <h2
-              className="mt-2 text-xl font-bold tracking-tight text-white"
-              id="quick-actions-title"
-            >
-              Para onde você quer ir?
+            <p className="alchemy-kicker">Índice principal</p>
+            <h2 className="alchemy-display mt-2 text-2xl" id="collections-title">
+              Coleções em consulta
             </h2>
           </div>
           <span className="hidden items-center gap-2 text-xs text-crypt-subtle sm:flex">
-            <ShieldCheck size={15} /> Protegido pelas suas permissões
+            <ShieldCheck size={14} /> Acesso conforme suas permissões
           </span>
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {quickActions.map(({ description, icon: Icon, label, to }) => (
-            <Link
-              className="panel group p-5 transition duration-200 hover:-translate-y-1 hover:border-violet-400/25"
-              key={label}
-              to={to}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <span className="grid size-11 place-items-center rounded-2xl border border-violet-400/10 bg-violet-500/10 text-violet-200">
-                  <Icon aria-hidden="true" size={19} />
-                </span>
-                <ArrowRight
-                  aria-hidden="true"
-                  className="text-crypt-subtle transition group-hover:translate-x-1 group-hover:text-violet-200"
-                  size={17}
-                />
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          {collections.map(({ description, icon: Icon, label, meta, to }, index) => (
+            <Link className="alchemy-card group" key={label} to={to}>
+              <div className="flex items-center justify-between gap-4">
+                <span className="alchemy-card__number">0{index + 1}</span>
+                <Icon aria-hidden="true" className="text-[var(--alchemy-brass)]" size={19} />
               </div>
-              <h3 className="mt-5 font-bold text-white">{label}</h3>
-              <p className="mt-2 text-xs leading-5 text-crypt-muted">{description}</p>
+              <p className="mt-8 text-[0.64rem] font-semibold uppercase tracking-[0.18em] text-crypt-subtle">
+                {meta}
+              </p>
+              <h3 className="alchemy-display mt-2 text-xl text-white">{label}</h3>
+              <p className="mt-3 text-xs leading-6 text-crypt-muted">{description}</p>
+              <span className="mt-7 inline-flex items-center gap-2 text-xs font-semibold text-[var(--alchemy-parchment)]">
+                Consultar <ArrowRight className="transition group-hover:translate-x-1" size={14} />
+              </span>
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="alchemy-note mt-8 flex flex-col gap-5 sm:flex-row sm:items-center">
+        <span className="alchemy-note__icon">
+          <Sparkles aria-hidden="true" size={18} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="alchemy-kicker">Arcana</p>
+          <h2 className="mt-1 font-semibold text-[var(--alchemy-parchment)]">
+            A câmara de recursos especiais permanece ao seu alcance.
+          </h2>
+        </div>
+        <Link className="alchemy-button shrink-0" to="/app/arcana">
+          Abrir câmara <ArrowRight aria-hidden="true" size={15} />
+        </Link>
       </section>
     </main>
   );

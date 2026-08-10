@@ -1,0 +1,248 @@
+:root {
+  --alchemy-ink: #080907;
+  --alchemy-charcoal: #10120f;
+  --alchemy-leather: #1a1811;
+  --alchemy-parchment: #eadfbd;
+  --alchemy-parchment-muted: #bdb18f;
+  --alchemy-brass: #b79252;
+  --alchemy-brass-bright: #d2ae68;
+  --alchemy-reagent: #6e9170;
+  --alchemy-line: rgb(197 164 100 / 17%);
+  --font-alchemy: Georgia, 'Times New Roman', ui-serif, serif;
+}
+
+body.app-shell-active {
+  background:
+    radial-gradient(circle at 80% 5%, rgb(112 139 100 / 8%), transparent 28rem),
+    linear-gradient(145deg, #090a08, #0d0d0a 55%, #070806) !important;
+}
+
+.app-shell--alchemy {
+  background:
+    linear-gradient(90deg, rgb(183 146 82 / 3%) 1px, transparent 1px) 0 0 / 5rem 100%,
+    linear-gradient(145deg, rgb(13 14 11 / 96%), rgb(7 8 6 / 98%)) !important;
+}
+
+.app-shell--alchemy .app-shell__rail {
+  border-color: var(--alchemy-line) !important;
+  background: linear-gradient(180deg, #15140f, #090a08) !important;
+  box-shadow: inset -1px 0 rgb(231 201 137 / 5%);
+}
+
+.app-shell--alchemy .app-shell__sidebar,
+.app-shell--alchemy .app-shell__members {
+  border-color: var(--alchemy-line) !important;
+  background: linear-gradient(90deg, transparent 96%, rgb(201 166 102 / 4%)), #10110e !important;
+  box-shadow: none;
+}
+
+.app-shell--alchemy .app-shell__header {
+  border-color: var(--alchemy-line) !important;
+  background: rgb(10 11 9 / 91%) !important;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 18%);
+}
+
+.app-shell--alchemy .app-shell__sidebar nav a[aria-current='page'] {
+  color: var(--alchemy-parchment);
+  background: linear-gradient(90deg, rgb(183 146 82 / 14%), rgb(183 146 82 / 3%));
+  box-shadow: inset 2px 0 var(--alchemy-brass);
+}
+
+.app-shell--alchemy .text-violet-200,
+.app-shell--alchemy .text-violet-300 {
+  color: var(--alchemy-parchment-muted) !important;
+}
+
+.app-shell--alchemy .bg-violet-500,
+.app-shell--alchemy .bg-violet-500\/10 {
+  background-color: rgb(183 146 82 / 15%) !important;
+}
+
+.alchemy-display {
+  font-family: var(--font-alchemy);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  color: var(--alchemy-parchment);
+}
+
+.alchemy-kicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--alchemy-brass-bright);
+}
+
+.alchemy-hero {
+  min-height: 28rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--alchemy-line);
+  border-radius: 0.35rem 2.5rem 0.35rem 0.35rem;
+  background:
+    linear-gradient(90deg, transparent 3.2rem, rgb(183 146 82 / 8%) 3.25rem, transparent 3.3rem),
+    radial-gradient(circle at 86% 38%, rgb(95 126 91 / 16%), transparent 20rem),
+    linear-gradient(135deg, rgb(33 30 21 / 92%), rgb(12 13 10 / 96%));
+  box-shadow:
+    0 28px 80px rgb(0 0 0 / 28%),
+    inset 0 1px rgb(239 220 175 / 5%);
+}
+
+.alchemy-hero::after {
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid rgb(183 146 82 / 9%);
+  content: '';
+  pointer-events: none;
+}
+
+.alchemy-hero__seal {
+  position: absolute;
+  right: 9%;
+  top: 20%;
+  display: grid;
+  width: 8rem;
+  height: 8rem;
+  place-items: center;
+  border: 1px solid rgb(183 146 82 / 28%);
+  border-radius: 999px;
+  color: var(--alchemy-brass);
+  box-shadow: inset 0 0 0 0.7rem rgb(183 146 82 / 3%);
+  opacity: 0.68;
+}
+
+.alchemy-hero__folio {
+  position: absolute;
+  right: 2rem;
+  bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-alchemy);
+  font-size: 0.65rem;
+  letter-spacing: 0.13em;
+  color: rgb(234 223 189 / 45%);
+}
+
+.alchemy-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--alchemy-line);
+  padding-bottom: 1rem;
+}
+
+.alchemy-card {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1px solid var(--alchemy-line);
+  border-radius: 0.25rem 1.5rem 0.25rem 0.25rem;
+  background: linear-gradient(145deg, rgb(31 29 21 / 83%), rgb(14 15 12 / 92%));
+  padding: 1.5rem;
+  box-shadow: 0 18px 45px rgb(0 0 0 / 17%);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.alchemy-card::after {
+  position: absolute;
+  right: -3rem;
+  bottom: -3rem;
+  width: 9rem;
+  height: 9rem;
+  border: 1px solid rgb(110 145 112 / 12%);
+  border-radius: 999px;
+  content: '';
+}
+
+.alchemy-card:hover {
+  transform: translateY(-3px);
+  border-color: rgb(210 174 104 / 32%);
+  background: linear-gradient(145deg, rgb(39 35 24 / 90%), rgb(15 17 13 / 96%));
+}
+
+.alchemy-card__number {
+  font-family: var(--font-alchemy);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: rgb(234 223 189 / 40%);
+}
+
+.alchemy-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid rgb(210 174 104 / 24%);
+  border-radius: 0.25rem 0.9rem 0.25rem 0.25rem;
+  background: rgb(234 223 189 / 4%);
+  padding: 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--alchemy-parchment);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.alchemy-button:hover {
+  transform: translateY(-1px);
+  border-color: rgb(210 174 104 / 43%);
+  background: rgb(234 223 189 / 8%);
+}
+
+.alchemy-button--primary {
+  border-color: var(--alchemy-brass);
+  background: var(--alchemy-brass);
+  color: #15130d;
+}
+
+.alchemy-button--primary:hover {
+  background: var(--alchemy-brass-bright);
+}
+
+.alchemy-note {
+  border-top: 1px solid var(--alchemy-line);
+  border-bottom: 1px solid var(--alchemy-line);
+  background: linear-gradient(90deg, rgb(110 145 112 / 8%), transparent 55%);
+  padding: 1.25rem 0.25rem;
+}
+
+.alchemy-note__icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid rgb(110 145 112 / 28%);
+  border-radius: 999px;
+  color: #a6c3a6;
+}
+
+@media (max-width: 640px) {
+  .alchemy-hero {
+    min-height: 31rem;
+    border-radius: 0.25rem 1.75rem 0.25rem 0.25rem;
+  }
+
+  .alchemy-hero__seal {
+    right: -2.5rem;
+    top: 2rem;
+    width: 7rem;
+    height: 7rem;
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alchemy-card,
+  .alchemy-button {
+    transition: none;
+  }
+}

@@ -4,17 +4,17 @@ import { describe, expect, it } from 'vitest';
 import { authenticatedAuthValue, renderRoute } from '../test/renderRoute';
 
 describe('rotas do Crypt', () => {
-  it('abre o início com acesso aos servidores', async () => {
+  it('abre o índice com acesso aos acervos', async () => {
     renderRoute('/app', { authValue: authenticatedAuthValue });
 
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Tudo o que importa, sem menus desnecessários.',
+        name: 'Sua biblioteca de pessoas, ideias e círculos.',
       }),
     ).toBeVisible();
-    expect(screen.getByText('Seu espaço no Crypt')).toBeVisible();
-    expect(screen.getByRole('link', { name: /Continuar no Crypt/ })).toHaveAttribute(
+    expect(screen.getByText('Catálogo particular · Crypt')).toBeVisible();
+    expect(screen.getByRole('link', { name: /Consultar acervos/ })).toHaveAttribute(
       'href',
       '/app/servidores',
     );

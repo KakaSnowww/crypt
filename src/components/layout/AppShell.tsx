@@ -71,23 +71,23 @@ import { ExperienceSettingsButton } from '../../features/experience/ExperienceSe
 import { IconButton } from '../common/IconButton';
 
 const channelLinks = [
-  { end: true, icon: Gem, label: 'Arcana', to: '/app/arcana' },
+  { end: true, icon: Gem, label: 'Câmara Arcana', to: '/app/arcana' },
   {
     end: false,
     icon: ServerGlyph,
-    label: 'Servidores',
+    label: 'Acervos',
     to: '/app/servidores',
   },
   {
     end: false,
     icon: MessageCircle,
-    label: 'Mensagens',
+    label: 'Correspondências',
     to: '/app/mensagens',
   },
   {
     end: true,
     icon: Search,
-    label: 'Buscar',
+    label: 'Catálogo',
     to: '/app/busca',
   },
   {
@@ -99,7 +99,7 @@ const channelLinks = [
   {
     end: false,
     icon: Users,
-    label: 'Conexões',
+    label: 'Vínculos',
     to: '/app/conexoes',
   },
   {
@@ -355,8 +355,8 @@ export function AppShell() {
   return (
     <div
       className={classNames(
-        'app-shell h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[5rem_18rem_minmax(0,1fr)]',
-        !isVoiceRoute && '2xl:grid-cols-[5rem_18rem_minmax(0,1fr)_15rem]',
+        'app-shell app-shell--alchemy h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)]',
+        !isVoiceRoute && '2xl:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)_15rem]',
       )}
     >
       <aside
@@ -424,10 +424,10 @@ export function AppShell() {
       >
         <div className="border-b border-white/[0.06] px-5 py-[1.15rem]">
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-violet-300">
-            {currentServer ? 'Servidor atual' : 'Navegação'}
+            {currentServer ? 'Acervo em consulta' : 'Biblioteca alquímica'}
           </p>
           <h1 className="mt-1.5 truncate text-base font-bold tracking-tight text-white">
-            {currentServer?.server_name ?? 'Crypt'}
+            {currentServer?.server_name ?? 'Catálogo do Crypt'}
           </h1>
         </div>
 
@@ -506,7 +506,7 @@ export function AppShell() {
               )}
             >
               <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-                {currentServer ? 'Menu do Crypt' : 'Crypt'}
+                {currentServer ? 'Catálogo geral' : 'Índice'}
               </p>
               <div className="mt-2 grid gap-1">
                 {channelLinks.map((channel) => {
@@ -771,7 +771,7 @@ export function AppShell() {
             to="/app/servidores"
           >
             <ServerGlyph aria-hidden="true" size={19} />
-            Servidores
+            Acervos
           </NavLink>
           <NavLink
             className={({ isActive }) =>
@@ -784,7 +784,7 @@ export function AppShell() {
             to="/app"
           >
             <Home aria-hidden="true" size={19} />
-            Início
+            Índice
           </NavLink>
           <NavLink
             className={({ isActive }) =>
@@ -796,7 +796,7 @@ export function AppShell() {
             to="/app/mensagens"
           >
             <MessageCircle aria-hidden="true" size={19} />
-            Mensagens
+            Cartas
             {unreadDirectMessages ? (
               <span className="absolute right-2 top-0 grid min-w-5 place-items-center rounded-full bg-violet-500 px-1 text-[0.58rem] text-white">
                 {unreadDirectMessages > 99 ? '99+' : unreadDirectMessages}
@@ -813,7 +813,7 @@ export function AppShell() {
             to="/app/conexoes"
           >
             <Users aria-hidden="true" size={19} />
-            Amigos
+            Vínculos
           </NavLink>
           <NavLink
             className={({ isActive }) =>
