@@ -1,0 +1,109 @@
+@media (max-width: 63.999rem) {
+  html[data-obsidian-arcana='v2'] .app-shell__header {
+    min-height: 4rem;
+    padding-inline: max(0.85rem, env(safe-area-inset-left)) max(0.85rem, env(safe-area-inset-right));
+  }
+
+  html[data-obsidian-arcana='v2'] .app-shell__content {
+    background:
+      radial-gradient(circle at 50% -10%, rgb(144 105 208 / 4.5%), transparent 20rem), #06060b;
+  }
+
+  html[data-obsidian-arcana='v2'] .chat-fixed {
+    padding-inline: 0.85rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .chat-scroll {
+    padding-inline: 0.5rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .chat-layout article[id^='message-'] {
+    border-radius: 0.8rem;
+    padding-inline: 0.65rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .panel {
+    border-radius: 1.25rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .crypt-modal {
+    width: calc(100% - 1rem);
+    max-height: calc(100dvh - 1rem);
+    border-radius: 1.5rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .voice-stage__grid {
+    padding: 0.55rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .voice-participant {
+    border-radius: 0.85rem;
+  }
+}
+
+@media (max-width: 39.999rem) {
+  html[data-obsidian-arcana='v2'] .auth-surface {
+    border-color: transparent;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  html[data-obsidian-arcana='v2'] .crypt-auth-access {
+    background:
+      radial-gradient(circle at 50% 8%, rgb(145 105 210 / 7%), transparent 20rem), #05050a;
+  }
+
+  html[data-obsidian-arcana='v2'] .chat-fixed:first-of-type {
+    min-height: 4.15rem;
+  }
+
+  html[data-obsidian-arcana='v2'] .chat-fixed:last-of-type .relative > .flex.items-end {
+    border-radius: 0.9rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-obsidian-arcana='v2'].obsidian-route-enter .app-shell__content > *,
+  html[data-obsidian-arcana='v2'] .crypt-button,
+  html[data-obsidian-arcana='v2'] .app-shell__rail a,
+  html[data-obsidian-arcana='v2'] .arcana-tier-icon,
+  html[data-obsidian-arcana='v2'] .community-rune-icon,
+  html[data-obsidian-arcana='v2'] .voice-participant {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html[data-obsidian-arcana='v2'] body::after {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-obsidian-arcana='v2'] .panel,
+  html[data-obsidian-arcana='v2'] .crypt-modal,
+  html[data-obsidian-arcana='v2'] .crypt-button,
+  html[data-obsidian-arcana='v2'] .crypt-field,
+  html[data-obsidian-arcana='v2'] .voice-participant {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+  }
+
+  html[data-obsidian-arcana='v2'] .app-shell__sidebar nav a[aria-current='page'] {
+    outline: 2px solid Highlight;
+  }
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-performance='limited'] body::after,
+html[data-obsidian-arcana='v2'][data-page-visibility='hidden'] body::after {
+  display: none;
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-performance='limited'] .panel,
+html[data-obsidian-arcana='v2'][data-crypt-performance='limited'] .crypt-modal,
+html[data-obsidian-arcana='v2'][data-crypt-performance='limited'] .app-shell__sidebar,
+html[data-obsidian-arcana='v2'][data-crypt-performance='limited'] .app-shell__members {
+  backdrop-filter: none;
+}

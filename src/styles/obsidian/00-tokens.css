@@ -1,0 +1,83 @@
+:root {
+  --obsidian-black: #020205;
+  --obsidian-void: #05050a;
+  --obsidian-ink: #080810;
+  --obsidian-deep: #0b0b15;
+  --obsidian-panel: #10101d;
+  --obsidian-panel-raised: #151526;
+  --obsidian-panel-bright: #1b1930;
+  --obsidian-glass: rgb(16 15 29 / 86%);
+  --obsidian-glass-heavy: rgb(9 9 17 / 94%);
+  --obsidian-text: #f7f5fb;
+  --obsidian-muted: #b7b2c5;
+  --obsidian-subtle: #777286;
+  --obsidian-faint: #504b5d;
+  --obsidian-violet: #9f7aea;
+  --obsidian-violet-bright: #c7a7ff;
+  --obsidian-blue: #67b7ff;
+  --obsidian-cyan: #72e5ed;
+  --obsidian-gold: #e7c982;
+  --obsidian-rose: #ee8fae;
+  --obsidian-success: #65d8ad;
+  --obsidian-danger: #ff8092;
+  --obsidian-warning: #f2bd68;
+
+  --obsidian-line: rgb(223 213 255 / 8%);
+  --obsidian-line-medium: rgb(223 213 255 / 13%);
+  --obsidian-line-strong: rgb(211 193 255 / 23%);
+  --obsidian-highlight: rgb(255 255 255 / 4.5%);
+  --obsidian-highlight-strong: rgb(255 255 255 / 8%);
+
+  --obsidian-shadow-xs: 0 1px 0 rgb(255 255 255 / 3%), 0 8px 20px rgb(0 0 0 / 18%);
+  --obsidian-shadow-sm: 0 1px 0 rgb(255 255 255 / 4%), 0 14px 34px rgb(0 0 0 / 24%);
+  --obsidian-shadow-md:
+    0 1px 0 rgb(255 255 255 / 4.5%), 0 26px 70px rgb(0 0 0 / 34%), 0 0 44px rgb(112 82 175 / 5%);
+  --obsidian-shadow-lg:
+    0 1px 0 rgb(255 255 255 / 5%), 0 44px 130px rgb(0 0 0 / 56%), 0 0 80px rgb(116 85 200 / 8%);
+  --obsidian-inset: inset 0 1px 0 rgb(255 255 255 / 4%), inset 0 -1px 0 rgb(0 0 0 / 22%);
+
+  --obsidian-radius-xs: 0.55rem;
+  --obsidian-radius-sm: 0.8rem;
+  --obsidian-radius-md: 1.05rem;
+  --obsidian-radius-lg: 1.35rem;
+  --obsidian-radius-xl: 1.7rem;
+  --obsidian-radius-2xl: 2.1rem;
+
+  --obsidian-ease-out: cubic-bezier(0.2, 0.75, 0.2, 1);
+  --obsidian-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --obsidian-fast: 120ms;
+  --obsidian-medium: 220ms;
+  --obsidian-slow: 360ms;
+
+  --obsidian-pointer-x: 50vw;
+  --obsidian-pointer-y: 30vh;
+
+  --color-crypt-background: var(--obsidian-void);
+  --color-crypt-deep: var(--obsidian-black);
+  --color-crypt-sidebar: var(--obsidian-ink);
+  --color-crypt-panel: var(--obsidian-panel);
+  --color-crypt-elevated: var(--obsidian-panel-raised);
+  --color-crypt-text: var(--obsidian-text);
+  --color-crypt-muted: var(--obsidian-muted);
+  --color-crypt-subtle: var(--obsidian-subtle);
+  --color-crypt-purple: var(--obsidian-violet);
+  --color-crypt-blue: var(--obsidian-blue);
+  --color-crypt-focus: var(--obsidian-violet-bright);
+
+  --arcane-void: var(--obsidian-black);
+  --arcane-night: var(--obsidian-void);
+  --arcane-surface: var(--obsidian-panel);
+  --arcane-surface-2: var(--obsidian-panel-raised);
+  --arcane-surface-3: var(--obsidian-panel-bright);
+  --arcane-purple: var(--obsidian-violet);
+  --arcane-violet: var(--obsidian-violet-bright);
+  --arcane-blue: var(--obsidian-blue);
+  --arcane-cyan: var(--obsidian-cyan);
+  --arcane-gold: var(--obsidian-gold);
+  --arcane-success: var(--obsidian-success);
+  --arcane-danger: var(--obsidian-danger);
+  --arcane-border: var(--obsidian-line-medium);
+  --arcane-border-strong: var(--obsidian-line-strong);
+  --arcane-glow: var(--obsidian-shadow-md);
+  --arcane-glow-strong: var(--obsidian-shadow-lg);
+}

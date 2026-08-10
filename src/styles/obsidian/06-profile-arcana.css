@@ -1,0 +1,84 @@
+html[data-obsidian-arcana='v2'][data-crypt-area='profile'] .panel,
+html[data-obsidian-arcana='v2'][data-crypt-area='arcana'] .panel {
+  border-radius: 1.65rem;
+}
+
+html[data-obsidian-arcana='v2'] .profile-visual-preview {
+  border-color: rgb(224 209 248 / 14%) !important;
+  border-radius: 1.5rem !important;
+  box-shadow:
+    0 32px 80px rgb(0 0 0 / 35%),
+    inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+html[data-obsidian-arcana='v2'] .profile-visual-preview::after {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(255 255 255 / 4%);
+  border-radius: inherit;
+  box-shadow: inset 0 -80px 100px rgb(0 0 0 / 28%);
+  content: '';
+  pointer-events: none;
+}
+
+html[data-obsidian-arcana='v2'] [class*='profile-effect-'] {
+  transition:
+    filter var(--obsidian-medium) ease,
+    box-shadow var(--obsidian-medium) ease;
+}
+
+html[data-obsidian-arcana='v2'] .profile-effect-neon {
+  box-shadow:
+    0 0 0 1px rgb(178 145 231 / 20%),
+    0 25px 80px rgb(81 57 128 / 24%) !important;
+}
+
+html[data-obsidian-arcana='v2'] .profile-effect-aurora {
+  filter: saturate(0.92) contrast(1.02);
+}
+
+html[data-obsidian-arcana='v2'] .arcana-tier-icon,
+html[data-obsidian-arcana='v2'] .community-rune-icon {
+  filter: drop-shadow(0 8px 13px rgb(0 0 0 / 28%)) drop-shadow(0 0 8px rgb(161 123 224 / 12%));
+  transition:
+    transform var(--obsidian-medium) var(--obsidian-ease-spring),
+    filter var(--obsidian-medium) ease;
+}
+
+html[data-obsidian-arcana='v2'] .arcana-tier-icon:hover,
+html[data-obsidian-arcana='v2'] .community-rune-icon:hover {
+  transform: translateY(-2px) rotate(-1deg);
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 32%)) drop-shadow(0 0 12px rgb(174 137 232 / 20%));
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-area='arcana'] .app-shell__content {
+  background:
+    radial-gradient(circle at 50% -12%, rgb(161 120 221 / 8%), transparent 29rem),
+    radial-gradient(circle at 88% 84%, rgb(207 177 112 / 3.5%), transparent 22rem),
+    linear-gradient(145deg, rgb(11 11 20 / 72%), rgb(5 5 10 / 94%));
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-area='arcana'] .panel::before {
+  background:
+    radial-gradient(circle at 88% 0%, rgb(175 133 231 / 8%), transparent 17rem),
+    radial-gradient(circle at 8% 100%, rgb(218 189 126 / 3%), transparent 14rem);
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-area='settings'] fieldset,
+html[data-obsidian-arcana='v2'][data-crypt-area='profile'] fieldset {
+  border-color: var(--obsidian-line-medium);
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-area='settings'] legend,
+html[data-obsidian-arcana='v2'][data-crypt-area='profile'] legend {
+  color: #e8e3ee;
+  letter-spacing: -0.01em;
+}
+
+html[data-obsidian-arcana='v2'] [aria-pressed='true'] {
+  border-color: rgb(197 168 240 / 35%) !important;
+  background: linear-gradient(145deg, rgb(156 116 222 / 12%), rgb(94 137 177 / 4%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 4%),
+    0 10px 28px rgb(0 0 0 / 12%);
+}

@@ -6,6 +6,7 @@ import { AppExperienceCoordinator } from './features/experience/AppExperienceCoo
 import { configureAndroidRuntime, hideAndroidSplashScreen } from './lib/androidRuntime';
 import { configureDesktopDeepLinks } from './lib/desktopDeepLinks';
 import { configureRuntimeDocument } from './lib/platform';
+import './features/appearance/obsidianArcanaRuntime';
 import './styles/globals.css';
 
 configureRuntimeDocument();

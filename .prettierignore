@@ -7,3 +7,5 @@ package-lock.json
 android/app/src/main/assets
 android/**/build
 android/.gradle
+_trash
+_backup-login-arcano-20260806-112931

@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { KeyRound, Mail } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -10,7 +11,6 @@ import { loginSchema, type LoginValues } from '../features/auth/auth.schemas';
 import { getSafeNextPath, loginWithPassword } from '../features/auth/auth.service';
 import { AuthConfigurationNotice } from '../features/auth/components/AuthConfigurationNotice';
 import { AuthFormError } from '../features/auth/components/AuthFormError';
-import { AuthPageHeader } from '../features/auth/components/AuthPageHeader';
 
 export function LoginRoute() {
   const navigate = useNavigate();
@@ -32,43 +32,72 @@ export function LoginRoute() {
     await loginMutation.mutateAsync(values).catch(() => undefined);
   });
 
+  const passwordFieldId = useId();
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <section aria-labelledby="login-title">
-      <AuthPageHeader
-        description="Entre para continuar suas conversas e encontrar sua comunidade."
-        eyebrow="Acesse sua conta"
-        id="login-title"
-        title="Que bom ter você de volta"
-      />
+    <section aria-labelledby="login-title" className="crypt-login-route">
+      <header className="crypt-login-header">
+        <p className="crypt-login-eyebrow">
+          <Sparkles aria-hidden="true" size={13} />
+          Santuário Arcano · Acesso
+        </p>
+        <h1 className="crypt-login-title" id="login-title">
+          Que bom ter você de volta
+        </h1>
+        <p className="crypt-login-subtitle">
+          Entre novamente no seu círculo. Retome conversas, chamadas e comunidades onde estavam.
+        </p>
+      </header>
+
       <AuthConfigurationNotice />
 
-      <form className="mt-8 grid gap-5" noValidate onSubmit={(event) => void handleSubmit(event)}>
+      <form className="crypt-login-form" noValidate onSubmit={(event) => void handleSubmit(event)}>
         <Input
           autoComplete="email"
+          className="crypt-login-field"
           errorText={form.formState.errors.email?.message}
           label="E-mail"
-          leadingIcon={<Mail aria-hidden="true" size={17} />}
+          leadingIcon={<Mail aria-hidden="true" size={18} />}
           placeholder="voce@exemplo.com"
           required
           type="email"
           {...form.register('email')}
         />
-        <Input
-          autoComplete="current-password"
-          errorText={form.formState.errors.password?.message}
-          label="Senha"
-          leadingIcon={<KeyRound aria-hidden="true" size={17} />}
-          placeholder="Digite sua senha"
-          required
-          type="password"
-          {...form.register('password')}
-        />
 
-        <div className="flex justify-end">
-          <Link
-            className="rounded-lg text-xs font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
-            to="/recuperar-senha"
+        <div className="crypt-login-field">
+          <Input
+            aria-controls={`${passwordFieldId}-toggle`}
+            autoComplete="current-password"
+            className="crypt-login-field__inner"
+            errorText={form.formState.errors.password?.message}
+            id={passwordFieldId}
+            label="Senha"
+            leadingIcon={<KeyRound aria-hidden="true" size={18} />}
+            placeholder="Digite sua senha"
+            required
+            type={showPassword ? 'text' : 'password'}
+            {...form.register('password')}
+          />
+          <button
+            aria-controls={passwordFieldId}
+            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            aria-pressed={showPassword}
+            className="crypt-login-toggle"
+            id={`${passwordFieldId}-toggle`}
+            onClick={() => setShowPassword((current) => !current)}
+            type="button"
           >
+            {showPassword ? (
+              <EyeOff aria-hidden="true" size={18} />
+            ) : (
+              <Eye aria-hidden="true" size={18} />
+            )}
+          </button>
+        </div>
+
+        <div className="crypt-login-links">
+          <Link className="crypt-login-link" to="/recuperar-senha">
             Esqueci minha senha
           </Link>
         </div>
@@ -77,17 +106,29 @@ export function LoginRoute() {
           message={loginMutation.error ? toAuthActionError(loginMutation.error).message : undefined}
         />
 
-        <Button className="mt-1 w-full" loading={loginMutation.isPending} size="lg" type="submit">
-          Entrar no Crypt
-        </Button>
+        <div className="crypt-login-submit-wrap">
+          <Button
+            className="crypt-login-submit"
+            leadingIcon={<ShieldCheck aria-hidden="true" size={18} />}
+            loading={loginMutation.isPending}
+            size="lg"
+            type="submit"
+          >
+            Entrar no Crypt
+          </Button>
+          <span aria-hidden="true" className="crypt-login-submit__sigil" />
+        </div>
       </form>
 
-      <p className="mt-7 text-center text-xs text-crypt-subtle">
+      <div aria-hidden="true" className="crypt-login-divider">
+        <span />
+        <i />
+        <span />
+      </div>
+
+      <p className="crypt-login-register">
         Ainda não tem uma conta?{' '}
-        <Link
-          className="font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
-          to="/cadastro"
-        >
+        <Link className="crypt-login-link crypt-login-link--strong" to="/cadastro">
           Criar conta
         </Link>
       </p>

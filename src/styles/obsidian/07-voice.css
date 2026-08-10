@@ -1,0 +1,108 @@
+html[data-obsidian-arcana='v2'] .voice-lobby {
+  background:
+    radial-gradient(circle at 50% 20%, rgb(143 103 205 / 10%), transparent 28rem),
+    linear-gradient(145deg, #08080f, #030306);
+}
+
+html[data-obsidian-arcana='v2'] .voice-lobby > section {
+  border-color: var(--obsidian-line-medium);
+  border-radius: var(--obsidian-radius-2xl);
+  background: linear-gradient(145deg, rgb(255 255 255 / 4%), transparent 36%), rgb(15 15 27 / 94%);
+  box-shadow: var(--obsidian-shadow-lg);
+  backdrop-filter: blur(28px);
+}
+
+html[data-obsidian-arcana='v2'] .voice-lobby__icon {
+  border: 1px solid rgb(218 199 246 / 17%);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 8%), transparent),
+    linear-gradient(135deg, #72549d, #4c7197);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 13%),
+    0 20px 50px rgb(74 55 117 / 30%);
+}
+
+html[data-obsidian-arcana='v2'] .voice-stage {
+  background:
+    radial-gradient(circle at 50% -20%, rgb(143 104 207 / 7%), transparent 30rem), #040408;
+}
+
+html[data-obsidian-arcana='v2'] .voice-stage__header {
+  min-height: 3.6rem;
+  border-bottom: 1px solid var(--obsidian-line);
+  background: linear-gradient(90deg, rgb(14 14 25 / 96%), rgb(8 8 15 / 97%));
+  box-shadow: 0 12px 34px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(24px);
+}
+
+html[data-obsidian-arcana='v2'] .voice-stage__header-actions > span,
+html[data-obsidian-arcana='v2'] .voice-stage__header-actions > button {
+  border: 1px solid var(--obsidian-line);
+  border-radius: 0.7rem;
+  background: rgb(255 255 255 / 3%);
+  box-shadow: var(--obsidian-inset);
+}
+
+html[data-obsidian-arcana='v2'] .voice-stage__share {
+  border-color: var(--obsidian-line-medium);
+  border-radius: 1rem;
+  background: #010103;
+  box-shadow:
+    0 24px 70px rgb(0 0 0 / 38%),
+    inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+html[data-obsidian-arcana='v2'] .voice-participant {
+  border-width: 1px;
+  border-color: var(--obsidian-line-medium);
+  border-radius: 1rem;
+  background-color: #11111c;
+  box-shadow:
+    0 18px 45px rgb(0 0 0 / 24%),
+    inset 0 1px 0 rgb(255 255 255 / 3%),
+    inset 0 -70px 100px rgb(0 0 0 / 16%);
+  transition:
+    border-color 90ms linear,
+    box-shadow 120ms ease,
+    transform var(--obsidian-medium) var(--obsidian-ease-out);
+}
+
+html[data-obsidian-arcana='v2'] .voice-participant:hover {
+  transform: translateY(-1px);
+  border-color: rgb(220 204 245 / 17%);
+}
+
+html[data-obsidian-arcana='v2'] .voice-participant.is-speaking,
+html[data-obsidian-arcana='v2'] .voice-presence-person.is-speaking {
+  border-color: rgb(101 216 173 / 68%) !important;
+  box-shadow:
+    0 0 0 2px rgb(101 216 173 / 9%),
+    0 0 24px rgb(101 216 173 / 11%),
+    0 20px 50px rgb(0 0 0 / 28%);
+}
+
+html[data-obsidian-arcana='v2'] .voice-side-panel {
+  border-color: var(--obsidian-line-medium);
+  border-radius: 0.95rem;
+  background: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent), rgb(10 10 18 / 94%);
+  box-shadow: var(--obsidian-shadow-sm);
+}
+
+html[data-obsidian-arcana='v2'] .voice-side-panel__actions button {
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  background: rgb(255 255 255 / 3%);
+}
+
+html[data-obsidian-arcana='v2'] .voice-side-panel__actions button:hover,
+html[data-obsidian-arcana='v2'] .voice-side-panel__actions button.is-active {
+  border-color: var(--obsidian-line-medium);
+  background: rgb(154 114 220 / 9%);
+}
+
+html[data-obsidian-arcana='v2'] .voice-connection-monitor {
+  border-color: var(--obsidian-line-medium);
+  background: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent), rgb(10 10 18 / 94%);
+  box-shadow: var(--obsidian-shadow-md);
+  backdrop-filter: blur(24px);
+}

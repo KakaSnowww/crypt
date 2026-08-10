@@ -7,6 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   globalIgnores([
+    '_backup-login-arcano-20260806-112931/**',
     'coverage',
     'dist',
     'dist-electron',
@@ -14,6 +15,7 @@ export default defineConfig([
     'node_modules',
     'release',
     'supabase/functions',
+    '_trash/**',
   ]),
   {
     files: ['**/*.{ts,tsx}'],

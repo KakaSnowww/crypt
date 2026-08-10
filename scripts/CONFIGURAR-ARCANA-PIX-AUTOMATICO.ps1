@@ -11,16 +11,6 @@ function Stop-WithMessage([string]$Message) {
   exit 1
 }
 
-function ConvertFrom-SecureStringPlain([Security.SecureString]$Value) {
-  $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($Value)
-
-  try {
-    return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
-  } finally {
-    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
-  }
-}
-
 function Read-SecretFromClipboard([string]$Label) {
   while ($true) {
     Write-Host ''
@@ -41,25 +31,20 @@ function Read-SecretFromClipboard([string]$Label) {
       try {
         Set-Clipboard -Value '' -ErrorAction SilentlyContinue
       } catch {
-        # Limpar a área de transferência é opcional.
       }
 
       Write-Host "[OK] $Label capturada sem exibir o conteúdo." -ForegroundColor Green
       return $plain.Trim()
     }
 
-    Write-Host 'A área de transferência está vazia. Copie a chave e tente novamente.' -ForegroundColor Red
+    Write-Host 'A área de transferência está vazia.' -ForegroundColor Red
   }
 }
 
 function Read-RequiredText([string]$Prompt) {
   while ($true) {
     $value = (Read-Host $Prompt).Trim()
-
-    if ($value) {
-      return $value
-    }
-
+    if ($value) { return $value }
     Write-Host 'O valor não pode ficar vazio.' -ForegroundColor Yellow
   }
 }
@@ -68,9 +53,7 @@ function Read-SupabaseUrl {
   foreach ($name in @('.env.local', '.env', '.env.development', '.env.production')) {
     $file = Join-Path $project $name
 
-    if (-not (Test-Path $file)) {
-      continue
-    }
+    if (-not (Test-Path $file)) { continue }
 
     foreach ($line in Get-Content $file) {
       if ($line -match '^\s*VITE_SUPABASE_URL\s*=\s*(.+?)\s*$') {
@@ -138,13 +121,12 @@ if (-not (Test-Path (Join-Path $project 'package.json'))) {
 Set-Location $project
 
 Write-Host ''
-Write-Host 'CRYPT — CONFIGURAÇÃO DA ARCANA COM ASAAS' -ForegroundColor Magenta
-Write-Host 'Preço configurado: R$ 5,00 por mês.' -ForegroundColor DarkGray
-Write-Host 'As credenciais não serão gravadas no projeto.' -ForegroundColor DarkGray
+Write-Host 'CRYPT — CONFIGURAÇÃO DO PIX AUTOMÁTICO' -ForegroundColor Magenta
+Write-Host 'O cartão recorrente continuará funcionando normalmente.' -ForegroundColor DarkGray
 Write-Host ''
 
 Write-Host 'Escolha o ambiente:' -ForegroundColor Cyan
-Write-Host '  1 - Sandbox (recomendado para os primeiros testes)'
+Write-Host '  1 - Sandbox'
 Write-Host '  2 - Produção'
 $environmentChoice = (Read-Host 'Opção').Trim()
 
@@ -156,54 +138,64 @@ if ($environmentChoice -eq '2') {
   $environmentLabel = 'SANDBOX'
 }
 
-Write-Host ''
-Write-Host "Ambiente selecionado: $environmentLabel" -ForegroundColor Yellow
-Write-Host ''
-
 $apiKey = Read-SecretFromClipboard 'a ASAAS_API_KEY'
 $notificationEmail = Read-RequiredText 'E-mail para avisos de falha do Webhook'
 
 if ($notificationEmail -notmatch '^[^@\s]+@[^@\s]+\.[^@\s]+$') {
-  Stop-WithMessage 'Informe um e-mail válido para o Webhook.'
+  Stop-WithMessage 'Informe um e-mail válido.'
 }
 
 $supabaseUrl = Read-SupabaseUrl
-
 if (-not $supabaseUrl) {
   Stop-WithMessage 'VITE_SUPABASE_URL não encontrada nos arquivos .env.'
 }
 
 Write-Host ''
-Write-Host 'Validando a API Key no Asaas...' -ForegroundColor Cyan
+Write-Host 'Validando acesso ao Pix Automático...' -ForegroundColor Cyan
 
 try {
-  $webhooks = Invoke-AsaasApi `
+  $null = Invoke-AsaasApi `
     -Method 'GET' `
-    -Path '/webhooks?offset=0&limit=100' `
+    -Path '/pix/automatic/authorizations?offset=0&limit=1' `
     -ApiBaseUrl $apiBaseUrl `
     -ApiKey $apiKey
 } catch {
-  Stop-WithMessage 'O Asaas recusou a API Key ou o ambiente selecionado está incorreto.'
+  Write-Host ''
+  Write-Host 'O Asaas recusou o acesso ao Pix Automático.' -ForegroundColor Red
+  Write-Host 'Confirme o ambiente, as permissões da API Key e a liberação da funcionalidade na conta.' -ForegroundColor Yellow
+  Write-Host ''
+  throw
 }
 
-Write-Host '[OK] API Key aceita.' -ForegroundColor Green
+Write-Host '[OK] Pix Automático disponível para esta API Key.' -ForegroundColor Green
 
 $webhookToken = New-WebhookToken
-$webhookUrl = "$supabaseUrl/functions/v1/arcana-billing/webhook"
+$webhookUrl = "$supabaseUrl/functions/v1/arcana-pix-automatic/webhook"
 $events = @(
-  'CHECKOUT_PAID',
-  'CHECKOUT_CANCELED',
-  'CHECKOUT_EXPIRED',
   'PAYMENT_CONFIRMED',
-  'PAYMENT_RECEIVED',
   'PAYMENT_OVERDUE',
-  'PAYMENT_CREDIT_CARD_CAPTURE_REFUSED',
+  'PAYMENT_RECEIVED',
   'PAYMENT_REFUNDED',
-  'PAYMENT_CHARGEBACK_REQUESTED'
+  'PAYMENT_CHARGEBACK_REQUESTED',
+  'PIX_AUTOMATIC_RECURRING_AUTHORIZATION_ACTIVATED',
+  'PIX_AUTOMATIC_RECURRING_AUTHORIZATION_CANCELLED',
+  'PIX_AUTOMATIC_RECURRING_AUTHORIZATION_CREATED',
+  'PIX_AUTOMATIC_RECURRING_AUTHORIZATION_EXPIRED',
+  'PIX_AUTOMATIC_RECURRING_AUTHORIZATION_REFUSED',
+  'PIX_AUTOMATIC_RECURRING_PAYMENT_INSTRUCTION_CANCELLED',
+  'PIX_AUTOMATIC_RECURRING_PAYMENT_INSTRUCTION_CREATED',
+  'PIX_AUTOMATIC_RECURRING_PAYMENT_INSTRUCTION_REFUSED',
+  'PIX_AUTOMATIC_RECURRING_PAYMENT_INSTRUCTION_SCHEDULED'
 )
 
+$webhooks = Invoke-AsaasApi `
+  -Method 'GET' `
+  -Path '/webhooks?offset=0&limit=100' `
+  -ApiBaseUrl $apiBaseUrl `
+  -ApiKey $apiKey
+
 $webhookBody = @{
-  name = 'Crypt Arcana'
+  name = 'Crypt Arcana Pix Automatico'
   url = $webhookUrl
   email = $notificationEmail
   enabled = $true
@@ -219,15 +211,14 @@ $existingWebhook = $null
 if ($webhooks.data) {
   $existingWebhook = $webhooks.data |
     Where-Object {
-      $_.name -eq 'Crypt Arcana' -or
+      $_.name -eq 'Crypt Arcana Pix Automatico' -or
       $_.url -eq $webhookUrl
     } |
     Select-Object -First 1
 }
 
-Write-Host ''
 if ($existingWebhook -and $existingWebhook.id) {
-  Write-Host 'Atualizando Webhook existente no Asaas...' -ForegroundColor Cyan
+  Write-Host 'Atualizando Webhook do Pix Automático...' -ForegroundColor Cyan
 
   $null = Invoke-AsaasApi `
     -Method 'PUT' `
@@ -236,7 +227,7 @@ if ($existingWebhook -and $existingWebhook.id) {
     -ApiKey $apiKey `
     -Body $webhookBody
 } else {
-  Write-Host 'Criando Webhook no Asaas...' -ForegroundColor Cyan
+  Write-Host 'Criando Webhook do Pix Automático...' -ForegroundColor Cyan
 
   $null = Invoke-AsaasApi `
     -Method 'POST' `
@@ -248,27 +239,21 @@ if ($existingWebhook -and $existingWebhook.id) {
 
 Write-Host '[OK] Webhook configurado.' -ForegroundColor Green
 
-$tempFile = Join-Path $env:TEMP "crypt-arcana-asaas-$([Guid]::NewGuid().ToString('N')).env"
+$tempFile = Join-Path $env:TEMP "crypt-arcana-pix-$([Guid]::NewGuid().ToString('N')).env"
 
 try {
   $secretContent = @"
 ASAAS_API_KEY=$apiKey
 ASAAS_API_BASE_URL=$apiBaseUrl
-ASAAS_WEBHOOK_TOKEN=$webhookToken
-ASAAS_WEBHOOK_NOTIFICATION_EMAIL=$notificationEmail
+ASAAS_PIX_WEBHOOK_TOKEN=$webhookToken
 ARCANA_MONTHLY_PRICE_BRL=5.00
 "@
 
-  [System.IO.File]::WriteAllText(
-    $tempFile,
-    $secretContent,
-    $utf8WithoutBom
-  )
+  [System.IO.File]::WriteAllText($tempFile, $secretContent, $utf8WithoutBom)
 
-  Write-Host ''
   Write-Host 'Enviando secrets ao Supabase...' -ForegroundColor Cyan
   & npx supabase secrets set --env-file $tempFile
-  Assert-CommandSucceeded 'enviar secrets ao Supabase'
+  Assert-CommandSucceeded 'enviar secrets'
 } finally {
   if (Test-Path $tempFile) {
     Remove-Item $tempFile -Force
@@ -277,22 +262,17 @@ ARCANA_MONTHLY_PRICE_BRL=5.00
   Remove-Variable apiKey, webhookToken -ErrorAction SilentlyContinue
 }
 
-Write-Host ''
-Write-Host 'Aplicando migration da Arcana...' -ForegroundColor Cyan
+Write-Host 'Aplicando migration...' -ForegroundColor Cyan
 & npx supabase db push
 Assert-CommandSucceeded 'aplicar migration'
 
-Write-Host ''
-Write-Host 'Publicando arcana-billing...' -ForegroundColor Cyan
-& npx supabase functions deploy arcana-billing --no-verify-jwt
-Assert-CommandSucceeded 'publicar arcana-billing'
+Write-Host 'Publicando arcana-pix-automatic...' -ForegroundColor Cyan
+& npx supabase functions deploy arcana-pix-automatic --no-verify-jwt
+Assert-CommandSucceeded 'publicar Edge Function'
 
 Write-Host ''
-Write-Host 'CONFIGURAÇÃO CONCLUÍDA' -ForegroundColor Green
-Write-Host ''
+Write-Host 'CONFIGURAÇÃO DO PIX AUTOMÁTICO CONCLUÍDA' -ForegroundColor Green
 Write-Host "Ambiente: $environmentLabel"
 Write-Host "Webhook: $webhookUrl"
-Write-Host ''
-Write-Host 'Teste primeiro no Sandbox antes de escolher Produção.' -ForegroundColor Yellow
 Write-Host ''
 Read-Host 'Pressione Enter para fechar'

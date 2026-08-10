@@ -16,10 +16,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
 import { ArcanaTierIcon } from '../features/arcana/ArcanaTierIcon';
-import {
-  ArcanaPixAutomaticManager,
-  ArcanaPixAutomaticStartButton,
-} from '../features/arcana/ArcanaPixAutomaticPanel';
 import { CommunityRuneIcon } from '../features/arcana/CommunityRuneIcon';
 import { useToast } from '../components/common/ToastContext';
 import { arcanaKeys, useArcanaMembership } from '../features/arcana/arcana.queries';
@@ -301,31 +297,7 @@ export function ArcanaRoute() {
         </div>
       </section>
 
-      {!active ? (
-        <section className="panel mt-6 p-5 sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="max-w-2xl">
-              <p className="eyebrow">Outra forma de pagamento</p>
-              <h2 className="mt-2 text-xl font-bold text-white">Pix Automático</h2>
-              <p className="mt-2 text-sm leading-6 text-crypt-muted">
-                Faça o primeiro Pix e autorize as próximas mensalidades de R$ 5 pelo aplicativo do
-                seu banco.
-              </p>
-            </div>
-
-            <ArcanaPixAutomaticStartButton onChanged={refreshArcana} />
-          </div>
-        </section>
-      ) : null}
-
-      <ArcanaPixAutomaticManager
-        active={active}
-        onChanged={refreshArcana}
-        pending={pending}
-        provider={data?.provider}
-      />
-
-      {asaasSubscription && data ? (
+      {(asaasSubscription || pending) && data ? (
         <section className="panel mt-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>

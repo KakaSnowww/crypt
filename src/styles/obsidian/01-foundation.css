@@ -1,0 +1,141 @@
+html[data-obsidian-arcana='v2'] {
+  color-scheme: dark;
+  background: var(--obsidian-black);
+  font-feature-settings:
+    'cv02' 1,
+    'cv03' 1,
+    'cv04' 1,
+    'cv11' 1;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-obsidian-arcana='v2'] body {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% -8%, rgb(134 95 207 / 10%), transparent 32rem),
+    radial-gradient(circle at 92% 108%, rgb(62 134 193 / 7%), transparent 36rem),
+    linear-gradient(145deg, #05050a 0%, #070710 42%, #040408 100%) !important;
+  color: var(--obsidian-text);
+}
+
+html[data-obsidian-arcana='v2'] body::before {
+  z-index: -2;
+  background:
+    linear-gradient(rgb(255 255 255 / 1.1%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 1.1%) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 42%), transparent 78%);
+  opacity: 0.22;
+  mix-blend-mode: normal;
+}
+
+html[data-obsidian-arcana='v2'] body::after {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(
+    30rem circle at var(--obsidian-pointer-x) var(--obsidian-pointer-y),
+    rgb(156 119 226 / 5.5%),
+    transparent 74%
+  );
+  content: '';
+  pointer-events: none;
+}
+
+html[data-obsidian-arcana='v2'] ::selection {
+  background: rgb(157 116 229 / 38%);
+  color: white;
+}
+
+html[data-obsidian-arcana='v2'] * {
+  scrollbar-color: rgb(153 135 184 / 26%) transparent;
+  scrollbar-width: thin;
+}
+
+html[data-obsidian-arcana='v2'] *::-webkit-scrollbar {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+html[data-obsidian-arcana='v2'] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-obsidian-arcana='v2'] *::-webkit-scrollbar-thumb {
+  border: 0.19rem solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(rgb(168 148 201 / 24%), rgb(112 102 139 / 18%)) padding-box;
+}
+
+html[data-obsidian-arcana='v2'] *::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(rgb(194 169 235 / 38%), rgb(130 113 168 / 28%)) padding-box;
+}
+
+html[data-obsidian-arcana='v2'] :focus-visible {
+  outline-color: var(--obsidian-violet-bright) !important;
+  outline-offset: 3px;
+}
+
+html[data-obsidian-arcana='v2'] a,
+html[data-obsidian-arcana='v2'] button,
+html[data-obsidian-arcana='v2'] input,
+html[data-obsidian-arcana='v2'] textarea,
+html[data-obsidian-arcana='v2'] select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-obsidian-arcana='v2'] .arcane-atmosphere {
+  opacity: 0.8;
+}
+
+html[data-obsidian-arcana='v2'] .arcane-atmosphere__noise {
+  opacity: 0.035;
+}
+
+html[data-obsidian-arcana='v2'] .arcane-atmosphere__constellations {
+  opacity: 0.095;
+  filter: saturate(0.55);
+  mask-image: radial-gradient(circle at 50% 35%, black, transparent 76%);
+}
+
+html[data-obsidian-arcana='v2'] .arcane-atmosphere__aurora {
+  filter: blur(130px);
+  opacity: 0.085;
+}
+
+html[data-obsidian-arcana='v2'] .arcane-atmosphere__sigil {
+  opacity: 0.022;
+  filter: saturate(0.55);
+}
+
+html[data-obsidian-arcana='v2'] .arcane-atmosphere__particles i {
+  background: #e1d8ef;
+  box-shadow: 0 0 8px rgb(196 176 230 / 38%);
+  opacity: 0.18;
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-area='arcana'] .arcane-atmosphere__constellations {
+  opacity: 0.15;
+}
+
+html[data-obsidian-arcana='v2'][data-crypt-area='arcana'] .arcane-atmosphere__sigil {
+  opacity: 0.04;
+}
+
+html[data-obsidian-arcana='v2'].obsidian-route-enter .app-shell__content > * {
+  animation: obsidian-route-enter var(--obsidian-slow) var(--obsidian-ease-spring) both;
+}
+
+@keyframes obsidian-route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

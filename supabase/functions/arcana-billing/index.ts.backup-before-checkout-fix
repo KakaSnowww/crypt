@@ -736,7 +736,7 @@ async function processCheckoutEvent(
   }
 }
 
-async function startCheckout(admin: AdminClient, profileId: string) {
+async function startCheckout(admin: AdminClient, profileId: string, email: string) {
   if (await hasActiveArcana(admin, profileId)) {
     return { already_active: true };
   }
@@ -759,8 +759,8 @@ async function startCheckout(admin: AdminClient, profileId: string) {
   if (
     existing?.status === 'pending' &&
     !existing.provider_checkout_id &&
-    existing.checkout_started_at &&
-    new Date(existing.checkout_started_at).getTime() > Date.now() - 2 * 60 * 1000
+    existing.checkout_expires_at &&
+    new Date(existing.checkout_expires_at).getTime() > Date.now() - 2 * 60 * 1000
   ) {
     throw new Error('checkout_in_progress');
   }
@@ -795,6 +795,7 @@ async function startCheckout(admin: AdminClient, profileId: string) {
         successUrl: callbackUrl('success'),
       },
       chargeTypes: ['RECURRENT'],
+      customerData: { email },
       externalReference: reference,
       items: [
         {
@@ -1228,7 +1229,11 @@ Deno.serve(async (request) => {
 
   try {
     if (action === 'start') {
-      return json(origin, 200, await startCheckout(admin, authentication.user.id));
+      return json(
+        origin,
+        200,
+        await startCheckout(admin, authentication.user.id, authentication.user.email),
+      );
     }
 
     if (action === 'sync') {
