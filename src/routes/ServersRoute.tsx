@@ -134,7 +134,7 @@ export function ServersRoute() {
         <section aria-label="Lista de servidores" className="mt-6 grid gap-4 md:grid-cols-2">
           {serversQuery.data.map((server) => (
             <Link
-              className="group panel flex min-h-44 flex-col p-5 transition hover:-translate-y-0.5 hover:border-violet-400/25 hover:bg-white/[0.055]"
+              className="alchemy-tome group panel flex min-h-52 flex-col p-5 transition"
               key={server.server_id}
               to={`/app/servidores/${server.server_id}/abrir`}
             >
@@ -177,7 +177,7 @@ export function ServersRoute() {
           ))}
         </section>
       ) : (
-        <section className="panel mt-6 grid min-h-64 place-items-center p-7 text-center">
+        <section className="alchemy-empty-shelf panel mt-6 grid min-h-72 place-items-center p-7 text-center">
           <div>
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet-500/10 text-violet-200">
               <Server aria-hidden="true" size={24} />

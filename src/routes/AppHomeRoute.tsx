@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AlchemicalLivingScene } from '../components/arcane/AlchemicalLivingScene';
 
 const collections = [
   {
@@ -39,6 +40,7 @@ export function AppHomeRoute() {
   return (
     <main className="alchemy-home mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-9">
       <section className="alchemy-hero relative isolate overflow-hidden px-6 py-8 sm:px-10 sm:py-12">
+        <AlchemicalLivingScene />
         <div className="alchemy-hero__seal" aria-hidden="true">
           <FlaskConical size={30} strokeWidth={1.35} />
         </div>

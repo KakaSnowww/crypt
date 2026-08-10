@@ -1,5 +1,6 @@
 import { BookOpenText, CheckCircle2, KeyRound, LibraryBig, Sparkles } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
+import { AlchemicalLivingScene } from '../arcane/AlchemicalLivingScene';
 import { Brand } from './Brand';
 
 const benefits = [
@@ -21,6 +22,7 @@ export function AuthLayout() {
   return (
     <main className="crypt-auth-layout grid h-dvh min-h-0 overflow-hidden lg:grid-cols-[minmax(0,1.08fr)_minmax(28rem,0.92fr)]">
       <section className="crypt-auth-story relative hidden h-full overflow-hidden border-r border-white/[0.06] p-12 lg:flex lg:flex-col xl:p-16">
+        <AlchemicalLivingScene />
         <span aria-hidden="true" className="crypt-auth-story__circle" />
         <span aria-hidden="true" className="crypt-auth-story__constellations" />
         <span aria-hidden="true" className="crypt-auth-story__crystal">

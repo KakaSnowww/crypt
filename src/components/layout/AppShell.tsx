@@ -69,6 +69,7 @@ import { isSupabaseConfigured } from '../../lib/supabase/client';
 import { isElectronRuntime } from '../../lib/platform';
 import { ExperienceSettingsButton } from '../../features/experience/ExperienceSettingsButton';
 import { IconButton } from '../common/IconButton';
+import { AlchemicalLivingScene } from '../arcane/AlchemicalLivingScene';
 
 const channelLinks = [
   { end: true, icon: Gem, label: 'Câmara Arcana', to: '/app/arcana' },
@@ -359,6 +360,7 @@ export function AppShell() {
         !isVoiceRoute && '2xl:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)_15rem]',
       )}
     >
+      <AlchemicalLivingScene compact />
       <aside
         aria-label="Seus espaços"
         className="app-shell__rail hidden border-r border-white/[0.06] px-2.5 py-4 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:items-center lg:overflow-hidden"
