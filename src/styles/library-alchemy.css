@@ -9,12 +9,206 @@
   --alchemy-reagent: #6e9170;
   --alchemy-line: rgb(197 164 100 / 17%);
   --font-alchemy: Georgia, 'Times New Roman', ui-serif, serif;
+  /* Retira a paleta violeta legada também de utilitários Tailwind já existentes. */
+  --color-violet-50: #fff8df;
+  --color-violet-100: #f6e9bd;
+  --color-violet-200: #e4cb87;
+  --color-violet-300: #c9a557;
+  --color-violet-400: #a98438;
+  --color-violet-500: #7f6328;
+  --color-violet-600: #60491d;
+  --color-violet-700: #463514;
+  --color-violet-800: #2e2514;
+  --color-violet-900: #1b180f;
+  --color-violet-950: #0b0c08;
+  --color-indigo-500: #47715d;
+  --color-indigo-600: #315545;
+  --color-indigo-700: #243f34;
+  --color-blue-500: #4c826d;
+  --color-blue-600: #35634f;
+  --color-blue-700: #274a3d;
+}
+
+/* Biblioteca Alquímica II — identidade integral */
+.crypt-auth-layout {
+  background: #060806 !important;
+}
+
+.crypt-auth-story {
+  isolation: isolate;
+  border-color: rgb(206 170 96 / 18%) !important;
+  background:
+    linear-gradient(90deg, rgb(4 6 4 / 12%), rgb(4 6 4 / 78%)),
+    linear-gradient(0deg, rgb(3 5 3 / 45%), transparent 60%),
+    url('/art/alchemical-library-surreal.png') left center / cover no-repeat !important;
+}
+
+.crypt-auth-story::after {
+  position: absolute;
+  inset: 1.25rem;
+  z-index: -1;
+  border: 1px solid rgb(214 180 108 / 13%);
+  content: '';
+  pointer-events: none;
+}
+
+.crypt-auth-story__circle,
+.crypt-auth-story__constellations {
+  display: none !important;
+}
+
+.crypt-auth-story__crystal {
+  border-color: rgb(211 174 96 / 38%) !important;
+  background: rgb(8 12 8 / 72%) !important;
+  color: var(--alchemy-brass-bright) !important;
+  box-shadow: 0 0 42px rgb(74 133 99 / 28%) !important;
+}
+
+.crypt-auth-title {
+  max-width: 11ch;
+  font-family: var(--font-alchemy);
+  font-weight: 400 !important;
+  letter-spacing: -0.045em !important;
+  text-shadow: 0 4px 30px #000;
+}
+
+.crypt-auth-title span {
+  color: var(--alchemy-brass-bright) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.crypt-auth-benefit > span {
+  border: 1px solid rgb(201 164 90 / 23%);
+  background: rgb(8 13 9 / 72%) !important;
+  color: #89b197 !important;
+}
+
+.crypt-auth-tome {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.85rem;
+  border-top: 1px solid rgb(210 174 99 / 25%);
+  border-bottom: 1px solid rgb(210 174 99 / 12%);
+  padding: 0.8rem 0;
+  color: var(--alchemy-brass-bright);
+}
+
+.crypt-auth-tome span {
+  font-family: var(--font-alchemy);
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.crypt-auth-access {
+  background:
+    radial-gradient(circle at 50% 18%, rgb(74 126 94 / 12%), transparent 22rem),
+    linear-gradient(145deg, #10120d, #070906) !important;
+}
+
+.auth-surface {
+  border-color: rgb(203 166 94 / 22%) !important;
+  border-radius: 0.35rem 2rem 0.35rem 0.35rem !important;
+  background: linear-gradient(145deg, rgb(31 30 21 / 94%), rgb(10 12 9 / 97%)) !important;
+  box-shadow: 0 34px 100px rgb(0 0 0 / 46%) !important;
+}
+
+.alchemy-hero {
+  min-height: 34rem;
+  background:
+    linear-gradient(90deg, rgb(5 7 5 / 88%) 0%, rgb(5 7 5 / 67%) 48%, rgb(5 7 5 / 28%)),
+    linear-gradient(0deg, rgb(5 7 5 / 76%), transparent 68%),
+    url('/art/alchemical-library-surreal.png') center / cover no-repeat !important;
+}
+
+.alchemy-hero .alchemy-display {
+  max-width: 12ch;
+  text-shadow: 0 4px 32px #000;
+}
+
+.alchemy-hero__seal {
+  box-shadow:
+    inset 0 0 0 0.7rem rgb(183 146 82 / 3%),
+    0 0 60px rgb(72 135 95 / 20%);
+}
+
+.alchemy-page-heading {
+  border-bottom: 1px solid var(--alchemy-line);
+  padding-bottom: 1.5rem;
+}
+
+.alchemy-invite {
+  border-color: rgb(192 154 83 / 20%) !important;
+  background:
+    radial-gradient(circle at 90% 20%, rgb(69 117 85 / 14%), transparent 18rem),
+    linear-gradient(145deg, rgb(29 27 19 / 92%), rgb(12 14 10 / 96%)) !important;
+}
+
+/* Cobre componentes antigos fora do shell: login, modais, perfis e telas de update. */
+.text-violet-100,
+.text-violet-200,
+.text-violet-300,
+.text-violet-400 {
+  color: var(--alchemy-brass-bright) !important;
+}
+
+.border-violet-400\/15,
+.border-violet-400\/20,
+.border-violet-400\/25,
+.border-violet-400\/40,
+.border-violet-400\/50,
+.border-violet-400\/55,
+.border-violet-400\/60 {
+  border-color: rgb(193 155 82 / 28%) !important;
+}
+
+.from-violet-500,
+.from-violet-600,
+.from-violet-700 {
+  --tw-gradient-from: #8b6a2f !important;
+}
+
+.to-blue-500,
+.to-blue-600,
+.to-blue-700,
+.via-indigo-700 {
+  --tw-gradient-to: #32604b !important;
+}
+
+@media (max-width: 63.999rem) {
+  .crypt-auth-access {
+    background:
+      linear-gradient(180deg, rgb(5 8 5 / 54%), rgb(5 8 5 / 94%)),
+      url('/art/alchemical-library-surreal.png') 31% center / auto 100% no-repeat !important;
+  }
+
+  .alchemy-hero {
+    min-height: 31rem;
+    background-position: 34% center !important;
+  }
 }
 
 body.app-shell-active {
   background:
     radial-gradient(circle at 80% 5%, rgb(112 139 100 / 8%), transparent 28rem),
     linear-gradient(145deg, #090a08, #0d0d0a 55%, #070806) !important;
+}
+
+.arcane-atmosphere__aurora--violet {
+  background: radial-gradient(circle, #527d5e, transparent 67%) !important;
+}
+
+.arcane-atmosphere__aurora--blue {
+  background: radial-gradient(circle, #917039, transparent 68%) !important;
+}
+
+.arcane-atmosphere__star {
+  background: #dbc992 !important;
+  box-shadow:
+    0 0 7px #9cb47d,
+    0 0 18px rgb(87 146 107 / 42%) !important;
 }
 
 .app-shell--alchemy {

@@ -10,10 +10,10 @@ describe('rotas do Crypt', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Sua biblioteca de pessoas, ideias e círculos.',
+        name: 'Um arquivo vivo além do mundo conhecido.',
       }),
     ).toBeVisible();
-    expect(screen.getByText('Catálogo particular · Crypt')).toBeVisible();
+    expect(screen.getByText('Biblioteca impossível · Crypt')).toBeVisible();
     expect(screen.getByRole('link', { name: /Consultar acervos/ })).toHaveAttribute(
       'href',
       '/app/servidores',

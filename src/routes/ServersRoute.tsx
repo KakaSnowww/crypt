@@ -69,23 +69,23 @@ export function ServersRoute() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="alchemy-page-heading flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Comunidades privadas</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Seus servidores</h1>
+          <p className="alchemy-kicker">Acervos sob sua guarda</p>
+          <h1 className="alchemy-display mt-3 text-4xl">Suas bibliotecas</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Crie um espaço próprio ou entre com um convite protegido pelo servidor.
+            Abra uma nova coleção ou atravesse um convite protegido para outra biblioteca.
           </p>
         </div>
         <Button
           leadingIcon={<Plus aria-hidden="true" size={17} />}
           onClick={() => setCreateOpen(true)}
         >
-          Criar servidor
+          Fundar biblioteca
         </Button>
       </div>
 
-      <section className="panel mt-8 p-5 sm:p-7" aria-labelledby="join-title">
+      <section className="panel alchemy-invite mt-8 p-5 sm:p-7" aria-labelledby="join-title">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-500/10 text-blue-200">
             <Link2 aria-hidden="true" size={19} />

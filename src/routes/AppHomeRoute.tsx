@@ -43,13 +43,13 @@ export function AppHomeRoute() {
           <FlaskConical size={30} strokeWidth={1.35} />
         </div>
         <div className="relative max-w-3xl">
-          <p className="alchemy-kicker">Catálogo particular · Crypt</p>
+          <p className="alchemy-kicker">Biblioteca impossível · Crypt</p>
           <h1 className="alchemy-display mt-4 text-4xl leading-[0.98] sm:text-6xl">
-            Sua biblioteca de pessoas, ideias e círculos.
+            Um arquivo vivo além do mundo conhecido.
           </h1>
           <p className="mt-6 max-w-2xl text-sm leading-7 text-crypt-muted sm:text-base">
-            Um lugar silencioso para encontrar conversas, organizar comunidades e cultivar vínculos
-            — sem ruído, sem corredores infinitos, no seu próprio ritmo.
+            Grimórios tornam-se conversas, acervos guardam comunidades e cada vínculo abre uma nova
+            passagem. Explore sem ruído, no seu próprio ritmo.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link className="alchemy-button alchemy-button--primary" to="/app/servidores">

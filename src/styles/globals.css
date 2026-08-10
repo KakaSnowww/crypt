@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './arcane-theme.css';
-@import './library-alchemy.css';
 @import './accessibility-performance.css';
+@import './library-alchemy.css';
 
 :root {
   color: var(--color-crypt-text);
