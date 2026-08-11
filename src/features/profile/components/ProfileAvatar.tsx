@@ -41,7 +41,7 @@ export function ProfileAvatar({
   return (
     <span
       className={classNames(
-        'grid shrink-0 place-items-center overflow-hidden bg-gradient-to-br from-violet-500 to-blue-600 font-bold text-white shadow-xl shadow-violet-950/25',
+        'grid shrink-0 place-items-center overflow-hidden bg-gradient-to-br from-emerald-700 to-amber-700 font-bold text-white shadow-xl shadow-black/25',
         sizeClasses[size],
         className,
       )}

@@ -4,6 +4,7 @@
 @import './accessibility-performance.css';
 @import './library-alchemy.css';
 @import './living-library-v4.css';
+@import './grimoire-profile.css';
 
 :root {
   color: var(--color-crypt-text);

@@ -1,0 +1,216 @@
+.grimoire-profile {
+  --paper: #d8c39a;
+  --paper-deep: #a98652;
+  --ink: #251b12;
+  --jade: #4f9b72;
+  --brass: #c49a4a;
+  position: relative;
+  isolation: isolate;
+}
+
+.grimoire-profile::before {
+  position: absolute;
+  z-index: -1;
+  inset: -4rem -10%;
+  background:
+    radial-gradient(circle at 50% 25%, rgb(76 141 102 / 13%), transparent 32%),
+    radial-gradient(circle at 50% 70%, rgb(196 154 74 / 8%), transparent 38%);
+  content: '';
+  pointer-events: none;
+}
+
+.grimoire-book {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  min-height: 36rem;
+  border: 1px solid rgb(207 170 94 / 42%);
+  border-radius: 1.35rem 1.7rem 1.7rem 1.35rem;
+  background: #26170f;
+  box-shadow:
+    0 2.2rem 5rem rgb(0 0 0 / 48%),
+    0 0 0 0.35rem #130c08,
+    0 0 0 0.45rem rgb(197 151 70 / 28%),
+    inset 0 0 2rem rgb(0 0 0 / 65%);
+  transform: perspective(1400px) rotateX(0.7deg);
+}
+
+.grimoire-book::after {
+  position: absolute;
+  z-index: 4;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  left: 44%;
+  width: 1.2rem;
+  background: linear-gradient(
+    90deg,
+    rgb(55 33 19 / 75%),
+    rgb(255 242 199 / 20%),
+    rgb(48 27 16 / 65%)
+  );
+  box-shadow: 0 0 1.4rem rgb(35 19 10 / 58%);
+  content: '';
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.grimoire-page {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  color: var(--ink);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 27px, rgb(72 50 27 / 6%) 28px),
+    radial-gradient(circle at 40% 25%, rgb(255 247 216 / 72%), transparent 40%),
+    linear-gradient(100deg, #b79a68, #ead9af 10%, #dbc59a 88%, #9b7545);
+}
+
+.grimoire-page--left {
+  border-radius: 1rem 0.2rem 0.2rem 1rem;
+}
+.grimoire-page--right {
+  border-radius: 0.2rem 1.25rem 1.25rem 0.2rem;
+}
+.grimoire-page::after {
+  position: absolute;
+  inset: 0.6rem;
+  border: 1px solid rgb(77 50 23 / 28%);
+  border-radius: inherit;
+  content: '';
+  pointer-events: none;
+}
+
+.grimoire-rune-ring {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.7rem;
+  width: 5.5rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(68 89 61 / 32%);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+.grimoire-rune-ring::before,
+.grimoire-rune-ring::after {
+  position: absolute;
+  inset: 0.55rem;
+  border: 1px dashed rgb(68 89 61 / 42%);
+  border-radius: 50%;
+  content: '';
+}
+.grimoire-rune-ring::after {
+  inset: 1.7rem;
+  background: rgb(64 125 89 / 16%);
+}
+
+.grimoire-kicker,
+.grimoire-section-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.grimoire-kicker {
+  color: #5f5937;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+.grimoire-section-title {
+  color: #352416;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.grimoire-name {
+  font-family: var(--font-display);
+  color: #21160f;
+  text-shadow: 0 1px rgb(255 245 208 / 75%);
+}
+.grimoire-handle {
+  color: #356a50;
+  font-weight: 800;
+}
+.grimoire-copy {
+  color: #4b3825;
+}
+.grimoire-meta {
+  color: #675137;
+}
+
+.grimoire-avatar-frame {
+  position: relative;
+  width: fit-content;
+  padding: 0.45rem;
+  border: 1px solid #70522e;
+  border-radius: 2.4rem;
+  background: linear-gradient(145deg, #d8bd76, #5f4125 48%, #cba861);
+  box-shadow: 0 0.8rem 2rem rgb(53 30 13 / 28%);
+}
+.grimoire-avatar-frame::after {
+  position: absolute;
+  inset: -0.7rem;
+  border: 1px solid rgb(64 111 78 / 35%);
+  border-radius: 2.8rem;
+  content: '';
+  transform: rotate(4deg);
+}
+
+.grimoire-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #7d6038, transparent);
+}
+.grimoire-chip {
+  border: 1px solid rgb(69 92 65 / 35%);
+  border-radius: 999px;
+  background: rgb(64 113 80 / 10%);
+  color: #305b43;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.grimoire-inset {
+  position: relative;
+  border: 1px solid rgb(92 65 33 / 23%);
+  border-radius: 0.75rem;
+  background: rgb(255 248 219 / 25%);
+  box-shadow: inset 0 1px 9px rgb(77 48 22 / 9%);
+}
+.grimoire-bookmark {
+  position: absolute;
+  z-index: 5;
+  right: 2.2rem;
+  bottom: -1.15rem;
+  width: 2.15rem;
+  height: 7.5rem;
+  background: linear-gradient(90deg, #315f48, #4b8867, #274b39);
+  clip-path: polygon(0 0, 100% 0, 100% 84%, 50% 100%, 0 84%);
+  filter: drop-shadow(0 0.4rem 0.3rem rgb(0 0 0 / 30%));
+}
+.grimoire-note {
+  border: 1px solid rgb(196 154 74 / 20%);
+  background: linear-gradient(100deg, rgb(37 27 18 / 70%), rgb(24 31 25 / 84%));
+}
+
+@media (max-width: 52rem) {
+  .grimoire-book {
+    grid-template-columns: 1fr;
+    transform: none;
+  }
+  .grimoire-book::after {
+    display: none;
+  }
+  .grimoire-page--left {
+    border-radius: 1rem 1rem 0.15rem 0.15rem;
+  }
+  .grimoire-page--right {
+    border-radius: 0.15rem 0.15rem 1rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grimoire-rune-ring {
+    animation: grimoire-turn 28s linear infinite;
+  }
+  @keyframes grimoire-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
