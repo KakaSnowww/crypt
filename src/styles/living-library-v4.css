@@ -1,0 +1,421 @@
+/* Biblioteca Viva V4 — a última camada vence os temas legados sem alterar dados. */
+:root {
+  --color-crypt-background: #050806;
+  --color-crypt-deep: #030604;
+  --color-crypt-sidebar: #09100c;
+  --color-crypt-panel: #0d1510;
+  --color-crypt-elevated: #142019;
+  --color-crypt-text: #f4ecd7;
+  --color-crypt-muted: #c7bfae;
+  --color-crypt-subtle: #8e9b8e;
+  --color-crypt-purple: #c8953f;
+  --color-crypt-blue: #42b883;
+  --color-crypt-focus: #e4b85d;
+  --arcane-void: #030604;
+  --arcane-night: #07100b;
+  --arcane-surface: #0b1510;
+  --arcane-surface-2: #112019;
+  --arcane-surface-3: #182b21;
+  --arcane-purple: #d19d45;
+  --arcane-violet: #e6c77d;
+  --arcane-blue: #53c994;
+  --arcane-cyan: #74dfae;
+  --arcane-pink: #c97c55;
+  --arcane-gold: #efc96e;
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 4%, rgb(44 132 82 / 14%), transparent 31rem),
+    radial-gradient(circle at 92% 92%, rgb(190 135 48 / 9%), transparent 32rem), #030604;
+}
+::selection {
+  color: #081009;
+  background: rgb(226 180 86 / 82%);
+}
+
+/* Objetos 3D: imagens reais, movimento por profundidade e líquido vivo. */
+.living-alchemy {
+  perspective: 1100px;
+  isolation: isolate;
+}
+.living-alchemy__books3d,
+.living-alchemy__potion3d {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+.living-alchemy__books3d {
+  right: 1%;
+  top: -17%;
+  width: min(39rem, 51%);
+  opacity: 0.9;
+  filter: drop-shadow(0 35px 34px rgb(0 0 0 / 72%));
+  animation: crypt-books-flight 9s ease-in-out infinite;
+}
+.living-alchemy__potion3d {
+  right: 3%;
+  bottom: -22%;
+  width: min(34rem, 42%);
+  animation: crypt-potion-hover 7s ease-in-out infinite;
+}
+.living-alchemy__potion3d img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 30px 38px rgb(0 0 0 / 78%)) drop-shadow(0 0 22px rgb(50 212 116 / 22%));
+}
+.living-alchemy__potion-glow {
+  position: absolute;
+  z-index: 1;
+  inset: 25% 12% 13%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(63 255 138 / 38%),
+    rgb(39 170 89 / 9%) 49%,
+    transparent 72%
+  );
+  filter: blur(24px);
+  animation: crypt-brew-glow 2.2s ease-in-out infinite alternate;
+}
+.living-alchemy__bubble {
+  position: absolute;
+  z-index: 3;
+  border: 1px solid rgb(211 255 220 / 58%);
+  border-radius: 50%;
+  background: rgb(121 255 163 / 12%);
+  box-shadow:
+    inset 2px 2px 4px rgb(255 255 255 / 30%),
+    0 0 8px rgb(70 255 134 / 26%);
+  animation: crypt-bubble-rise 2.8s ease-in infinite;
+}
+.living-alchemy__bubble--one {
+  left: 49%;
+  bottom: 36%;
+  width: 10px;
+  height: 10px;
+}
+.living-alchemy__bubble--two {
+  left: 57%;
+  bottom: 31%;
+  width: 7px;
+  height: 7px;
+  animation-delay: -0.8s;
+}
+.living-alchemy__bubble--three {
+  left: 42%;
+  bottom: 30%;
+  width: 5px;
+  height: 5px;
+  animation-delay: -1.7s;
+}
+.living-alchemy__depth--far {
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(circle at 71% 44%, rgb(45 191 100 / 16%), transparent 27rem);
+  filter: blur(20px);
+}
+.living-alchemy__embers {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image: radial-gradient(circle, #f0c56c 0 1px, transparent 1.6px);
+  background-size: 89px 71px;
+  mask-image: linear-gradient(90deg, transparent 30%, #000);
+  animation: crypt-embers 17s linear infinite;
+}
+.living-alchemy--compact .living-alchemy__books3d {
+  display: none;
+}
+.living-alchemy--compact .living-alchemy__potion3d {
+  right: -4%;
+  bottom: -43%;
+  width: min(29rem, 43%);
+  opacity: 0.88;
+}
+
+/* Login: portal assimétrico, vidro fumê e ausência total do gradiente roxo. */
+.crypt-auth-story::after {
+  background: linear-gradient(
+    90deg,
+    rgb(2 6 4 / 85%) 0 34%,
+    rgb(2 6 4 / 25%) 72%,
+    rgb(2 6 4 / 63%)
+  ) !important;
+}
+.crypt-auth-story {
+  background-position: center !important;
+}
+.crypt-auth-story .living-alchemy__books3d {
+  right: -3%;
+  top: -9%;
+  width: 49%;
+}
+.crypt-auth-story .living-alchemy__potion3d {
+  right: 3%;
+  bottom: -8%;
+  width: 33%;
+}
+.crypt-auth-access {
+  background:
+    radial-gradient(circle at 50% 26%, rgb(39 105 65 / 13%), transparent 25rem),
+    linear-gradient(145deg, #0a100c, #040705) !important;
+}
+.auth-surface {
+  border: 1px solid rgb(213 171 87 / 28%) !important;
+  border-radius: 2.25rem !important;
+  background: linear-gradient(145deg, rgb(22 29 23 / 92%), rgb(6 11 8 / 96%)) !important;
+  box-shadow:
+    0 38px 110px rgb(0 0 0 / 58%),
+    inset 0 1px rgb(255 240 197 / 10%),
+    0 0 70px rgb(38 142 80 / 8%) !important;
+  backdrop-filter: blur(30px) saturate(1.2);
+}
+.crypt-auth-title span,
+.arcana-subscription-title {
+  color: #e9bd60 !important;
+  text-shadow: 0 8px 40px rgb(229 176 68 / 14%);
+}
+.crypt-field {
+  border-color: rgb(211 174 100 / 19%) !important;
+  background: rgb(3 9 6 / 74%) !important;
+  box-shadow: inset 0 1px 10px rgb(0 0 0 / 38%);
+}
+.crypt-field:focus {
+  border-color: #c99a48 !important;
+  box-shadow:
+    0 0 0 3px rgb(197 148 65 / 12%),
+    inset 0 1px 10px rgb(0 0 0 / 38%) !important;
+}
+.crypt-field-icon,
+.crypt-field-label,
+.text-violet-200,
+.text-violet-300,
+.text-violet-400 {
+  color: #d7b466 !important;
+}
+.crypt-button[data-variant='primary'] {
+  color: #071009 !important;
+  background: linear-gradient(115deg, #d19c43, #f1cd78 46%, #6fc591) !important;
+  box-shadow:
+    0 14px 34px rgb(173 123 43 / 21%),
+    inset 0 1px rgb(255 255 255 / 38%) !important;
+}
+.crypt-button[data-variant='primary']:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+/* Conversas: papel escuro, jade e bronze — sem a antiga pele Discord. */
+.app-shell__rail {
+  background: linear-gradient(180deg, rgb(54 101 70 / 10%), transparent 26%), #030705 !important;
+  border-right-color: rgb(200 155 73 / 14%) !important;
+}
+.app-shell__sidebar,
+.app-shell__members {
+  background: linear-gradient(180deg, rgb(225 190 113 / 3%), transparent 18%), #09100c !important;
+  border-color: rgb(200 155 73 / 11%) !important;
+}
+.app-shell__header {
+  background: rgb(4 9 6 / 91%) !important;
+  border-color: rgb(200 155 73 / 14%) !important;
+  backdrop-filter: blur(18px);
+}
+.app-shell__content,
+.chat-layout {
+  background:
+    radial-gradient(circle at 88% 7%, rgb(41 123 75 / 7%), transparent 25rem), #060b08 !important;
+}
+.chat-scroll > article,
+[id^='message-'] {
+  border-radius: 1rem;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+.chat-scroll > article:hover,
+[id^='message-']:hover {
+  background: linear-gradient(
+    90deg,
+    rgb(190 147 67 / 6%),
+    rgb(51 124 77 / 4%),
+    transparent
+  ) !important;
+}
+.bg-violet-500\/10,
+.bg-violet-500\/20 {
+  background-color: rgb(191 146 65 / 12%) !important;
+}
+.border-violet-400\/20,
+.border-violet-400\/25,
+.border-violet-400\/40 {
+  border-color: rgb(203 160 80 / 25%) !important;
+}
+.from-violet-500,
+.from-violet-600,
+.from-violet-700 {
+  --tw-gradient-from: #ad7a32 !important;
+}
+.to-blue-500,
+.to-blue-600,
+.to-blue-700,
+.via-indigo-700 {
+  --tw-gradient-to: #337c59 !important;
+}
+.panel {
+  border-color: rgb(207 164 83 / 13%) !important;
+  background: linear-gradient(145deg, rgb(24 31 24 / 88%), rgb(7 12 9 / 94%)) !important;
+}
+.panel:hover {
+  border-color: rgb(218 173 86 / 27%) !important;
+}
+
+/* Assinatura como altar visual, e não um card genérico. */
+.arcana-subscription-altar {
+  min-height: 29rem;
+  border: 1px solid rgb(224 179 86 / 27%);
+  border-radius: 2.6rem;
+  background:
+    radial-gradient(circle at 83% 48%, rgb(35 169 83 / 16%), transparent 22rem),
+    linear-gradient(125deg, #15170f, #07110b 62%, #030705);
+  box-shadow:
+    0 34px 100px rgb(0 0 0 / 48%),
+    inset 0 1px rgb(255 238 193 / 10%);
+}
+.arcana-subscription-altar::after {
+  position: absolute;
+  inset: 0.75rem;
+  border: 1px solid rgb(230 187 101 / 10%);
+  border-radius: 2rem;
+  content: '';
+  pointer-events: none;
+}
+.arcana-price-ritual {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.2rem;
+}
+.arcana-price-ritual > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: #f1ce7a;
+}
+.arcana-price-ritual b {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+}
+.arcana-price-ritual small {
+  color: var(--color-crypt-subtle);
+}
+.arcana-benefit-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 10rem;
+}
+.arcana-benefit-card::after {
+  position: absolute;
+  right: -2rem;
+  bottom: -3rem;
+  width: 8rem;
+  height: 8rem;
+  border: 1px solid rgb(75 191 122 / 12%);
+  border-radius: 50%;
+  content: '';
+  box-shadow: 0 0 45px rgb(47 169 94 / 8%);
+}
+.arcana-benefit-card > svg {
+  color: #dcb15c !important;
+  filter: drop-shadow(0 0 12px rgb(215 169 76 / 24%));
+}
+
+@keyframes crypt-books-flight {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotateY(-8deg) rotateZ(-2deg);
+  }
+  50% {
+    transform: translate3d(-18px, -25px, 45px) rotateY(7deg) rotateZ(2deg);
+  }
+}
+@keyframes crypt-potion-hover {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotateY(-3deg);
+  }
+  50% {
+    transform: translate3d(0, -16px, 32px) rotateY(4deg);
+  }
+}
+@keyframes crypt-brew-glow {
+  to {
+    opacity: 0.58;
+    transform: scale(1.12);
+  }
+}
+@keyframes crypt-bubble-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.45);
+  }
+  18% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-92px) scale(1.2);
+  }
+}
+@keyframes crypt-embers {
+  to {
+    background-position: 45px -71px;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .living-alchemy__books3d {
+    right: -13%;
+    top: -5%;
+    width: 60%;
+    opacity: 0.55;
+  }
+  .living-alchemy__potion3d {
+    right: -8%;
+    bottom: -8%;
+    width: 48%;
+    opacity: 0.72;
+  }
+  .arcana-subscription-altar {
+    min-height: 24rem;
+  }
+}
+@media (max-width: 40rem) {
+  .auth-surface {
+    border-radius: 1.5rem !important;
+  }
+  .living-alchemy__books3d {
+    width: 78%;
+    opacity: 0.28;
+  }
+  .living-alchemy__potion3d {
+    right: -22%;
+    width: 70%;
+    opacity: 0.42;
+  }
+  .living-alchemy--compact .living-alchemy__potion3d {
+    opacity: 0.3;
+    width: 82%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .living-alchemy__books3d,
+  .living-alchemy__potion3d,
+  .living-alchemy__bubble,
+  .living-alchemy__potion-glow,
+  .living-alchemy__embers {
+    animation: none !important;
+  }
+}

@@ -14,12 +14,9 @@ import {
 import { useEffect, type CSSProperties } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { AlchemicalLivingScene } from '../components/arcane/AlchemicalLivingScene';
 import { Spinner } from '../components/common/Spinner';
 import { ArcanaTierIcon } from '../features/arcana/ArcanaTierIcon';
-import {
-  ArcanaPixAutomaticManager,
-  ArcanaPixAutomaticStartButton,
-} from '../features/arcana/ArcanaPixAutomaticPanel';
 import { CommunityRuneIcon } from '../features/arcana/CommunityRuneIcon';
 import { useToast } from '../components/common/ToastContext';
 import { arcanaKeys, useArcanaMembership } from '../features/arcana/arcana.queries';
@@ -249,18 +246,20 @@ export function ArcanaRoute() {
   const asaasSubscription = data?.provider === 'asaas';
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
-      <section className="relative overflow-hidden rounded-[2rem] border border-violet-400/20 bg-[#0d1020] p-6 sm:p-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,.28),transparent_38%)]" />
-        <div className="relative">
+    <main className="arcana-sanctum mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+      <section className="arcana-subscription-altar relative overflow-hidden p-6 sm:p-10">
+        <AlchemicalLivingScene compact />
+        <div className="relative z-10 max-w-2xl">
           <p className="eyebrow flex items-center gap-2">
             <ArcanaTierIcon decorative size="xs" tierNumber={active ? data?.tier_number : 1} />
             Arcana
           </p>
-          <h1 className="mt-3 text-4xl font-black text-white">Seu Crypt, elevado.</h1>
+          <h1 className="arcana-subscription-title mt-3 text-4xl font-black text-white sm:text-5xl">
+            Desperte sua Arcana.
+          </h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-crypt-muted">
-            R$ 5 por mês. A assinatura é concluída no ambiente seguro do Asaas e pode ser cancelada
-            nesta página.
+            Acesso ao círculo interior por <strong>R$ 5 por mês</strong>. Mais expressão, mais poder
+            para seus acervos e uma jornada que evolui com você.
           </p>
 
           {membership.error ? (
@@ -288,7 +287,11 @@ export function ArcanaRoute() {
               </p>
             </div>
           ) : (
-            <div className="mt-6">
+            <div className="arcana-price-ritual mt-6">
+              <span>
+                <b>R$ 5</b>
+                <small>/mês</small>
+              </span>
               <Button
                 leadingIcon={<CreditCard aria-hidden="true" size={16} />}
                 loading={startBilling.isPending}
@@ -301,31 +304,7 @@ export function ArcanaRoute() {
         </div>
       </section>
 
-      {!active ? (
-        <section className="panel mt-6 p-5 sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="max-w-2xl">
-              <p className="eyebrow">Outra forma de pagamento</p>
-              <h2 className="mt-2 text-xl font-bold text-white">Pix Automático</h2>
-              <p className="mt-2 text-sm leading-6 text-crypt-muted">
-                Faça o primeiro Pix e autorize as próximas mensalidades de R$ 5 pelo aplicativo do
-                seu banco.
-              </p>
-            </div>
-
-            <ArcanaPixAutomaticStartButton onChanged={refreshArcana} />
-          </div>
-        </section>
-      ) : null}
-
-      <ArcanaPixAutomaticManager
-        active={active}
-        onChanged={refreshArcana}
-        pending={pending}
-        provider={data?.provider}
-      />
-
-      {asaasSubscription && data ? (
+      {(asaasSubscription || pending) && data ? (
         <section className="panel mt-6 p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -398,9 +377,9 @@ export function ArcanaRoute() {
         </section>
       ) : null}
 
-      <section className="mt-6 grid gap-3 sm:grid-cols-2">
+      <section className="arcana-benefit-grid mt-6 grid gap-3 sm:grid-cols-2">
         {benefits.map(({ icon: Icon, title, text }) => (
-          <article className="panel p-5" key={title}>
+          <article className="arcana-benefit-card panel p-5" key={title}>
             <Icon className="text-violet-300" />
             <h2 className="mt-4 font-semibold text-white">{title}</h2>
             <p className="mt-2 text-sm text-crypt-muted">{text}</p>

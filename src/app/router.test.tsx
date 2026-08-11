@@ -24,7 +24,7 @@ describe('rotas do Crypt', () => {
   it('protege a área privada quando não existe sessão', async () => {
     const { router } = renderRoute('/app');
 
-    await screen.findByRole('heading', { level: 1, name: 'Que bom ter você de volta' });
+    await screen.findByRole('heading', { level: 1, name: 'A Biblioteca reconhece você' });
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toContain('next=%2Fapp');
   });
@@ -32,7 +32,7 @@ describe('rotas do Crypt', () => {
   it('protege o onboarding quando não existe sessão', async () => {
     const { router } = renderRoute('/onboarding');
 
-    await screen.findByRole('heading', { level: 1, name: 'Que bom ter você de volta' });
+    await screen.findByRole('heading', { level: 1, name: 'A Biblioteca reconhece você' });
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toContain('next=%2Fonboarding');
   });

@@ -1,4 +1,4 @@
-import { BookOpenText, CheckCircle2, KeyRound, LibraryBig, Sparkles } from 'lucide-react';
+import { CheckCircle2, KeyRound, LibraryBig, Sparkles } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
 import { AlchemicalLivingScene } from '../arcane/AlchemicalLivingScene';
 import { Brand } from './Brand';
@@ -25,23 +25,21 @@ export function AuthLayout() {
         <AlchemicalLivingScene />
         <span aria-hidden="true" className="crypt-auth-story__circle" />
         <span aria-hidden="true" className="crypt-auth-story__constellations" />
-        <span aria-hidden="true" className="crypt-auth-story__crystal">
-          <BookOpenText size={29} />
-        </span>
 
         <Brand className="relative z-10" />
 
         <div className="relative z-10 my-auto max-w-xl py-16">
           <p className="eyebrow flex items-center gap-2">
-            <LibraryBig size={14} />O arquivo impossível aguarda
+            <LibraryBig size={14} />
+            Portal da Biblioteca Viva
           </p>
           <h1 className="crypt-auth-title mt-5 text-5xl font-black leading-[1.01] tracking-[-0.06em] xl:text-6xl">
-            Abra as portas da
-            <span> Biblioteca Oculta.</span>
+            Entre onde os livros
+            <span> guardam mundos.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base leading-7 text-crypt-muted">
-            Entre em um arquivo vivo de comunidades, correspondências e rituais digitais — criado
-            para parecer um lugar impossível, não mais uma plataforma comum.
+            Comunidades viram grimórios, conversas deixam rastros de luz e cada acervo respira com a
+            presença de quem pertence a ele.
           </p>
 
           <ul className="mt-10 grid gap-4">
@@ -63,7 +61,6 @@ export function AuthLayout() {
           </ul>
 
           <div aria-hidden="true" className="crypt-auth-tome mt-10">
-            <BookOpenText size={30} strokeWidth={1.25} />
             <span>Catálogo reservado · MMXXVI</span>
           </div>
         </div>
