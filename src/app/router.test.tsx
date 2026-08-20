@@ -10,11 +10,11 @@ describe('rotas do Crypt', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Tudo o que importa, sem menus desnecessários.',
+        name: 'Seu squad. Seu código. Seu espaço.',
       }),
     ).toBeVisible();
-    expect(screen.getByText('Seu espaço no Crypt')).toBeVisible();
-    expect(screen.getByRole('link', { name: /Continuar no Crypt/ })).toHaveAttribute(
+    expect(screen.getByText('Crypt Community OS')).toBeVisible();
+    expect(screen.getByRole('link', { name: /Abrir servidores/ })).toHaveAttribute(
       'href',
       '/app/servidores',
     );

@@ -14,10 +14,7 @@ import {
 import { useEffect, type CSSProperties } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
-import { AlchemicalLivingScene } from '../components/arcane/AlchemicalLivingScene';
 import { Spinner } from '../components/common/Spinner';
-import { ArcanaTierIcon } from '../features/arcana/ArcanaTierIcon';
-import { CommunityRuneIcon } from '../features/arcana/CommunityRuneIcon';
 import { useToast } from '../components/common/ToastContext';
 import { arcanaKeys, useArcanaMembership } from '../features/arcana/arcana.queries';
 import {
@@ -48,14 +45,29 @@ const benefits = [
   },
   {
     icon: Zap,
-    title: '3 Runas de Comunidade',
-    text: 'Fortaleça até três servidores.',
+    title: '3 Boosts de Comunidade',
+    text: 'Aplique seus benefícios em até três servidores.',
   },
   {
     icon: Sparkles,
     title: 'Identidade avançada',
     text: 'GIF, efeitos e gradiente exclusivo.',
   },
+] as const;
+
+const proTierNames = [
+  'Core',
+  'Operator',
+  'Coder',
+  'Striker',
+  'Vanguard',
+  'Elite',
+  'Master',
+  'Nova',
+  'Titan',
+  'Apex',
+  'Legend',
+  'Infinite',
 ] as const;
 
 function formatDate(value: null | string) {
@@ -105,7 +117,7 @@ export function ArcanaRoute() {
         await refreshArcana();
         addToast({
           message: 'Os benefícios já estão disponíveis nesta conta.',
-          title: 'Arcana ativa',
+          title: 'Crypt Pro ativo',
           tone: 'success',
         });
         return;
@@ -135,7 +147,7 @@ export function ArcanaRoute() {
       await refreshArcana();
       addToast({
         message: 'O estado mais recente foi consultado diretamente no Asaas.',
-        title: 'Arcana atualizada',
+        title: 'Crypt Pro atualizado',
         tone: 'success',
       });
     },
@@ -210,7 +222,7 @@ export function ArcanaRoute() {
         ]);
         addToast({
           message:
-            'O Asaas foi consultado. A Arcana será liberada somente depois da confirmação financeira.',
+            'O Asaas foi consultado. O Crypt Pro será liberado somente depois da confirmação financeira.',
           title: 'Retorno do Checkout',
           tone: 'success',
         });
@@ -219,7 +231,7 @@ export function ArcanaRoute() {
         if (!active) return;
         addToast({
           message:
-            error instanceof Error ? error.message : 'Abra a Arcana novamente e use Atualizar.',
+            error instanceof Error ? error.message : 'Abra o Crypt Pro novamente e use Atualizar.',
           title: 'Verificação pendente',
           tone: 'error',
         });
@@ -248,18 +260,17 @@ export function ArcanaRoute() {
   return (
     <main className="arcana-sanctum mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <section className="arcana-subscription-altar relative overflow-hidden p-6 sm:p-10">
-        <AlchemicalLivingScene compact />
         <div className="relative z-10 max-w-2xl">
           <p className="eyebrow flex items-center gap-2">
-            <ArcanaTierIcon decorative size="xs" tierNumber={active ? data?.tier_number : 1} />
-            Arcana
+            <Zap aria-hidden="true" size={14} />
+            Crypt Pro
           </p>
           <h1 className="arcana-subscription-title mt-3 text-4xl font-black text-white sm:text-5xl">
-            Desperte sua Arcana.
+            Eleve sua experiência.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Acesso ao círculo interior por <strong>R$ 5 por mês</strong>. Mais expressão, mais poder
-            para seus acervos e uma jornada que evolui com você.
+            Recursos premium por <strong>R$ 5 por mês</strong>. Mais qualidade, personalização e
+            benefícios para os servidores que você mais usa.
           </p>
 
           {membership.error ? (
@@ -270,8 +281,10 @@ export function ArcanaRoute() {
 
           {active ? (
             <div className="mt-6 inline-flex flex-wrap items-center gap-3 rounded-2xl bg-emerald-400/10 px-4 py-3">
-              <ArcanaTierIcon decorative size="md" tierNumber={data?.tier_number} />
-              <strong className="text-white">Arcana {data?.tier_name}</strong>
+              <Zap aria-hidden="true" className="text-emerald-300" size={20} />
+              <strong className="text-white">
+                Crypt Pro {proTierNames[(data?.tier_number ?? 1) - 1] ?? 'Core'}
+              </strong>
               <span className="text-xs text-emerald-100/75">
                 {canceledWithAccess ? 'cancelada, ainda ativa' : 'ativa'}
               </span>
@@ -309,7 +322,7 @@ export function ArcanaRoute() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="eyebrow">Assinatura Asaas</p>
-              <h2 className="mt-2 text-xl font-bold text-white">Gerenciar Arcana</h2>
+              <h2 className="mt-2 text-xl font-bold text-white">Gerenciar Crypt Pro</h2>
               <div className="mt-4 grid gap-2 text-sm text-crypt-muted">
                 <p className="flex items-center gap-2">
                   <ShieldCheck className="text-violet-300" size={16} />
@@ -356,7 +369,7 @@ export function ArcanaRoute() {
                   loading={cancelBilling.isPending}
                   onClick={() => {
                     if (
-                      window.confirm('Cancelar a renovação da Arcana? Não haverá nova cobrança.')
+                      window.confirm('Cancelar a renovação do Crypt Pro? Não haverá nova cobrança.')
                     ) {
                       cancelBilling.mutate();
                     }
@@ -388,10 +401,11 @@ export function ArcanaRoute() {
       </section>
 
       <section className="panel mt-6 p-5">
-        <h2 className="text-xl font-bold text-white">Jornada Arcana</h2>
+        <h2 className="text-xl font-bold text-white">Progressão Crypt Pro</h2>
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-          {arcanaTiers.map(([name, color], index) => {
+          {arcanaTiers.map(([, color], index) => {
             const tierNumber = index + 1;
+            const name = proTierNames[index];
             const currentTier = active ? Math.max(1, Math.min(12, data?.tier_number ?? 1)) : 0;
             const current = tierNumber === currentTier;
             const earned = active && tierNumber <= currentTier;
@@ -408,7 +422,9 @@ export function ArcanaRoute() {
                   } as CSSProperties
                 }
               >
-                <ArcanaTierIcon decorative size="lg" tierNumber={tierNumber} />
+                <span className="mx-auto mb-3 grid size-11 place-items-center rounded-xl border border-white/10 bg-white/[0.04] font-mono text-sm font-black text-white">
+                  {tierNumber.toString().padStart(2, '0')}
+                </span>
                 <strong className="block text-xs text-white">
                   {tierNumber}. {name}
                 </strong>
@@ -423,15 +439,17 @@ export function ArcanaRoute() {
 
       {active ? (
         <section className="panel mt-6 p-5">
-          <h2 className="text-xl font-bold text-white">Runas de Comunidade</h2>
+          <h2 className="text-xl font-bold text-white">Boosts de Comunidade</h2>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[1, 2, 3].map((slot) => {
               const rune = runes.data?.find((item) => item.rune_slot === slot);
 
               return (
                 <div className="arcana-rune-card rounded-2xl p-4" key={slot}>
-                  <CommunityRuneIcon className="arcana-rune-card__image" size="lg" slot={slot} />
-                  <p className="mt-3 text-center text-xs font-bold text-violet-300">Runa {slot}</p>
+                  <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-cyan-400/15 bg-cyan-500/[0.08] text-cyan-300">
+                    <Zap aria-hidden="true" size={24} />
+                  </span>
+                  <p className="mt-3 text-center text-xs font-bold text-violet-300">Boost {slot}</p>
                   <select
                     className="mt-3 min-h-10 w-full rounded-xl bg-[#111522] text-white"
                     onChange={(event) => {

@@ -123,7 +123,7 @@ export function ArcanaPixAutomaticStartButton({ onChanged }: SharedProps) {
         message: alreadyActive
           ? 'Os benefícios já estão disponíveis.'
           : 'Copie o código e autorize o pagamento no aplicativo do seu banco.',
-        title: alreadyActive ? 'Arcana ativa' : 'Pix Automático criado',
+        title: alreadyActive ? 'Crypt Pro ativo' : 'Pix Automático criado',
         tone: 'success',
       });
     },
@@ -307,8 +307,8 @@ export function ArcanaPixAutomaticStartButton({ onChanged }: SharedProps) {
               ) : null}
 
               <p className="mt-5 border-t border-white/[0.07] pt-4 text-xs leading-5 text-crypt-subtle">
-                A Arcana só é liberada após o Asaas confirmar o primeiro pagamento e a autorização
-                recorrente.
+                O Crypt Pro só é liberado após o Asaas confirmar o primeiro pagamento e a
+                autorização recorrente.
               </p>
             </section>
           </div>,
@@ -439,7 +439,9 @@ export function ArcanaPixAutomaticManager({ active, onChanged, pending, provider
               loading={cancel.isPending}
               onClick={() => {
                 if (
-                  window.confirm('Cancelar o Pix Automático da Arcana? Não haverá nova cobrança.')
+                  window.confirm(
+                    'Cancelar o Pix Automático do Crypt Pro? Não haverá nova cobrança.',
+                  )
                 ) {
                   cancel.mutate();
                 }

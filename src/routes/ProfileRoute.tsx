@@ -1,4 +1,4 @@
-import { BookMarked, CalendarDays, EyeOff, Feather, Pencil, ShieldCheck } from 'lucide-react';
+import { CalendarDays, Code2, EyeOff, Gamepad2, Pencil, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
@@ -71,10 +71,10 @@ export function ProfileRoute() {
     <main className="grimoire-profile mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6 flex items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Arquivo pessoal</p>
-          <h1 className="font-display mt-1 text-3xl font-bold text-white">Meu grimório</h1>
+          <p className="eyebrow">Identidade digital</p>
+          <h1 className="font-display mt-1 text-3xl font-bold text-white">Meu perfil</h1>
           <p className="mt-1 text-sm text-crypt-muted">
-            Sua identidade registrada nas páginas do Crypt.
+            Sua presença, seus interesses e conexões dentro do Crypt.
           </p>
         </div>
         <Link to="/app/perfil/editar">
@@ -84,10 +84,10 @@ export function ProfileRoute() {
         </Link>
       </header>
 
-      <article className="grimoire-book" aria-label="Grimório de perfil">
+      <article className="grimoire-book" aria-label="Visão geral do perfil">
         <section className="grimoire-page grimoire-page--left">
           <div className="grimoire-rune-ring" aria-hidden="true" />
-          <p className="grimoire-kicker">Tomo pessoal · identidade</p>
+          <p className="grimoire-kicker">PROFILE.ID · ONLINE</p>
           <div className="relative z-[2] mt-10 flex flex-col items-center text-center">
             <div className="grimoire-avatar-frame">
               <ProfileAvatar
@@ -108,9 +108,9 @@ export function ProfileRoute() {
             </div>
             <p className="grimoire-handle mt-1 text-sm">@{profile.handle}</p>
             <div className="grimoire-divider my-6 w-full" />
-            <Feather aria-hidden="true" className="text-[#6f5734]" size={20} />
+            <Code2 aria-hidden="true" className="text-cyan-300" size={20} />
             <p className="grimoire-copy mt-3 max-w-md whitespace-pre-wrap text-sm leading-7">
-              {profile.bio ?? 'Estas páginas ainda aguardam sua história.'}
+              {profile.bio ?? 'Adicione uma bio para contar à comunidade quem você é.'}
             </p>
             <p className="grimoire-meta mt-6 flex items-center gap-2 text-xs font-semibold">
               <CalendarDays aria-hidden="true" size={15} /> No Crypt desde {joinedAt}
@@ -133,16 +133,16 @@ export function ProfileRoute() {
         >
           <div className="relative z-[2]">
             <div className="flex items-center gap-3">
-              <BookMarked aria-hidden="true" className="text-[#416b50]" size={23} />
+              <Gamepad2 aria-hidden="true" className="text-violet-300" size={23} />
               <div>
-                <p className="grimoire-kicker">Capítulo I</p>
+                <p className="grimoire-kicker">INTERESTS.DB</p>
                 <h2 className="grimoire-section-title mt-1" id="profile-interests-title">
                   Afinidades e interesses
                 </h2>
               </div>
             </div>
             <p className="grimoire-meta mt-3 text-xs">
-              Marcas que descrevem os caminhos percorridos por você.
+              Jogos, tecnologias e assuntos que fazem parte do seu universo.
             </p>
 
             {interestsVisible && visibleCategories.length > 0 ? (
@@ -171,11 +171,11 @@ export function ProfileRoute() {
               </div>
             )}
             <div className="grimoire-divider my-7" />
-            <p className="grimoire-kicker">Capítulo II</p>
+            <p className="grimoire-kicker">NOW PLAYING</p>
             <h2 className="grimoire-section-title mt-1" id="favorite-track-title">
-              Melodia vinculada
+              Trilha do perfil
             </h2>
-            <p className="grimoire-meta mt-2 text-xs">A música preservada entre estas páginas.</p>
+            <p className="grimoire-meta mt-2 text-xs">A música que representa seu momento.</p>
             <div className="grimoire-inset mt-4 p-3">
               <SpotifyEmbed
                 title={profile.favorite_spotify_title}

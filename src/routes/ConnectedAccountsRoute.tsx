@@ -84,7 +84,7 @@ function connectionSummary(connection: ExternalConnection) {
   const currentGame = connection.details.current_game_name;
   if (currentGame) return `Jogando ${currentGame}`;
   return gameCount === null || gameCount === undefined
-    ? 'Biblioteca privada ou indisponível.'
+    ? 'Perfil privado ou indisponível.'
     : `${new Intl.NumberFormat('pt-BR').format(gameCount)} jogos visíveis`;
 }
 

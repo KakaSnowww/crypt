@@ -1,10 +1,10 @@
 import {
   Bell,
+  Code2,
   Compass,
   Hash,
   Headphones,
   Home,
-  Gem,
   LogOut,
   Monitor,
   Menu,
@@ -69,26 +69,25 @@ import { isSupabaseConfigured } from '../../lib/supabase/client';
 import { isElectronRuntime } from '../../lib/platform';
 import { ExperienceSettingsButton } from '../../features/experience/ExperienceSettingsButton';
 import { IconButton } from '../common/IconButton';
-import { AlchemicalLivingScene } from '../arcane/AlchemicalLivingScene';
 
 const channelLinks = [
-  { end: true, icon: Gem, label: 'Câmara Arcana', to: '/app/arcana' },
+  { end: true, icon: Code2, label: 'Crypt Pro', to: '/app/arcana' },
   {
     end: false,
     icon: ServerGlyph,
-    label: 'Acervos',
+    label: 'Servidores',
     to: '/app/servidores',
   },
   {
     end: false,
     icon: MessageCircle,
-    label: 'Correspondências',
+    label: 'Mensagens',
     to: '/app/mensagens',
   },
   {
     end: true,
     icon: Search,
-    label: 'Catálogo',
+    label: 'Buscar',
     to: '/app/busca',
   },
   {
@@ -356,11 +355,10 @@ export function AppShell() {
   return (
     <div
       className={classNames(
-        'app-shell app-shell--alchemy h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)]',
+        'app-shell app-shell--cyber h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)]',
         !isVoiceRoute && '2xl:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)_15rem]',
       )}
     >
-      <AlchemicalLivingScene compact />
       <aside
         aria-label="Seus espaços"
         className="app-shell__rail hidden border-r border-white/[0.06] px-2.5 py-4 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:items-center lg:overflow-hidden"
@@ -426,10 +424,10 @@ export function AppShell() {
       >
         <div className="border-b border-white/[0.06] px-5 py-[1.15rem]">
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-violet-300">
-            {currentServer ? 'Acervo em consulta' : 'Biblioteca alquímica'}
+            {currentServer ? 'Servidor ativo' : 'Crypt Network'}
           </p>
           <h1 className="mt-1.5 truncate text-base font-bold tracking-tight text-white">
-            {currentServer?.server_name ?? 'Catálogo do Crypt'}
+            {currentServer?.server_name ?? 'Seu espaço digital'}
           </h1>
         </div>
 
@@ -508,7 +506,7 @@ export function AppShell() {
               )}
             >
               <p className="px-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-                {currentServer ? 'Catálogo geral' : 'Índice'}
+                {currentServer ? 'Navegação geral' : 'Workspace'}
               </p>
               <div className="mt-2 grid gap-1">
                 {channelLinks.map((channel) => {
@@ -773,7 +771,7 @@ export function AppShell() {
             to="/app/servidores"
           >
             <ServerGlyph aria-hidden="true" size={19} />
-            Acervos
+            Servidores
           </NavLink>
           <NavLink
             className={({ isActive }) =>
@@ -786,7 +784,7 @@ export function AppShell() {
             to="/app"
           >
             <Home aria-hidden="true" size={19} />
-            Índice
+            Início
           </NavLink>
           <NavLink
             className={({ isActive }) =>
@@ -798,7 +796,7 @@ export function AppShell() {
             to="/app/mensagens"
           >
             <MessageCircle aria-hidden="true" size={19} />
-            Cartas
+            Mensagens
             {unreadDirectMessages ? (
               <span className="absolute right-2 top-0 grid min-w-5 place-items-center rounded-full bg-violet-500 px-1 text-[0.58rem] text-white">
                 {unreadDirectMessages > 99 ? '99+' : unreadDirectMessages}
@@ -840,7 +838,7 @@ export function AppShell() {
         )}
       >
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">
-          {currentServer ? `Membros — ${serverMembers.length}` : 'Servidores'}
+          {currentServer ? `Membros — ${serverMembers.length}` : 'Atividade'}
         </p>
         {currentServer ? (
           <ServerMemberGroups
@@ -850,7 +848,7 @@ export function AppShell() {
           />
         ) : (
           <div className="mt-4 rounded-2xl border border-dashed border-white/10 p-4 text-xs leading-5 text-crypt-subtle">
-            Selecione um servidor para acompanhar os membros em tempo real.
+            Selecione um servidor para acompanhar sua comunidade em tempo real.
           </div>
         )}
       </aside>

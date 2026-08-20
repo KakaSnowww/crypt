@@ -121,7 +121,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       await stopScreenShare();
 
       if (options?.quality === 'arcana' && !connection?.arcana_hd60) {
-        throw new Error('A transmissão em 1080p a 60 FPS requer Arcana ativo.');
+        throw new Error('A transmissão em 1080p a 60 FPS requer Crypt Pro ativo.');
       }
 
       const preset =

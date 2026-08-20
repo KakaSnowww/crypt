@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
-import { Gem, LockKeyhole, Palette, RotateCcw, Save } from 'lucide-react';
+import { Cpu, LockKeyhole, Palette, RotateCcw, Save } from 'lucide-react';
 import { Button } from '../../../components/common/Button';
 import { useToast } from '../../../components/common/ToastContext';
 import { serverArcanaKeys, useServerArcanaStatus } from '../serverArcana.queries';
@@ -76,7 +76,7 @@ export function ServerArcanaSettingsCard({ serverId }: { serverId: string }) {
     onSuccess: async () => {
       await refresh();
       addToast({
-        message: 'O servidor voltou às cores automáticas do Círculo.',
+        message: 'O servidor voltou às cores automáticas do Boost.',
         title: 'Gradiente restaurado',
         tone: 'info',
       });
@@ -98,14 +98,14 @@ export function ServerArcanaSettingsCard({ serverId }: { serverId: string }) {
     <section aria-labelledby="server-gradient-title" className="panel mt-5 p-5 sm:p-7">
       <div className="flex items-start gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-200">
-          <Gem aria-hidden="true" size={19} />
+          <Cpu aria-hidden="true" size={19} />
         </span>
         <div>
           <h2 className="font-semibold text-white" id="server-gradient-title">
-            Identidade do Círculo
+            Identidade do servidor
           </h2>
           <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-            Personalização coletiva alimentada pelas Runas ativas do servidor.
+            Personalização coletiva liberada pelos Boosts ativos do servidor.
           </p>
         </div>
       </div>
@@ -114,9 +114,9 @@ export function ServerArcanaSettingsCard({ serverId }: { serverId: string }) {
         <div className="mt-6 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
           <LockKeyhole className="shrink-0 text-amber-200" size={18} />
           <div>
-            <strong className="text-sm text-white">Círculo Elevado necessário</strong>
+            <strong className="text-sm text-white">Boost nível 2 necessário</strong>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Alcance 7 Runas ativas para escolher gradiente próprio. O servidor possui{' '}
+              Alcance 7 Boosts ativos para escolher um gradiente próprio. O servidor possui{' '}
               {status.rune_count}.
             </p>
           </div>
@@ -185,8 +185,8 @@ export function ServerArcanaSettingsCard({ serverId }: { serverId: string }) {
       )}
 
       <div className="mt-5 flex items-start gap-2 border-t border-white/[0.07] pt-4 text-xs leading-5 text-crypt-subtle">
-        <Palette aria-hidden="true" className="mt-0.5 shrink-0 text-violet-300" size={15} />O
-        Círculo Desperto já libera ícone e banner animados em GIF.
+        <Palette aria-hidden="true" className="mt-0.5 shrink-0 text-violet-300" size={15} />O O
+        Boost inicial já libera ícone e banner animados em GIF.
       </div>
     </section>
   );

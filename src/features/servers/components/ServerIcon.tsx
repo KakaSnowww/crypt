@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { getServerMediaUrl } from '../servers.service';
 import '../serverArcana.css';
@@ -50,11 +50,11 @@ export function ServerIcon({
 
       {hasCircle ? (
         <span
-          aria-label={`Círculo Arcano nível ${circleLevel}`}
+          aria-label={`Boost do servidor nível ${circleLevel}`}
           className="server-icon__arcana-badge"
-          title={`Círculo Arcano nível ${circleLevel}`}
+          title={`Boost do servidor nível ${circleLevel}`}
         >
-          <Sparkles aria-hidden="true" size={9} />
+          <Zap aria-hidden="true" size={9} />
         </span>
       ) : null}
     </span>

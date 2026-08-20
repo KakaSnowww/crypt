@@ -1,0 +1,715 @@
+/* =========================================================
+   CRYPT — GAMER / DEVELOPER WORKSPACE
+   A single visual foundation for every authenticated screen.
+   ========================================================= */
+
+:root {
+  --crypt-void: #05050a;
+  --crypt-base: #080811;
+  --crypt-sidebar: #0b0b15;
+  --crypt-surface: #10101c;
+  --crypt-surface-raised: #151524;
+  --crypt-line: rgb(255 255 255 / 8%);
+  --crypt-line-strong: rgb(149 112 255 / 28%);
+  --crypt-violet: #8b5cf6;
+  --crypt-violet-bright: #a78bfa;
+  --crypt-cyan: #22d3ee;
+  --crypt-cyan-soft: #67e8f9;
+  --crypt-success: #34d399;
+  --crypt-danger: #fb7185;
+  --crypt-shadow: 0 20px 60px rgb(0 0 0 / 34%);
+
+  /* Compatibility tokens used by existing feature components. */
+  --arcane-purple: var(--crypt-violet);
+  --arcane-violet: var(--crypt-violet-bright);
+  --arcane-blue: #667eea;
+  --arcane-cyan: var(--crypt-cyan);
+  --arcane-success: var(--crypt-success);
+  --arcane-danger: var(--crypt-danger);
+  --arcane-border: var(--crypt-line);
+  --arcane-border-strong: var(--crypt-line-strong);
+}
+
+body {
+  background: var(--crypt-void);
+}
+
+body::before {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgb(124 58 237 / 11%), transparent 32rem),
+    radial-gradient(circle at 92% 100%, rgb(6 182 212 / 8%), transparent 34rem),
+    linear-gradient(145deg, #05050a, #080811 48%, #05060c);
+  content: '';
+  pointer-events: none;
+}
+
+.cyber-atmosphere {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cyber-atmosphere > span {
+  position: absolute;
+  display: block;
+}
+
+.cyber-atmosphere__grid {
+  inset: 0;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgb(139 92 246 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(34 211 238 / 4%) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 76%);
+}
+
+.cyber-atmosphere__glow {
+  width: 34rem;
+  height: 34rem;
+  border-radius: 999px;
+  filter: blur(110px);
+  opacity: 0.1;
+  animation: cyber-glow-drift 18s ease-in-out infinite alternate;
+}
+
+.cyber-atmosphere__glow--violet {
+  top: -18rem;
+  left: 12%;
+  background: #7c3aed;
+}
+
+.cyber-atmosphere__glow--cyan {
+  right: -18rem;
+  bottom: -20rem;
+  background: #0891b2;
+  animation-delay: -9s;
+}
+
+.cyber-atmosphere__scan {
+  top: -25%;
+  left: 45%;
+  width: 1px;
+  height: 150%;
+  opacity: 0.18;
+  background: linear-gradient(transparent, var(--crypt-cyan), transparent);
+  transform: rotate(28deg);
+}
+
+.panel {
+  position: relative;
+  border: 1px solid var(--crypt-line);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 3.5%), transparent 42%), rgb(14 14 25 / 88%);
+  box-shadow:
+    var(--crypt-shadow),
+    inset 0 1px rgb(255 255 255 / 3%);
+  backdrop-filter: blur(18px);
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.panel:hover {
+  border-color: rgb(139 92 246 / 20%);
+}
+
+.eyebrow,
+.alchemy-kicker,
+.grimoire-kicker {
+  color: var(--crypt-cyan-soft);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.crypt-button {
+  border: 1px solid transparent;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.crypt-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.crypt-button[data-variant='primary'] {
+  background: linear-gradient(120deg, #7c3aed, #8b5cf6 50%, #0891b2) !important;
+  box-shadow: 0 12px 32px rgb(124 58 237 / 22%);
+}
+
+.crypt-button[data-variant='secondary'] {
+  border-color: var(--crypt-line) !important;
+  background: rgb(255 255 255 / 4%) !important;
+}
+
+.crypt-button[data-variant='ghost'] {
+  box-shadow: none;
+}
+
+.crypt-icon-button {
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.crypt-icon-button:hover {
+  border-color: var(--crypt-line);
+  color: white;
+  background: rgb(255 255 255 / 6%);
+  transform: translateY(-1px);
+}
+
+.crypt-field,
+textarea:not([class*='bg-transparent']),
+select {
+  border-color: var(--crypt-line) !important;
+  color: #f8fafc;
+  background: rgb(5 5 11 / 72%) !important;
+  box-shadow: inset 0 1px 8px rgb(0 0 0 / 25%);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.crypt-field:focus,
+textarea:not([class*='bg-transparent']):focus,
+select:focus {
+  border-color: rgb(139 92 246 / 65%) !important;
+  background: rgb(9 9 18 / 92%) !important;
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 13%) !important;
+}
+
+.crypt-modal {
+  border-color: var(--crypt-line-strong);
+  background: rgb(12 12 22 / 97%);
+  box-shadow: 0 30px 100px rgb(0 0 0 / 65%);
+  backdrop-filter: blur(28px);
+}
+
+.crypt-modal__sigil {
+  display: none;
+}
+
+.modal-overlay {
+  background: rgb(2 2 7 / 76%);
+  backdrop-filter: blur(8px);
+}
+
+/* Application frame */
+
+.app-shell {
+  z-index: 1;
+  max-width: 100vw;
+  max-height: 100dvh;
+  background: rgb(6 6 12 / 91%) !important;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(circle at 44% -15%, rgb(124 58 237 / 8%), transparent 34rem),
+    radial-gradient(circle at 100% 80%, rgb(8 145 178 / 5%), transparent 30rem);
+  content: '';
+  pointer-events: none;
+}
+
+.app-shell__rail {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  background: rgb(5 5 10 / 96%) !important;
+  box-shadow: inset -1px 0 var(--crypt-line);
+}
+
+.app-shell__sidebar,
+.app-shell__members {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  background: rgb(10 10 18 / 94%) !important;
+  backdrop-filter: blur(24px);
+}
+
+.app-shell__sidebar {
+  box-shadow: inset -1px 0 var(--crypt-line);
+}
+
+.app-shell__members {
+  box-shadow: inset 1px 0 var(--crypt-line);
+}
+
+.app-shell__sidebar nav a {
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.app-shell__sidebar nav a:hover {
+  border-color: rgb(255 255 255 / 5%);
+  background: rgb(255 255 255 / 4%);
+}
+
+.app-shell__sidebar nav a[aria-current='page'] {
+  border-color: rgb(139 92 246 / 20%);
+  color: #fff;
+  background: linear-gradient(90deg, rgb(124 58 237 / 18%), rgb(34 211 238 / 5%));
+  box-shadow: inset 2px 0 var(--crypt-violet-bright);
+}
+
+.app-shell__header {
+  position: relative;
+  z-index: 3;
+  border-color: var(--crypt-line) !important;
+  background: rgb(8 8 15 / 82%) !important;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 16%);
+  backdrop-filter: blur(22px);
+}
+
+.app-shell__main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-shell__content,
+.chat-layout {
+  min-width: 0;
+  max-width: 100%;
+  background:
+    linear-gradient(rgb(139 92 246 / 2.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(34 211 238 / 2%) 1px, transparent 1px), rgb(7 7 14 / 76%);
+  background-size: 64px 64px;
+}
+
+.chat-scroll > article,
+[id^='message-'] {
+  border-radius: 0.9rem;
+  transition: background 140ms ease;
+}
+
+.chat-scroll > article:hover,
+[id^='message-']:hover {
+  background: linear-gradient(90deg, rgb(139 92 246 / 7%), transparent 72%);
+}
+
+/* Dashboard */
+
+.cyber-home {
+  min-height: 100%;
+}
+
+.cyber-home__hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--crypt-line-strong);
+  border-radius: 1.6rem;
+  background:
+    linear-gradient(112deg, rgb(124 58 237 / 18%), transparent 48%),
+    linear-gradient(145deg, rgb(255 255 255 / 4%), transparent 50%), #0d0d19;
+  box-shadow: 0 28px 80px rgb(0 0 0 / 34%);
+}
+
+.cyber-home__hero::before {
+  position: absolute;
+  top: -60%;
+  right: -12%;
+  width: 34rem;
+  height: 34rem;
+  border: 1px solid rgb(34 211 238 / 14%);
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 30px, rgb(139 92 246 / 7%) 31px 32px);
+  content: '';
+  animation: cyber-orbit 24s linear infinite;
+}
+
+.cyber-home__terminal {
+  border: 1px solid var(--crypt-line);
+  border-radius: 1rem;
+  background: rgb(3 3 8 / 76%);
+  box-shadow: inset 0 1px rgb(255 255 255 / 3%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.cyber-home__terminal-dots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.cyber-home__terminal-dots span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--crypt-violet);
+}
+
+.cyber-home__terminal-dots span:nth-child(2) {
+  background: var(--crypt-cyan);
+}
+
+.cyber-home__terminal-dots span:nth-child(3) {
+  background: var(--crypt-success);
+}
+
+.cyber-action-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--crypt-line);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgb(255 255 255 / 3.5%), transparent 50%), #0e0e19;
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease;
+}
+
+.cyber-action-card::after {
+  position: absolute;
+  right: -2rem;
+  bottom: -3rem;
+  width: 8rem;
+  height: 8rem;
+  border: 1px solid rgb(34 211 238 / 11%);
+  border-radius: 50%;
+  content: '';
+}
+
+.cyber-action-card:hover {
+  border-color: rgb(139 92 246 / 34%);
+  box-shadow:
+    0 18px 48px rgb(0 0 0 / 30%),
+    0 0 36px rgb(124 58 237 / 7%);
+  transform: translateY(-3px);
+}
+
+.cyber-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgb(34 211 238 / 18%);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  color: var(--crypt-cyan-soft);
+  background: rgb(34 211 238 / 6%);
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+/* Existing server, subscription and profile routes receive the same system. */
+
+.alchemy-page-heading,
+.settings-grimoire > header,
+.grimoire-profile > header {
+  border-bottom: 1px solid var(--crypt-line);
+  padding-bottom: 1.5rem;
+}
+
+.alchemy-display,
+.grimoire-name,
+.grimoire-section-title,
+.arcana-subscription-title {
+  color: #fff;
+  font-family: inherit;
+  letter-spacing: -0.035em;
+}
+
+.alchemy-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid var(--crypt-line);
+  border-radius: 0.85rem;
+  padding: 0.65rem 1rem;
+  color: #e9e7f2;
+  background: rgb(255 255 255 / 4%);
+  font-size: 0.78rem;
+  font-weight: 750;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.alchemy-button:hover {
+  border-color: rgb(139 92 246 / 35%);
+  background: rgb(139 92 246 / 10%);
+  transform: translateY(-1px);
+}
+
+.alchemy-button--primary {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(120deg, #7c3aed, #8b5cf6 55%, #0891b2);
+}
+
+.alchemy-tome,
+.arcana-benefit-card,
+.arcana-rune-card,
+.arcana-tier-card {
+  background: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent 52%), #0e0e19 !important;
+}
+
+.arcana-subscription-altar {
+  border: 1px solid var(--crypt-line-strong);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 88% 15%, rgb(34 211 238 / 11%), transparent 22rem),
+    linear-gradient(115deg, rgb(124 58 237 / 18%), transparent 55%), #0d0d19;
+  box-shadow: var(--crypt-shadow);
+}
+
+.arcana-price-ritual {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: white;
+}
+
+.arcana-price-ritual b {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.arcana-benefit-card > svg {
+  color: var(--crypt-cyan);
+}
+
+.grimoire-profile,
+.settings-grimoire {
+  position: relative;
+}
+
+.grimoire-profile::before,
+.settings-grimoire::before,
+.grimoire-book::after,
+.grimoire-page::after,
+.grimoire-rune-ring,
+.grimoire-bookmark {
+  display: none !important;
+}
+
+.grimoire-book {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--crypt-line);
+  border-radius: 1.5rem;
+  background: rgb(12 12 22 / 88%);
+  box-shadow: var(--crypt-shadow);
+}
+
+.grimoire-page {
+  position: relative;
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  background: linear-gradient(145deg, rgb(255 255 255 / 2.5%), transparent 48%);
+}
+
+.grimoire-page + .grimoire-page {
+  border-top: 1px solid var(--crypt-line);
+}
+
+.grimoire-avatar-frame {
+  border: 2px solid rgb(139 92 246 / 35%);
+  border-radius: 1.25rem;
+  padding: 0.25rem;
+  background: linear-gradient(135deg, rgb(139 92 246 / 20%), rgb(34 211 238 / 10%));
+  box-shadow: 0 0 36px rgb(124 58 237 / 12%);
+}
+
+.grimoire-avatar-frame::after {
+  display: none;
+}
+
+.grimoire-handle,
+.grimoire-copy,
+.grimoire-meta {
+  color: var(--color-crypt-muted);
+}
+
+.grimoire-divider {
+  height: 1px;
+  background: linear-gradient(90deg, var(--crypt-violet), rgb(34 211 238 / 30%), transparent);
+}
+
+.grimoire-chip {
+  border: 1px solid rgb(139 92 246 / 18%);
+  border-radius: 999px;
+  color: #ddd6fe;
+  background: rgb(139 92 246 / 8%);
+}
+
+.grimoire-inset,
+.grimoire-note {
+  border: 1px solid var(--crypt-line);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 3%);
+}
+
+.settings-grimoire > section,
+.settings-grimoire > form,
+.settings-grimoire .panel {
+  border-radius: 1.25rem;
+}
+
+.settings-title,
+.settings-section-title {
+  color: #fff;
+}
+
+.settings-chapters {
+  border: 1px solid var(--crypt-line);
+  border-radius: 1.1rem;
+  background: rgb(10 10 18 / 72%);
+}
+
+.settings-chapter {
+  border: 1px solid transparent;
+}
+
+.settings-chapter:hover {
+  border-color: rgb(255 255 255 / 5%);
+  background: rgb(255 255 255 / 3.5%);
+}
+
+.settings-chapter.is-active {
+  border-color: rgb(139 92 246 / 20%);
+  background: linear-gradient(100deg, rgb(124 58 237 / 16%), rgb(34 211 238 / 4%));
+  box-shadow: inset 2px 0 var(--crypt-violet-bright);
+}
+
+.settings-chapter-icon,
+.settings-section-icon {
+  border: 1px solid rgb(139 92 246 / 16%);
+  color: #c4b5fd;
+  background: rgb(139 92 246 / 9%);
+}
+
+.settings-page {
+  border: 1px solid var(--crypt-line);
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent 48%), rgb(13 13 23 / 86%);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 22%);
+}
+
+.settings-badge {
+  border: 1px solid rgb(34 211 238 / 16%);
+  color: var(--crypt-cyan-soft);
+  background: rgb(34 211 238 / 6%);
+}
+
+.settings-text-link {
+  color: #c4b5fd;
+}
+
+.settings-text-link:hover {
+  color: #fff;
+}
+
+.arcana-tier-card {
+  min-width: 0;
+  border: 1px solid var(--crypt-line);
+  border-radius: 1rem;
+  padding: 0.9rem;
+  text-align: center;
+}
+
+.arcana-tier-card.is-current {
+  border-color: color-mix(in srgb, var(--arcana-tier-color) 58%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--arcana-tier-color) 13%, transparent);
+}
+
+.arcana-tier-card.is-locked {
+  opacity: 0.48;
+}
+
+.arcana-tier-card__state {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-crypt-subtle);
+  font-size: 0.62rem;
+}
+
+.server-arcana-panel {
+  border: 1px solid var(--crypt-line-strong) !important;
+  background:
+    linear-gradient(120deg, rgb(124 58 237 / 12%), transparent 48%), rgb(13 13 23 / 88%) !important;
+}
+
+@media (min-width: 900px) {
+  .grimoire-book {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .grimoire-page + .grimoire-page {
+    border-top: 0;
+    border-left: 1px solid var(--crypt-line);
+  }
+}
+
+@media (max-width: 1279px) {
+  .app-shell__members {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .app-shell {
+    display: block !important;
+  }
+
+  .app-shell__main {
+    width: 100%;
+    height: 100dvh;
+  }
+}
+
+@media (max-width: 640px) {
+  .panel,
+  .cyber-home__hero,
+  .grimoire-book,
+  .arcana-subscription-altar {
+    border-radius: 1rem;
+  }
+
+  .cyber-atmosphere__grid {
+    background-size: 48px 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyber-atmosphere__glow,
+  .cyber-home__hero::before {
+    animation: none;
+  }
+}
+
+@keyframes cyber-glow-drift {
+  to {
+    opacity: 0.16;
+    transform: translate3d(3rem, 2rem, 0) scale(1.08);
+  }
+}
+
+@keyframes cyber-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}

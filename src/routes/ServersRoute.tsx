@@ -71,17 +71,17 @@ export function ServersRoute() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <div className="alchemy-page-heading flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="alchemy-kicker">Acervos sob sua guarda</p>
-          <h1 className="alchemy-display mt-3 text-4xl">Suas bibliotecas</h1>
+          <p className="alchemy-kicker">Seus espaços</p>
+          <h1 className="alchemy-display mt-3 text-4xl">Seus servidores</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Abra uma nova coleção ou atravesse um convite protegido para outra biblioteca.
+            Crie uma comunidade do seu jeito ou entre em um servidor usando um convite.
           </p>
         </div>
         <Button
           leadingIcon={<Plus aria-hidden="true" size={17} />}
           onClick={() => setCreateOpen(true)}
         >
-          Fundar biblioteca
+          Criar servidor
         </Button>
       </div>
 

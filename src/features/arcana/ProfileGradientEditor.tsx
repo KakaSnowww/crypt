@@ -42,12 +42,12 @@ export function ProfileGradientEditor({ profile }: { profile: Profile }) {
             <Paintbrush size={16} /> Gradiente do perfil
           </p>
           <p className="mt-1 text-xs text-crypt-subtle">
-            Exclusivo do Arcana e aplicado ao cartão público.
+            Exclusivo do Crypt Pro e aplicado ao cartão público.
           </p>
         </div>
         {!active ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-1 text-[11px] font-semibold text-violet-200">
-            <LockKeyhole size={11} /> Arcana
+            <LockKeyhole size={11} /> Crypt Pro
           </span>
         ) : null}
       </div>

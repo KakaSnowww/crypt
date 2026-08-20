@@ -1,5 +1,5 @@
-import { Sparkles } from 'lucide-react';
-import { useState, type CSSProperties } from 'react';
+import { Cpu } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { getArcanaTierAsset } from './arcanaAssets';
 import './arcanaAssets.css';
 
@@ -17,8 +17,7 @@ export function ArcanaTierIcon({
   tierNumber,
 }: Props) {
   const asset = getArcanaTierAsset(tierNumber);
-  const [failedPath, setFailedPath] = useState<string>();
-  const imageFailed = failedPath === asset.imagePath;
+  const level = Math.max(1, Math.min(12, tierNumber ?? 1));
 
   const style = {
     '--arcana-tier-color': asset.color,
@@ -26,23 +25,13 @@ export function ArcanaTierIcon({
 
   return (
     <span
-      aria-label={decorative ? undefined : `Arcana ${asset.name}`}
+      aria-label={decorative ? undefined : `Crypt Pro nível ${level}`}
       className={`arcana-tier-icon arcana-tier-icon--${size} ${className}`}
       role={decorative ? undefined : 'img'}
       style={style}
-      title={decorative ? undefined : `Arcana ${asset.name}`}
+      title={decorative ? undefined : `Crypt Pro nível ${level}`}
     >
-      {!imageFailed ? (
-        <img
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          onError={() => setFailedPath(asset.imagePath)}
-          src={asset.imagePath}
-        />
-      ) : (
-        <Sparkles aria-hidden="true" className="arcana-tier-icon__fallback" />
-      )}
+      <Cpu aria-hidden="true" className="arcana-tier-icon__fallback" />
     </span>
   );
 }

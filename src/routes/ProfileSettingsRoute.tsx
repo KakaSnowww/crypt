@@ -71,7 +71,7 @@ export function ProfileSettingsRoute() {
         <div>
           <p className="eyebrow">Perfil e privacidade</p>
           <h1 className="settings-title mt-3 text-3xl font-bold tracking-tight">
-            Edite seu tomo pessoal
+            Personalize sua identidade
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
             Tudo que foi escolhido no onboarding pode ser alterado aqui.
