@@ -73,16 +73,16 @@ export function AccountSecurityRoute() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+    <main className="settings-grimoire mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       <SettingsNavigation />
       <p className="eyebrow">Conta e segurança</p>
-      <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Proteja seu acesso</h1>
+      <h1 className="settings-title mt-3 text-3xl font-bold tracking-tight">Proteja seu acesso</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
         Sua senha permanece exclusivamente no Supabase Auth e nunca é salva na tabela pública de
         perfis.
       </p>
 
-      <section className="panel mt-8 p-5 sm:p-7" aria-labelledby="session-title">
+      <section className="settings-page mt-8 p-5 sm:p-7" aria-labelledby="session-title">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-400/10 text-emerald-300">
             <ShieldCheck aria-hidden="true" size={20} />
@@ -104,7 +104,7 @@ export function AccountSecurityRoute() {
         </Button>
       </section>
 
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="password-title">
+      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="password-title">
         <h2 className="text-lg font-semibold text-white" id="password-title">
           Alterar senha
         </h2>

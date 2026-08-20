@@ -65,33 +65,30 @@ export function ProfileSettingsRoute() {
   const profile = profileQuery.data;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
+    <main className="settings-grimoire mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       <SettingsNavigation />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Perfil e privacidade</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
-            Escolha como aparecer
+          <h1 className="settings-title mt-3 text-3xl font-bold tracking-tight">
+            Edite seu tomo pessoal
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
             Tudo que foi escolhido no onboarding pode ser alterado aqui.
           </p>
         </div>
-        <Link
-          className="text-sm font-semibold text-violet-300 hover:text-violet-200"
-          to="/app/perfil"
-        >
+        <Link className="settings-text-link text-sm font-semibold" to="/app/perfil">
           Ver meu perfil
         </Link>
       </div>
 
-      <section className="panel mt-8 p-5 sm:p-7" aria-labelledby="identity-title">
+      <section className="settings-page mt-8 p-5 sm:p-7" aria-labelledby="identity-title">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
+          <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
             <UserRound aria-hidden="true" size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="identity-title">
+            <h2 className="settings-section-title font-semibold" id="identity-title">
               Apresentação
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
@@ -111,13 +108,13 @@ export function ProfileSettingsRoute() {
         </div>
       </section>
 
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="avatar-title">
+      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="avatar-title">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-500/10 text-blue-200">
+          <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
             <Image aria-hidden="true" size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="avatar-title">
+            <h2 className="settings-section-title font-semibold" id="avatar-title">
               Avatar
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
@@ -130,13 +127,13 @@ export function ProfileSettingsRoute() {
         </div>
       </section>
 
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="visual-title">
+      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="visual-title">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
+          <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
             <Sparkles aria-hidden="true" size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="visual-title">
+            <h2 className="settings-section-title font-semibold" id="visual-title">
               Banner e efeitos
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
@@ -152,13 +149,13 @@ export function ProfileSettingsRoute() {
         </div>
       </section>
 
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="interests-title">
+      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="interests-title">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-200">
+          <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
             <Sparkles aria-hidden="true" size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="interests-title">
+            <h2 className="settings-section-title font-semibold" id="interests-title">
               Interesses e autodescrições
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
@@ -174,13 +171,13 @@ export function ProfileSettingsRoute() {
         </div>
       </section>
 
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="privacy-title">
+      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="privacy-title">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-200">
+          <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
             <LockKeyhole aria-hidden="true" size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="privacy-title">
+            <h2 className="settings-section-title font-semibold" id="privacy-title">
               Privacidade
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
@@ -193,13 +190,13 @@ export function ProfileSettingsRoute() {
         </div>
       </section>
 
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="spotify-title">
+      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="spotify-title">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-green-500/10 text-green-300">
+          <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
             <Music2 aria-hidden="true" size={19} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="spotify-title">
+            <h2 className="settings-section-title font-semibold" id="spotify-title">
               Música favorita
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-subtle">
@@ -214,7 +211,7 @@ export function ProfileSettingsRoute() {
 
       <p className="mt-6 text-center text-xs text-crypt-subtle">
         Senha, sessão e exclusão continuam disponíveis em{' '}
-        <Link className="font-semibold text-violet-300" to="/app/conta">
+        <Link className="settings-text-link font-semibold" to="/app/conta">
           Conta e segurança
         </Link>
         .

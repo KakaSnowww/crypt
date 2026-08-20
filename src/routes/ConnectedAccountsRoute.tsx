@@ -207,10 +207,10 @@ export function ConnectedAccountsRoute() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
+    <main className="settings-grimoire mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <SettingsNavigation />
       <p className="eyebrow">Contas conectadas</p>
-      <h1 className="mt-3 text-3xl font-bold text-white">Sua identidade, em um só lugar</h1>
+      <h1 className="settings-title mt-3 text-3xl font-bold">Sua identidade, em um só lugar</h1>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
         A autorização acontece diretamente no Spotify ou na Steam. O Crypt não recebe sua senha e os
         tokens ficam cifrados no backend. A conexão com o YouTube voltará depois da liberação
@@ -231,20 +231,20 @@ export function ConnectedAccountsRoute() {
           const isRemoving = remove.isPending && remove.variables === id;
 
           return (
-            <section className="panel relative overflow-hidden p-5" key={id}>
+            <section className="settings-page relative overflow-hidden p-5" key={id}>
               {!available && !connection ? (
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.12),transparent_42%)]" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(181,139,70,0.10),transparent_42%)]" />
               ) : null}
               <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/[0.06] text-violet-200">
+                  <span className="settings-section-icon grid size-11 shrink-0 place-items-center rounded-xl">
                     <Icon aria-hidden="true" size={20} />
                   </span>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-semibold text-white">{name}</h2>
                       {!available && !connection ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-violet-300/15 bg-violet-500/10 px-2 py-0.5 text-[0.65rem] font-semibold text-violet-200">
+                        <span className="settings-badge inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold">
                           <Clock3 aria-hidden="true" size={11} />
                           Em breve
                         </span>
@@ -254,7 +254,7 @@ export function ConnectedAccountsRoute() {
                       {connection ? `Conectado como ${connection.display_name}` : description}
                     </p>
                     {connection ? (
-                      <p className="mt-2 text-xs leading-5 text-violet-200/85">
+                      <p className="settings-accent-copy mt-2 text-xs leading-5">
                         {connectionSummary(connection) || 'Dados públicos sincronizados.'}
                       </p>
                     ) : null}
@@ -332,7 +332,7 @@ export function ConnectedAccountsRoute() {
                   ) : null}
                 </div>
               ) : (
-                <p className="relative mt-4 rounded-xl bg-violet-400/[0.06] px-4 py-3 text-xs leading-5 text-violet-100/80">
+                <p className="settings-inset relative mt-4 rounded-xl px-4 py-3 text-xs leading-5">
                   {available
                     ? 'Ao clicar em Conectar, o navegador oficial do provedor será aberto. Depois da autorização, você voltará automaticamente ao Crypt.'
                     : 'A integração está preservada, mas novas conexões permanecerão desligadas até concluirmos a verificação pública necessária.'}
