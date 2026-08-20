@@ -4,10 +4,16 @@ import { classNames } from '../../lib/classNames';
 export type BrandProps = {
   className?: string;
   compact?: boolean;
+  subtitle?: string;
   to?: string;
 };
 
-export function Brand({ className, compact = false, to = '/app' }: BrandProps) {
+export function Brand({
+  className,
+  compact = false,
+  subtitle = 'Arcane Network',
+  to = '/app',
+}: BrandProps) {
   return (
     <Link
       aria-label="Crypt — página inicial"
@@ -36,7 +42,7 @@ export function Brand({ className, compact = false, to = '/app' }: BrandProps) {
         </span>
         {!compact ? (
           <span className="crypt-brand__subtitle block text-[0.52rem] font-bold uppercase tracking-[0.24em]">
-            Arcane Network
+            {subtitle}
           </span>
         ) : null}
       </span>

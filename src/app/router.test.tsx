@@ -4,17 +4,17 @@ import { describe, expect, it } from 'vitest';
 import { authenticatedAuthValue, renderRoute } from '../test/renderRoute';
 
 describe('rotas do Crypt', () => {
-  it('abre o índice com acesso aos acervos', async () => {
+  it('abre o início com acesso aos servidores', async () => {
     renderRoute('/app', { authValue: authenticatedAuthValue });
 
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Um arquivo vivo além do mundo conhecido.',
+        name: 'Tudo o que importa, sem menus desnecessários.',
       }),
     ).toBeVisible();
-    expect(screen.getByText('Biblioteca impossível · Crypt')).toBeVisible();
-    expect(screen.getByRole('link', { name: /Consultar acervos/ })).toHaveAttribute(
+    expect(screen.getByText('Seu espaço no Crypt')).toBeVisible();
+    expect(screen.getByRole('link', { name: /Continuar no Crypt/ })).toHaveAttribute(
       'href',
       '/app/servidores',
     );
@@ -24,7 +24,7 @@ describe('rotas do Crypt', () => {
   it('protege a área privada quando não existe sessão', async () => {
     const { router } = renderRoute('/app');
 
-    await screen.findByRole('heading', { level: 1, name: 'A Biblioteca reconhece você' });
+    await screen.findByRole('heading', { level: 1, name: 'Bem-vindo de volta' });
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toContain('next=%2Fapp');
   });
@@ -32,7 +32,7 @@ describe('rotas do Crypt', () => {
   it('protege o onboarding quando não existe sessão', async () => {
     const { router } = renderRoute('/onboarding');
 
-    await screen.findByRole('heading', { level: 1, name: 'A Biblioteca reconhece você' });
+    await screen.findByRole('heading', { level: 1, name: 'Bem-vindo de volta' });
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toContain('next=%2Fonboarding');
   });
@@ -42,7 +42,7 @@ describe('rotas do Crypt', () => {
     renderRoute('/login');
 
     await user.type(await screen.findByRole('textbox', { name: 'E-mail' }), 'email-invalido');
-    await user.click(screen.getByRole('button', { name: 'Entrar no Crypt' }));
+    await user.click(screen.getByRole('button', { name: 'Acessar o Crypt' }));
 
     expect(await screen.findByText('Informe um e-mail válido.')).toBeVisible();
     expect(screen.getByText('Digite sua senha.')).toBeVisible();
