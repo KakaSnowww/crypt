@@ -1,4 +1,14 @@
-import { ArrowRight, CalendarClock, Link2, LockKeyhole, Plus, Server, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarClock,
+  Link2,
+  LockKeyhole,
+  Network,
+  Plus,
+  Server,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -68,56 +78,64 @@ export function ServersRoute() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <div className="alchemy-page-heading flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="alchemy-kicker">Seus espaços</p>
-          <h1 className="alchemy-display mt-3 text-4xl">Seus servidores</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Crie uma comunidade do seu jeito ou entre em um servidor usando um convite.
-          </p>
+    <main className="server-browser mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <section className="server-browser__hero">
+        <div className="server-browser__intro">
+          <p className="eyebrow">Network control</p>
+          <h1>Seus servidores</h1>
+          <p>Comunidades, equipes e grupos reunidos em uma central única.</p>
+          <div className="server-browser__metrics">
+            <span>
+              <Network size={15} />
+              <strong>{serversQuery.data?.length ?? 0}</strong> espaços
+            </span>
+            <span>
+              <ShieldCheck size={15} /> conexões privadas
+            </span>
+          </div>
+          <Button
+            leadingIcon={<Plus aria-hidden="true" size={17} />}
+            onClick={() => setCreateOpen(true)}
+          >
+            Criar servidor
+          </Button>
         </div>
-        <Button
-          leadingIcon={<Plus aria-hidden="true" size={17} />}
-          onClick={() => setCreateOpen(true)}
-        >
-          Criar servidor
-        </Button>
-      </div>
 
-      <section className="panel alchemy-invite mt-8 p-5 sm:p-7" aria-labelledby="join-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-500/10 text-blue-200">
-            <Link2 aria-hidden="true" size={19} />
+        <section className="server-browser__join" aria-labelledby="join-title">
+          <span>
+            <Link2 aria-hidden="true" size={20} />
           </span>
           <div>
-            <h2 className="font-semibold text-white" id="join-title">
-              Entrar com convite
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Cole o link completo ou somente o código recebido.
-            </p>
+            <p className="eyebrow">Acesso rápido</p>
+            <h2 id="join-title">Recebeu um convite?</h2>
+            <p>Cole o link completo ou o código para conferir o servidor.</p>
           </div>
-        </div>
-        <form className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={handleJoin}>
-          <Input
-            className="flex-1"
-            errorText={inviteError}
-            label="Convite do servidor"
-            onChange={(event) => setInviteValue(event.target.value)}
-            placeholder="https://crypt.../convite/..."
-            value={inviteValue}
-          />
-          <Button
-            className="sm:mb-0"
-            disabled={!inviteValue.trim()}
-            leadingIcon={<ArrowRight aria-hidden="true" size={16} />}
-            type="submit"
-          >
-            Ver convite
-          </Button>
-        </form>
+          <form onSubmit={handleJoin}>
+            <Input
+              errorText={inviteError}
+              label="Link ou código"
+              onChange={(event) => setInviteValue(event.target.value)}
+              placeholder="crypt.gg/convite/..."
+              value={inviteValue}
+            />
+            <Button
+              disabled={!inviteValue.trim()}
+              leadingIcon={<ArrowRight aria-hidden="true" size={16} />}
+              type="submit"
+              variant="secondary"
+            >
+              Abrir convite
+            </Button>
+          </form>
+        </section>
       </section>
+
+      <header className="server-browser__section-heading">
+        <div>
+          <p className="eyebrow">Biblioteca de espaços</p>
+          <h2>Continuar de onde parou</h2>
+        </div>
+      </header>
 
       {serversQuery.isPending ? (
         <div aria-label="Carregando servidores" className="grid min-h-56 place-items-center">
@@ -131,14 +149,14 @@ export function ServersRoute() {
           </p>
         </section>
       ) : serversQuery.data?.length ? (
-        <section aria-label="Lista de servidores" className="mt-6 grid gap-4 md:grid-cols-2">
+        <section aria-label="Lista de servidores" className="server-browser__list">
           {serversQuery.data.map((server) => (
             <Link
-              className="alchemy-tome group panel flex min-h-52 flex-col p-5 transition"
+              className="server-browser__card group"
               key={server.server_id}
               to={`/app/servidores/${server.server_id}/abrir`}
             >
-              <div className="flex items-start gap-4">
+              <div className="server-browser__card-identity">
                 <ServerIcon
                   circleColor={serverArcanaStatusById.get(server.server_id)?.circle_color}
                   circleLevel={serverArcanaStatusById.get(server.server_id)?.circle_level ?? 0}
@@ -146,7 +164,7 @@ export function ServersRoute() {
                   name={server.server_name}
                   size="md"
                 />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="truncate font-semibold text-white">{server.server_name}</h2>
                     {server.is_owner ? (
@@ -160,7 +178,7 @@ export function ServersRoute() {
                   </p>
                 </div>
               </div>
-              <div className="mt-auto flex flex-wrap items-center gap-4 pt-5 text-xs text-crypt-muted">
+              <div className="server-browser__card-meta">
                 <span className="inline-flex items-center gap-1.5">
                   <Users aria-hidden="true" size={14} />
                   {server.member_count} {server.member_count === 1 ? 'membro' : 'membros'}
@@ -169,15 +187,15 @@ export function ServersRoute() {
                   <LockKeyhole aria-hidden="true" size={14} />
                   Privado
                 </span>
-                <span className="ml-auto text-violet-300 transition group-hover:text-violet-200">
-                  Abrir →
+                <span className="server-browser__open">
+                  Abrir servidor <ArrowRight size={14} />
                 </span>
               </div>
             </Link>
           ))}
         </section>
       ) : (
-        <section className="alchemy-empty-shelf panel mt-6 grid min-h-72 place-items-center p-7 text-center">
+        <section className="server-browser__empty panel grid min-h-72 place-items-center p-7 text-center">
           <div>
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet-500/10 text-violet-200">
               <Server aria-hidden="true" size={24} />

@@ -1,4 +1,5 @@
 import { LiveKitRoom, RoomAudioRenderer, StartAudio } from '@livekit/components-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AudioPresets,
   ConnectionState,
@@ -8,6 +9,8 @@ import {
   ScreenSharePresets,
   Track,
   type RemoteParticipant,
+  type RemoteTrack,
+  type RemoteTrackPublication,
 } from 'livekit-client';
 import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { useToast } from '../../components/common/ToastContext';
@@ -34,8 +37,16 @@ import {
   createAndroidScreenShareConnection,
   createDirectVoiceConnection,
   createVoiceConnection,
+  setMyVoicePresence,
 } from './voice.service';
-import type { VoiceConnection } from './voice.types';
+import type { VoiceChannelPresence, VoiceConnection } from './voice.types';
+import { voiceKeys } from './voice.queries';
+import {
+  DEFAULT_PARTICIPANT_VOLUME,
+  clampParticipantVolume,
+  readParticipantVolumes,
+  saveParticipantVolumes,
+} from './participantVolume';
 import {
   getVoiceAudioCaptureOptions,
   getVoiceAudioFallbackOptions,
@@ -51,6 +62,7 @@ import './voice-stability.css';
 export function VoiceCallProvider({ children }: PropsWithChildren) {
   const { user } = useAuth();
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
   const [connection, setConnection] = useState<VoiceConnection | null>(null);
   const [channelId, setChannelId] = useState<string | null>(null);
   const [callKind, setCallKind] = useState<'channel' | 'direct' | null>(null);
@@ -59,6 +71,9 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   const [isExpanded, setExpanded] = useState(false);
   const [isNativeScreenSharing, setNativeScreenSharing] = useState(false);
   const [audioProfile, setAudioProfileState] = useState<VoiceAudioProfile>(readVoiceAudioProfile);
+  const [participantVolumes, setParticipantVolumes] =
+    useState<Record<string, number>>(readParticipantVolumes);
+  const participantVolumesRef = useRef(participantVolumes);
   const intentionalLeaveRef = useRef(false);
   const joinedRoomRef = useRef(false);
 
@@ -67,8 +82,9 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       new Room({
         adaptiveStream: true,
         audioCaptureDefaults: getVoiceAudioCaptureOptions(readVoiceAudioProfile()),
-        disconnectOnPageLeave: !isAndroidRuntime() && !isElectronRuntime(),
+        disconnectOnPageLeave: !isAndroidRuntime(),
         dynacast: true,
+        webAudioMix: !isAndroidRuntime(),
         publishDefaults: {
           audioPreset: AudioPresets.speech,
           degradationPreference: 'maintain-resolution',
@@ -78,6 +94,38 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           screenShareEncoding: ScreenSharePresets.h1080fps30.encoding,
         },
       }),
+  );
+
+  const refreshVoicePresence = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: voiceKeys.all });
+  }, [queryClient]);
+
+  const clearMyVoicePresence = useCallback(
+    async (profileId = user?.id) => {
+      if (profileId) {
+        queryClient.setQueriesData<VoiceChannelPresence[]>(
+          { queryKey: ['voice', 'presence'] },
+          (current) => current?.filter((entry) => entry.profile_id !== profileId),
+        );
+      }
+
+      await setMyVoicePresence(null).catch(() => undefined);
+      refreshVoicePresence();
+    },
+    [queryClient, refreshVoicePresence, user?.id],
+  );
+
+  const setParticipantVolume = useCallback(
+    (identity: string, requestedVolume: number) => {
+      const volume = clampParticipantVolume(requestedVolume);
+      const next = { ...participantVolumesRef.current, [identity]: volume };
+
+      participantVolumesRef.current = next;
+      setParticipantVolumes(next);
+      saveParticipantVolumes(next);
+      room.remoteParticipants.get(identity)?.setVolume(volume / 100);
+    },
+    [room],
   );
 
   const changeAudioProfile = useCallback(
@@ -219,13 +267,14 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
 
     await stopScreenShare();
     await stopAndroidCallService();
+    await clearMyVoicePresence();
     await room.disconnect();
     setConnection(null);
     setChannelId(null);
     setCallKind(null);
     setExpanded(false);
     setError(null);
-  }, [room, stopScreenShare]);
+  }, [clearMyVoicePresence, room, stopScreenShare]);
 
   const joinTarget = useCallback(
     async (targetId: string, targetKind: 'channel' | 'direct') => {
@@ -242,6 +291,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           intentionalLeaveRef.current = true;
           void playCryptSound('call-leave');
           await stopScreenShare();
+          await clearMyVoicePresence();
           await room.disconnect();
         }
 
@@ -270,7 +320,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         setIsConnecting(false);
       }
     },
-    [addToast, callKind, channelId, connection, room, stopScreenShare],
+    [addToast, callKind, channelId, clearMyVoicePresence, connection, room, stopScreenShare],
   );
 
   const join = useCallback(
@@ -303,6 +353,14 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       intentionalLeaveRef.current = false;
       joinedRoomRef.current = true;
       void playCryptSound('call-join');
+      void room.startAudio().catch(() => undefined);
+
+      if (callKind === 'channel' && channelId) {
+        void setMyVoicePresence(
+          channelId,
+          room.localParticipant.getTrackPublication(Track.Source.Microphone)?.isMuted ?? false,
+        ).finally(refreshVoicePresence);
+      }
 
       if (isAndroidRuntime() && connection) {
         void startAndroidCallService(connection.channel_name, connection.server_name).catch(
@@ -328,6 +386,11 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       if (joinedRoomRef.current && !intentionalLeaveRef.current) {
         void playCryptSound('call-join');
       }
+
+      participant.setVolume(
+        (participantVolumesRef.current[participant.identity] ?? DEFAULT_PARTICIPANT_VOLUME) / 100,
+      );
+      refreshVoicePresence();
     };
 
     const handleParticipantDisconnected = (participant: RemoteParticipant) => {
@@ -338,24 +401,52 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       if (joinedRoomRef.current && !intentionalLeaveRef.current) {
         void playCryptSound('call-leave');
       }
+
+      refreshVoicePresence();
+    };
+
+    const handleTrackSubscribed = (
+      _track: RemoteTrack,
+      _publication: RemoteTrackPublication,
+      participant: RemoteParticipant,
+    ) => {
+      participant.setVolume(
+        (participantVolumesRef.current[participant.identity] ?? DEFAULT_PARTICIPANT_VOLUME) / 100,
+      );
     };
 
     const handleDisconnected = () => {
       joinedRoomRef.current = false;
+      void clearMyVoicePresence();
     };
 
     room.on(RoomEvent.Connected, handleConnected);
     room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+    room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
     room.on(RoomEvent.Disconnected, handleDisconnected);
 
     return () => {
       room.off(RoomEvent.Connected, handleConnected);
       room.off(RoomEvent.ParticipantConnected, handleParticipantConnected);
       room.off(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+      room.off(RoomEvent.TrackSubscribed, handleTrackSubscribed);
       room.off(RoomEvent.Disconnected, handleDisconnected);
     };
-  }, [addToast, connection, room]);
+  }, [addToast, callKind, channelId, clearMyVoicePresence, connection, refreshVoicePresence, room]);
+
+  useEffect(() => {
+    if (!connection || callKind !== 'channel' || !channelId) return;
+
+    const heartbeat = window.setInterval(() => {
+      void setMyVoicePresence(
+        channelId,
+        room.localParticipant.getTrackPublication(Track.Source.Microphone)?.isMuted ?? false,
+      ).catch(() => undefined);
+    }, 20_000);
+
+    return () => window.clearInterval(heartbeat);
+  }, [callKind, channelId, connection, room]);
 
   useEffect(() => {
     if (!isAndroidRuntime()) return;
@@ -394,12 +485,14 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       isConnecting,
       isExpanded,
       isNativeScreenSharing,
+      participantVolumes,
       join,
       joinDirect,
       leave,
       listAndroidAudioOutputs,
       setAndroidAudioOutput,
       setExpanded,
+      setParticipantVolume,
       startScreenShare,
       stopScreenShare,
     }),
@@ -414,6 +507,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       join,
       joinDirect,
       leave,
+      participantVolumes,
+      setParticipantVolume,
       startScreenShare,
       stopScreenShare,
     ],
@@ -426,6 +521,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         className="contents"
         connect={Boolean(connection)}
         onDisconnected={() => {
+          void clearMyVoicePresence();
           setConnection(null);
           setChannelId(null);
           setCallKind(null);

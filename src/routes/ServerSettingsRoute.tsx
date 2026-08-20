@@ -160,12 +160,12 @@ function ServerSettingsContent({
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <main className="server-settings-center mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="server-settings-center__header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Configurações básicas</p>
+          <p className="eyebrow">Server settings</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
-            Gerenciar {server.server_name}
+            Configurar {server.server_name}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
             Alterações de propriedade e exclusão são verificadas novamente no banco.

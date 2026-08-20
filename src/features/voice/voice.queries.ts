@@ -28,7 +28,8 @@ export function useServerVoicePresence(
     enabled: enabled && Boolean(serverId) && channelIds.length > 0,
     queryFn: async () => (await Promise.all(channelIds.map(getLiveKitChannelPresence))).flat(),
     queryKey: voiceKeys.presence(serverId ?? '', channelIds),
-    refetchInterval: 3_000,
-    staleTime: 1_000,
+    refetchInterval: 2_000,
+    refetchIntervalInBackground: true,
+    staleTime: 500,
   });
 }

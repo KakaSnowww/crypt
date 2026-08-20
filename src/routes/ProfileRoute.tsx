@@ -1,4 +1,13 @@
-import { CalendarDays, Code2, EyeOff, Gamepad2, Pencil, ShieldCheck } from 'lucide-react';
+import {
+  CalendarDays,
+  Code2,
+  EyeOff,
+  Gamepad2,
+  Headphones,
+  Pencil,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
@@ -67,37 +76,53 @@ export function ProfileRoute() {
   }).format(new Date(profile.created_at));
   const bannerUrl = getProfileMediaUrl(profile.banner_path);
 
+  const interestCount = visibleCategories.reduce(
+    (total, category) => total + category.interests.length,
+    0,
+  );
+
   return (
-    <main className="grimoire-profile mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <header className="mb-6 flex items-end justify-between gap-4">
+    <main className="profile-hub mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="profile-hub__toolbar">
         <div>
-          <p className="eyebrow">Identidade digital</p>
-          <h1 className="font-display mt-1 text-3xl font-bold text-white">Meu perfil</h1>
-          <p className="mt-1 text-sm text-crypt-muted">
-            Sua presença, seus interesses e conexões dentro do Crypt.
-          </p>
+          <p className="eyebrow">Player identity</p>
+          <h1>Seu perfil</h1>
+          <p>A central pública da sua identidade no Crypt.</p>
         </div>
         <Link to="/app/perfil/editar">
           <Button leadingIcon={<Pencil aria-hidden="true" size={16} />} variant="secondary">
-            Editar perfil
+            Personalizar perfil
           </Button>
         </Link>
       </header>
 
-      <article className="grimoire-book" aria-label="Visão geral do perfil">
-        <section className="grimoire-page grimoire-page--left">
-          <div className="grimoire-rune-ring" aria-hidden="true" />
-          <p className="grimoire-kicker">PROFILE.ID · ONLINE</p>
-          <div className="relative z-[2] mt-10 flex flex-col items-center text-center">
-            <div className="grimoire-avatar-frame">
-              <ProfileAvatar
-                avatarPath={profile.avatar_path}
-                displayName={profile.display_name}
-                size="lg"
-              />
-            </div>
-            <div className="mt-6 flex max-w-full flex-wrap items-center justify-center gap-2">
-              <h2 className="grimoire-name truncate text-3xl font-black">{profile.display_name}</h2>
+      <section
+        className={classNames('profile-hub__hero', `profile-effect-${profile.profile_effect}`)}
+        style={
+          bannerUrl
+            ? {
+                backgroundImage: `linear-gradient(90deg, rgb(7 7 15 / 92%), rgb(7 7 15 / 32%)), url("${bannerUrl}")`,
+              }
+            : undefined
+        }
+      >
+        <div className="profile-hub__signal">
+          <span /> ONLINE
+        </div>
+        <div className="profile-hub__identity">
+          <div className="profile-hub__avatar">
+            <ProfileAvatar
+              avatarPath={profile.avatar_path}
+              displayName={profile.display_name}
+              positionX={profile.avatar_position_x}
+              positionY={profile.avatar_position_y}
+              size="lg"
+              zoom={profile.avatar_zoom}
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2>{profile.display_name}</h2>
               {arcanaMembership.data?.is_active ? (
                 <ArcanaTierBadge
                   tierColor={arcanaMembership.data.tier_color}
@@ -106,94 +131,102 @@ export function ProfileRoute() {
                 />
               ) : null}
             </div>
-            <p className="grimoire-handle mt-1 text-sm">@{profile.handle}</p>
-            <div className="grimoire-divider my-6 w-full" />
-            <Code2 aria-hidden="true" className="text-cyan-300" size={20} />
-            <p className="grimoire-copy mt-3 max-w-md whitespace-pre-wrap text-sm leading-7">
+            <p className="profile-hub__handle">@{profile.handle}</p>
+            <p className="profile-hub__bio">
               {profile.bio ?? 'Adicione uma bio para contar à comunidade quem você é.'}
             </p>
-            <p className="grimoire-meta mt-6 flex items-center gap-2 text-xs font-semibold">
-              <CalendarDays aria-hidden="true" size={15} /> No Crypt desde {joinedAt}
-            </p>
           </div>
-          {bannerUrl ? (
-            <div
-              className={classNames(
-                'profile-visual-preview absolute inset-x-6 bottom-6 h-16 opacity-20',
-                `profile-effect-${profile.profile_effect}`,
-              )}
-              style={{ backgroundImage: `url("${bannerUrl}")` }}
-            />
-          ) : null}
-        </section>
-
-        <section
-          className="grimoire-page grimoire-page--right"
-          aria-labelledby="profile-interests-title"
-        >
-          <div className="relative z-[2]">
-            <div className="flex items-center gap-3">
-              <Gamepad2 aria-hidden="true" className="text-violet-300" size={23} />
-              <div>
-                <p className="grimoire-kicker">INTERESTS.DB</p>
-                <h2 className="grimoire-section-title mt-1" id="profile-interests-title">
-                  Afinidades e interesses
-                </h2>
-              </div>
-            </div>
-            <p className="grimoire-meta mt-3 text-xs">
-              Jogos, tecnologias e assuntos que fazem parte do seu universo.
-            </p>
-
-            {interestsVisible && visibleCategories.length > 0 ? (
-              <div className="mt-6 grid gap-5">
-                {visibleCategories.map((category) => (
-                  <div key={category.id}>
-                    <h3 className="grimoire-kicker">{category.label}</h3>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {category.interests.map((interest) => (
-                        <span className="grimoire-chip px-3 py-1.5" key={interest.id}>
-                          {interest.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grimoire-inset mt-6 flex items-start gap-3 p-4">
-                <EyeOff aria-hidden="true" className="mt-0.5 shrink-0 text-[#53664e]" size={18} />
-                <p className="grimoire-copy text-sm leading-6">
-                  {visibleCategories.length === 0
-                    ? 'Nenhum interesse foi selecionado ainda.'
-                    : 'Seus interesses estão privados e não aparecem nesta prévia pública.'}
-                </p>
-              </div>
-            )}
-            <div className="grimoire-divider my-7" />
-            <p className="grimoire-kicker">NOW PLAYING</p>
-            <h2 className="grimoire-section-title mt-1" id="favorite-track-title">
-              Trilha do perfil
-            </h2>
-            <p className="grimoire-meta mt-2 text-xs">A música que representa seu momento.</p>
-            <div className="grimoire-inset mt-4 p-3">
-              <SpotifyEmbed
-                title={profile.favorite_spotify_title}
-                url={profile.favorite_spotify_url}
-              />
-            </div>
-          </div>
-          <span className="grimoire-bookmark" aria-hidden="true" />
-        </section>
-      </article>
-
-      <section className="grimoire-note mt-7 flex items-start gap-3 rounded-2xl p-4 text-sm text-crypt-muted">
-        <ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0 text-emerald-300" size={18} />
-        <p className="leading-6">
-          Seu e-mail nunca aparece no perfil. Você controla separadamente interesses, mensagens,
-          pedidos, presença e informações em comum.
-        </p>
+        </div>
       </section>
+
+      <section className="profile-hub__stats" aria-label="Resumo do perfil">
+        <div>
+          <Code2 />
+          <span>
+            <strong>DEV / GAMER</strong>Identidade
+          </span>
+        </div>
+        <div>
+          <Gamepad2 />
+          <span>
+            <strong>{interestCount}</strong>Interesses
+          </span>
+        </div>
+        <div>
+          <CalendarDays />
+          <span>
+            <strong>{joinedAt}</strong>Membro desde
+          </span>
+        </div>
+        <div>
+          <ShieldCheck />
+          <span>
+            <strong>Protegido</strong>Privacidade
+          </span>
+        </div>
+      </section>
+
+      <div className="profile-hub__dashboard">
+        <section className="profile-module" aria-labelledby="profile-interests-title">
+          <header>
+            <span>
+              <Sparkles size={18} />
+            </span>
+            <div>
+              <p className="eyebrow">Loadout pessoal</p>
+              <h2 id="profile-interests-title">Interesses e stacks</h2>
+            </div>
+          </header>
+          {interestsVisible && visibleCategories.length > 0 ? (
+            <div className="profile-module__interests">
+              {visibleCategories.map((category) => (
+                <div key={category.id}>
+                  <h3>{category.label}</h3>
+                  <div>
+                    {category.interests.map((interest) => (
+                      <span key={interest.id}>{interest.label}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="profile-module__empty">
+              <EyeOff size={18} />
+              <p>
+                {visibleCategories.length === 0
+                  ? 'Nenhum interesse foi selecionado ainda.'
+                  : 'Seus interesses estão privados nesta visualização.'}
+              </p>
+            </div>
+          )}
+        </section>
+
+        <aside
+          className="profile-module profile-module--audio"
+          aria-labelledby="favorite-track-title"
+        >
+          <header>
+            <span>
+              <Headphones size={18} />
+            </span>
+            <div>
+              <p className="eyebrow">Now playing</p>
+              <h2 id="favorite-track-title">Som do perfil</h2>
+            </div>
+          </header>
+          <div className="profile-module__spotify">
+            <SpotifyEmbed
+              title={profile.favorite_spotify_title}
+              url={profile.favorite_spotify_url}
+            />
+          </div>
+          <div className="profile-module__privacy">
+            <ShieldCheck size={17} />
+            <p>Seu e-mail nunca é exibido. Você controla cada informação compartilhada.</p>
+          </div>
+        </aside>
+      </div>
     </main>
   );
 }

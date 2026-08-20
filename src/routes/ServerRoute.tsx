@@ -187,8 +187,8 @@ export function ServerRoute() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-      <section className="panel overflow-hidden">
+    <main className="server-home mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <section className="server-home__hero panel overflow-hidden">
         <div className="h-36 bg-gradient-to-br from-violet-600/35 via-blue-600/20 to-crypt-elevated sm:h-48">
           {bannerUrl ? <img alt="" className="size-full object-cover" src={bannerUrl} /> : null}
         </div>

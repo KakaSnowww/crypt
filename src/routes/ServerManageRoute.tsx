@@ -185,56 +185,75 @@ export function ServerManageRoute() {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mb-6">
-        <p className="eyebrow">Fases 7 e 8</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
-          Organizar {overview.server_name}
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-crypt-muted">
-          Categorias, canais, cargos e exceções são aplicados no banco antes de aparecerem aos
-          membros.
-        </p>
-      </div>
+    <main className="server-control mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <header className="server-control__header">
+        <div>
+          <p className="eyebrow">Server control center</p>
+          <h1>{overview.server_name}</h1>
+          <p>Estrutura, acesso e equipe em um painel operacional único.</p>
+        </div>
+        <div className="server-control__summary">
+          <span>
+            <strong>{channelsQuery.data?.length ?? 0}</strong> canais
+          </span>
+          <span>
+            <strong>{rolesQuery.data?.length ?? 0}</strong> cargos
+          </span>
+          <span>
+            <strong>{membersQuery.data?.length ?? 0}</strong> membros
+          </span>
+        </div>
+      </header>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
-        {tabs.map(({ icon: Icon, id, label }) => (
-          <Button
-            key={id}
-            leadingIcon={<Icon aria-hidden="true" size={16} />}
-            onClick={() => setTab(id)}
-            variant={tab === id ? 'primary' : 'secondary'}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <div className="server-control__workspace">
+        <aside className="server-control__nav">
+          <p>Administração</p>
+          <nav aria-label="Seções de administração do servidor">
+            {tabs.map(({ icon: Icon, id, label }) => (
+              <button
+                className={tab === id ? 'is-active' : ''}
+                key={id}
+                onClick={() => setTab(id)}
+                type="button"
+              >
+                <Icon aria-hidden="true" size={17} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+          <Link to={`/app/servidores/${serverId}`}>← Voltar ao servidor</Link>
+        </aside>
 
-      {tab === 'channels' ? (
-        <ChannelsManager
-          categories={categoriesQuery.data ?? []}
-          channels={channelsQuery.data ?? []}
-          serverId={serverId}
-        />
-      ) : null}
-      {tab === 'roles' ? <RolesManager roles={rolesQuery.data ?? []} serverId={serverId} /> : null}
-      {tab === 'members' ? (
-        <MembersRolesManager
-          assignments={memberRolesQuery.data ?? []}
-          members={membersQuery.data ?? []}
-          roles={rolesQuery.data ?? []}
-          serverId={serverId}
-        />
-      ) : null}
-      {tab === 'overrides' ? (
-        <OverridesManager
-          categories={categoriesQuery.data ?? []}
-          channels={channelsQuery.data ?? []}
-          overrides={overridesQuery.data ?? []}
-          roles={rolesQuery.data ?? []}
-          serverId={serverId}
-        />
-      ) : null}
+        <section className="server-control__content">
+          {tab === 'channels' ? (
+            <ChannelsManager
+              categories={categoriesQuery.data ?? []}
+              channels={channelsQuery.data ?? []}
+              serverId={serverId}
+            />
+          ) : null}
+          {tab === 'roles' ? (
+            <RolesManager roles={rolesQuery.data ?? []} serverId={serverId} />
+          ) : null}
+          {tab === 'members' ? (
+            <MembersRolesManager
+              assignments={memberRolesQuery.data ?? []}
+              members={membersQuery.data ?? []}
+              roles={rolesQuery.data ?? []}
+              serverId={serverId}
+            />
+          ) : null}
+          {tab === 'overrides' ? (
+            <OverridesManager
+              categories={categoriesQuery.data ?? []}
+              channels={channelsQuery.data ?? []}
+              overrides={overridesQuery.data ?? []}
+              roles={rolesQuery.data ?? []}
+              serverId={serverId}
+            />
+          ) : null}
+        </section>
+      </div>
     </main>
   );
 }

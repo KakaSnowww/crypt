@@ -53,15 +53,7 @@ export function VoiceCallPanel() {
         <button
           aria-label={isMicrophoneEnabled ? 'Silenciar microfone' : 'Ativar microfone'}
           className={!isMicrophoneEnabled ? 'is-off' : ''}
-          onClick={() =>
-            void localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled, {
-              autoGainControl: false,
-              channelCount: 1,
-              echoCancellation: false,
-              noiseSuppression: false,
-              sampleRate: 48_000,
-            })
-          }
+          onClick={() => void localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)}
           type="button"
         >
           {isMicrophoneEnabled ? <Mic /> : <MicOff />}

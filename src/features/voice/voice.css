@@ -932,3 +932,39 @@
     justify-content: flex-start;
   }
 }
+.voice-participant__volume {
+  align-items: center;
+  backdrop-filter: blur(16px);
+  background: rgb(8 10 20 / 78%);
+  border: 1px solid rgb(154 112 255 / 28%);
+  border-radius: 999px;
+  bottom: 4rem;
+  display: flex;
+  gap: 0.5rem;
+  left: 1rem;
+  max-width: calc(100% - 2rem);
+  padding: 0.45rem 0.65rem;
+  position: absolute;
+  right: 1rem;
+  z-index: 5;
+}
+
+.voice-participant__volume svg {
+  color: #bca4ff;
+  flex: 0 0 auto;
+}
+
+.voice-participant__volume input {
+  accent-color: #9b6cff;
+  cursor: pointer;
+  min-width: 3rem;
+  width: 100%;
+}
+
+.voice-participant__volume output {
+  color: #f4f0ff;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 2.6rem;
+  text-align: right;
+}

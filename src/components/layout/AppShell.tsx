@@ -355,13 +355,13 @@ export function AppShell() {
   return (
     <div
       className={classNames(
-        'app-shell app-shell--cyber h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid lg:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)]',
-        !isVoiceRoute && '2xl:grid-cols-[4.5rem_17.5rem_minmax(0,1fr)_15rem]',
+        'app-shell app-shell--cyber app-shell--rebuild h-dvh min-h-0 overflow-hidden bg-crypt-background text-crypt-text lg:grid',
+        !isVoiceRoute && 'app-shell--with-members',
       )}
     >
       <aside
         aria-label="Seus espaços"
-        className="app-shell__rail hidden border-r border-white/[0.06] px-2.5 py-4 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:items-center lg:overflow-hidden"
+        className="app-shell__rail hidden border-b border-white/[0.06] px-4 lg:flex lg:min-h-0 lg:items-center lg:overflow-hidden"
       >
         <NavLink
           aria-label="Início do Crypt"
@@ -370,8 +370,8 @@ export function AppShell() {
         >
           <img alt="" aria-hidden="true" className="size-12" src="/crypt-mark.svg" />
         </NavLink>
-        <div className="my-4 h-px w-8 bg-white/10" />
-        <div className="grid gap-3">
+        <div className="app-shell__dock-divider mx-4 h-8 w-px bg-white/10" />
+        <div className="app-shell__server-dock flex min-w-0 items-center gap-3 overflow-x-auto py-2">
           {(serversQuery.data ?? []).map((server) => (
             <NavLink
               aria-label={server.server_name}
@@ -389,7 +389,7 @@ export function AppShell() {
                     size="sm"
                   />
                   {isActive ? (
-                    <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white" />
+                    <span className="app-shell__server-active absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white" />
                   ) : null}
                 </>
               )}
@@ -403,7 +403,7 @@ export function AppShell() {
             <Plus aria-hidden="true" size={18} />
           </NavLink>
         </div>
-        <div className="mt-auto">
+        <div className="app-shell__dock-tools ml-auto pl-4">
           <button
             aria-expanded={currentServer ? globalMenuOpen : undefined}
             aria-label={currentServer ? 'Abrir menu do Crypt' : 'Abrir configurações da conta'}
@@ -420,7 +420,7 @@ export function AppShell() {
 
       <aside
         aria-label={currentServer ? `Canais de ${currentServer.server_name}` : 'Navegação do Crypt'}
-        className="app-shell__sidebar hidden border-r border-white/[0.06] lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:overflow-hidden"
+        className="app-shell__sidebar hidden border-r border-white/[0.06] lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden"
       >
         <div className="border-b border-white/[0.06] px-5 py-[1.15rem]">
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-violet-300">
@@ -589,7 +589,7 @@ export function AppShell() {
         </div>
       </aside>
 
-      <section className="app-shell__main flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden">
+      <section className="app-shell__main flex min-h-0 min-w-0 flex-col overflow-hidden">
         <header className="app-shell__header flex min-h-[4.25rem] shrink-0 items-center gap-3 border-b border-white/[0.06] bg-crypt-background/85 px-4 backdrop-blur-2xl sm:px-6">
           <div className="lg:hidden">
             <IconButton
@@ -834,7 +834,7 @@ export function AppShell() {
         aria-label={currentServer ? `Membros de ${currentServer.server_name}` : 'Painel contextual'}
         className={classNames(
           'app-shell__members hidden min-h-0 overflow-y-auto border-l border-white/5 bg-crypt-sidebar px-4 py-5',
-          !isVoiceRoute && '2xl:block 2xl:h-dvh',
+          !isVoiceRoute && '2xl:block',
         )}
       >
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-crypt-subtle">

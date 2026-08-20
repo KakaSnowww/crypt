@@ -11,11 +11,13 @@ export type VoiceCallContextValue = {
   isConnecting: boolean;
   isExpanded: boolean;
   isNativeScreenSharing: boolean;
+  participantVolumes: Record<string, number>;
   join: (channelId: string) => Promise<void>;
   joinDirect: (conversationId: string) => Promise<void>;
   leave: () => Promise<void>;
   listAndroidAudioOutputs: () => Promise<AndroidAudioOutput[]>;
   setExpanded: (expanded: boolean) => void;
+  setParticipantVolume: (identity: string, volume: number) => void;
   setAndroidAudioOutput: (id: string) => Promise<void>;
   startScreenShare: (options?: NativeScreenShareOptions) => Promise<void>;
   stopScreenShare: () => Promise<void>;
