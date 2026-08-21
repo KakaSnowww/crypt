@@ -41,7 +41,7 @@ const benefits = [
   {
     icon: HardDriveUpload,
     title: 'Arquivos maiores',
-    text: 'Envios de até 25 MB.',
+    text: 'Envios de até 500 MB em canais e conversas.',
   },
   {
     icon: Zap,
@@ -51,7 +51,7 @@ const benefits = [
   {
     icon: Sparkles,
     title: 'Identidade avançada',
-    text: 'GIF, efeitos e gradiente exclusivo.',
+    text: 'Avatar GIF de até 5 MB, efeitos e gradiente exclusivo.',
   },
 ] as const;
 

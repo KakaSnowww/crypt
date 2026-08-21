@@ -20,6 +20,10 @@ vi.mock('../profile.service', async (importOriginal) => {
   };
 });
 
+vi.mock('../../arcana/arcana.queries', () => ({
+  useArcanaMembership: () => ({ data: { is_active: true } }),
+}));
+
 const profile: Profile = {
   avatar_path: null,
   avatar_position_x: 50,
@@ -80,6 +84,7 @@ describe('AvatarEditor', () => {
         image,
         null,
         { x: 50, y: 50, zoom: 1 },
+        true,
       ),
     );
     await waitFor(() => expect(onBusyChange).toHaveBeenLastCalledWith(false));

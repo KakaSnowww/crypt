@@ -3,14 +3,34 @@ import { z } from 'zod';
 export const MAX_MESSAGE_LENGTH = 2_000;
 export const MAX_MESSAGE_ATTACHMENTS = 3;
 export const MAX_MESSAGE_ATTACHMENT_BYTES = 5 * 1024 * 1024;
-export const ALLOWED_MESSAGE_ATTACHMENT_TYPES = new Set([
+export const MAX_PRO_MESSAGE_ATTACHMENT_BYTES = 500 * 1024 * 1024;
+const messageAttachmentTypes = [
+  'application/json',
+  'application/octet-stream',
   'application/pdf',
+  'application/vnd.rar',
+  'application/x-7z-compressed',
+  'application/x-rar-compressed',
+  'application/x-zip-compressed',
+  'application/zip',
+  'audio/mpeg',
+  'audio/ogg',
+  'audio/wav',
+  'audio/webm',
   'image/gif',
   'image/jpeg',
   'image/png',
   'image/webp',
+  'text/csv',
+  'text/markdown',
   'text/plain',
-]);
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+] as const;
+
+export const ALLOWED_MESSAGE_ATTACHMENT_TYPES = new Set<string>(messageAttachmentTypes);
+export const MESSAGE_ATTACHMENT_ACCEPT = messageAttachmentTypes.join(',');
 
 export const messageSchema = z
   .string()
@@ -34,7 +54,7 @@ export function validateMessagePayload(
 
   for (const file of files) {
     if (!ALLOWED_MESSAGE_ATTACHMENT_TYPES.has(file.type)) {
-      throw new Error('Use imagens, GIF, PDF ou arquivo de texto.');
+      throw new Error('Este formato de arquivo não é aceito pelo Crypt.');
     }
 
     if (file.size > maximumAttachmentBytes) {

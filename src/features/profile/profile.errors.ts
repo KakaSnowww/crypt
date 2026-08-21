@@ -1,5 +1,7 @@
 export type ProfileErrorCode =
   | 'avatar_invalid'
+  | 'avatar_gif_pro_required'
+  | 'avatar_gif_too_large'
   | 'avatar_too_large'
   | 'banner_too_large'
   | 'arcana_required'
@@ -10,8 +12,10 @@ export type ProfileErrorCode =
 
 const messages: Record<ProfileErrorCode, string> = {
   avatar_invalid: 'Escolha uma imagem JPG, PNG, WebP ou GIF válida.',
+  avatar_gif_pro_required: 'Avatar animado em GIF é exclusivo do Crypt Pro.',
+  avatar_gif_too_large: 'O avatar em GIF deve possuir no máximo 5 MB.',
   avatar_too_large: 'O avatar deve possuir no máximo 2 MB.',
-  arcana_required: 'Este recurso visual requer uma assinatura Arcana ativa.',
+  arcana_required: 'Este recurso visual requer uma assinatura Crypt Pro ativa.',
   banner_too_large: 'O banner deve possuir no máximo 5 MB.',
   configuration: 'A estrutura da Fase 4 ainda não foi aplicada ao Supabase.',
   network: 'Não foi possível acessar o serviço agora. Verifique sua conexão.',

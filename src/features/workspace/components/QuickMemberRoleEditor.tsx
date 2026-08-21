@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { Check, Crown, Search, ShieldCheck, UserCog, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ProfileAvatar } from '../../profile/components/ProfileAvatar';
 import type { ServerMember } from '../../servers/servers.types';
 import { classNames } from '../../../lib/classNames';
@@ -35,13 +35,6 @@ export function QuickMemberRoleEditor({
       ),
     [roles, search],
   );
-
-  useEffect(() => {
-    if (open) {
-      setDraft(selectedRoleIds);
-      setSearch('');
-    }
-  }, [open, selectedRoleIds]);
 
   function toggleRole(roleId: string) {
     const next = draft.includes(roleId)

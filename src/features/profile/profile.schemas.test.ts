@@ -3,6 +3,7 @@ import { ProfileActionError } from './profile.errors';
 import {
   MAX_AVATAR_BYTES,
   MAX_BANNER_BYTES,
+  MAX_PRO_GIF_AVATAR_BYTES,
   parseSpotifyTrackUrl,
   profileDetailsSchema,
   privacySchema,
@@ -47,13 +48,21 @@ describe('validação do perfil', () => {
     ).toBe(false);
   });
 
-  it('aceita somente imagens suportadas de até 2 MB', () => {
+  it('aceita imagens estáticas de até 2 MB e reserva GIF para o Crypt Pro', () => {
     expect(() =>
       validateAvatarFile(new File(['imagem'], 'avatar.png', { type: 'image/png' })),
     ).not.toThrow();
+    const gif = new File(['gif'], 'avatar.gif', { type: 'image/gif' });
+    expect(() => validateAvatarFile(gif)).toThrow('exclusivo do Crypt Pro');
+    expect(() => validateAvatarFile(gif, true)).not.toThrow();
     expect(() =>
-      validateAvatarFile(new File(['gif'], 'avatar.gif', { type: 'image/gif' })),
-    ).not.toThrow();
+      validateAvatarFile(
+        new File([new Uint8Array(MAX_PRO_GIF_AVATAR_BYTES + 1)], 'avatar.gif', {
+          type: 'image/gif',
+        }),
+        true,
+      ),
+    ).toThrow('no máximo 5 MB');
     expect(() =>
       validateAvatarFile(new File(['texto'], 'avatar.svg', { type: 'image/svg+xml' })),
     ).toThrow(ProfileActionError);

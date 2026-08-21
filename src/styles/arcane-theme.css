@@ -679,7 +679,7 @@ body::before {
     transform 140ms ease;
 }
 
-.crypt-toggle:not(.opacity-55):hover {
+.crypt-toggle:not(.is-disabled):hover {
   border-color: rgb(191 158 255 / 20%) !important;
   background: linear-gradient(145deg, rgb(255 255 255 / 4.5%), rgb(115 70 210 / 5%));
 }
@@ -689,8 +689,23 @@ body::before {
   background: linear-gradient(145deg, rgb(145 83 255 / 10%), rgb(56 145 255 / 4%));
 }
 
-.crypt-toggle__track {
-  border-color: rgb(255 255 255 / 11%);
+.crypt-toggle.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.crypt-toggle__control {
+  position: relative;
+  display: inline-flex;
+  width: 2.875rem;
+  height: 1.625rem;
+  flex: 0 0 2.875rem;
+  align-items: center;
+  padding: 0.1875rem;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
   background: rgb(255 255 255 / 8%);
   transition:
     border-color 160ms ease,
@@ -698,19 +713,38 @@ body::before {
     box-shadow 160ms ease;
 }
 
-.peer:checked + .crypt-toggle__track {
+.crypt-toggle__control:hover:not(:disabled) {
+  border-color: rgb(255 255 255 / 30%);
+  background: rgb(255 255 255 / 12%);
+}
+
+.crypt-toggle__control:focus-visible {
+  outline: 2px solid var(--crypt-focus);
+  outline-offset: 3px;
+}
+
+.crypt-toggle__control[aria-checked='true'] {
   border-color: rgb(190 151 255 / 51%);
   background: linear-gradient(90deg, #8249ef, #5b79ed);
   box-shadow: 0 0 20px rgb(132 74 239 / 24%);
 }
 
 .crypt-toggle__thumb {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 1.125rem;
+  border-radius: 999px;
   background: #fff;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 32%);
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 38%),
+    inset 0 0 0 1px rgb(0 0 0 / 5%);
   transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.peer:checked ~ .crypt-toggle__thumb {
+.crypt-toggle__control[aria-checked='true'] .crypt-toggle__thumb {
   transform: translateX(1.25rem);
 }
 
