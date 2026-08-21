@@ -12,6 +12,7 @@ export type VoiceCallContextValue = {
   isExpanded: boolean;
   isNativeScreenSharing: boolean;
   participantVolumes: Record<string, number>;
+  watchingScreenShares: ReadonlyArray<string>;
   join: (channelId: string) => Promise<void>;
   joinDirect: (conversationId: string) => Promise<void>;
   leave: () => Promise<void>;
@@ -21,6 +22,8 @@ export type VoiceCallContextValue = {
   setAndroidAudioOutput: (id: string) => Promise<void>;
   startScreenShare: (options?: NativeScreenShareOptions) => Promise<void>;
   stopScreenShare: () => Promise<void>;
+  stopWatchingScreenShare: (participantIdentity: string) => Promise<void>;
+  watchScreenShare: (participantIdentity: string) => Promise<void>;
 };
 
 export const VoiceCallContext = createContext<VoiceCallContextValue | null>(null);

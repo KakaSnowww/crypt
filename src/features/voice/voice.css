@@ -342,15 +342,96 @@
   object-fit: contain;
 }
 
-.voice-stage__share span {
+.voice-stage__share-status {
   position: absolute;
+  right: 0.65rem;
   bottom: 0.65rem;
   left: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.voice-stage__share-status > span,
+.voice-stage__share-status > button {
   padding: 0.35rem 0.55rem;
   border-radius: 0.4rem;
   background: rgb(0 0 0 / 70%);
   color: white;
   font-size: 0.66rem;
+}
+
+.voice-stage__share-status > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  transition:
+    border-color 130ms ease,
+    background 130ms ease;
+}
+
+.voice-stage__share-status > button:hover {
+  border-color: rgb(173 140 255 / 45%);
+  background: rgb(64 43 112 / 88%);
+}
+
+.voice-stage__share.is-available {
+  background: radial-gradient(circle at 50% 25%, rgb(125 82 255 / 18%), transparent 40%), #080a12;
+}
+
+.voice-stage__share-invitation {
+  display: grid;
+  width: min(28rem, calc(100% - 2rem));
+  justify-items: center;
+  gap: 0.9rem;
+  text-align: center;
+}
+
+.voice-stage__share-invitation > span {
+  display: grid;
+  width: 3.6rem;
+  height: 3.6rem;
+  place-items: center;
+  border: 1px solid rgb(157 124 255 / 32%);
+  border-radius: 1rem;
+  background: rgb(113 74 230 / 14%);
+  color: #bda9ff;
+  box-shadow: 0 16px 45px rgb(79 45 181 / 20%);
+}
+
+.voice-stage__share-invitation strong {
+  color: #f4f1ff;
+  font-size: 0.92rem;
+}
+
+.voice-stage__share-invitation p {
+  margin-top: 0.3rem;
+  color: #7f8aa3;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.voice-stage__share-invitation > button {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgb(159 126 255 / 38%);
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #7047e8, #4e36bd);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 750;
+  box-shadow: 0 12px 30px rgb(69 42 155 / 24%);
+}
+
+.voice-stage__share-invitation > button:disabled {
+  cursor: wait;
+  opacity: 0.58;
 }
 
 .voice-stage__people {
@@ -876,6 +957,14 @@
   height: 1rem;
   flex: none;
   accent-color: #805cff;
+}
+
+.native-share-picker__audio:has(input:disabled) {
+  opacity: 0.72;
+}
+
+.native-share-picker__audio input:disabled {
+  cursor: not-allowed;
 }
 
 .native-share-picker__notice {

@@ -9,7 +9,7 @@ export const voiceAudioProfiles: ReadonlyArray<{
 }> = [
   {
     description:
-      'Reduz eco, ruído constante e diferenças bruscas de volume. Recomendado para chamadas.',
+      'Usa Krisp AI para remover ruídos e vozes ao fundo, com proteção WebRTC como fallback.',
     id: 'voice',
     label: 'Voz limpa',
   },

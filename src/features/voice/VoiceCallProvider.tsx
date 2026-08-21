@@ -16,7 +16,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildr
 import { useToast } from '../../components/common/ToastContext';
 import { playCryptSound } from '../../lib/sounds';
 import { isAndroidRuntime, isElectronRuntime } from '../../lib/platform';
+import { getSupabaseClient } from '../../lib/supabase/client';
 import { useAuth } from '../auth/useAuth';
+import { profileKeys, useCurrentProfile } from '../profile/profile.queries';
 import {
   getAndroidCallState,
   listAndroidAudioOutputs,
@@ -56,6 +58,13 @@ import {
 } from './voiceAudioProfile';
 import { VoiceCallContext } from './VoiceCallContext';
 import { VoiceConnectionMonitor } from './VoiceConnectionMonitor';
+import { EnhancedNoiseCancellation, type NoiseCancellationMode } from './EnhancedNoiseCancellation';
+import {
+  configureDefaultTrackSubscription,
+  isScreenShareSource,
+  setParticipantScreenShareSubscription,
+} from './screenShareSubscription';
+import { mergeVoiceParticipantVisualMetadata } from './voice.participant';
 import './voice.css';
 import './voice-stability.css';
 
@@ -70,12 +79,21 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
   const [isNativeScreenSharing, setNativeScreenSharing] = useState(false);
+  const [noiseCancellationMode, setNoiseCancellationMode] =
+    useState<NoiseCancellationMode>('loading');
   const [audioProfile, setAudioProfileState] = useState<VoiceAudioProfile>(readVoiceAudioProfile);
+  const [watchingScreenShares, setWatchingScreenShares] = useState<string[]>([]);
+  const watchingScreenSharesRef = useRef(watchingScreenShares);
   const [participantVolumes, setParticipantVolumes] =
     useState<Record<string, number>>(readParticipantVolumes);
   const participantVolumesRef = useRef(participantVolumes);
   const intentionalLeaveRef = useRef(false);
   const joinedRoomRef = useRef(false);
+  const currentProfile = useCurrentProfile(user?.id ?? null, Boolean(connection));
+
+  useEffect(() => {
+    watchingScreenSharesRef.current = watchingScreenShares;
+  }, [watchingScreenShares]);
 
   const [room] = useState(
     () =>
@@ -126,6 +144,44 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       room.remoteParticipants.get(identity)?.setVolume(volume / 100);
     },
     [room],
+  );
+
+  const setWatchingScreenShare = useCallback(
+    (participantIdentity: string, subscribed: boolean): Promise<void> => {
+      const participant = room.remoteParticipants.get(participantIdentity);
+
+      if (!participant) {
+        throw new Error('Esta transmissão não está mais disponível.');
+      }
+
+      const changedPublications = setParticipantScreenShareSubscription(participant, subscribed);
+
+      if (changedPublications === 0) {
+        throw new Error('Esta transmissão não está mais disponível.');
+      }
+
+      setWatchingScreenShares((current) => {
+        const next = subscribed
+          ? Array.from(new Set([...current, participantIdentity]))
+          : current.filter((identity) => identity !== participantIdentity);
+
+        watchingScreenSharesRef.current = next;
+        return next;
+      });
+
+      return Promise.resolve();
+    },
+    [room],
+  );
+
+  const watchScreenShare = useCallback(
+    (participantIdentity: string) => setWatchingScreenShare(participantIdentity, true),
+    [setWatchingScreenShare],
+  );
+
+  const stopWatchingScreenShare = useCallback(
+    (participantIdentity: string) => setWatchingScreenShare(participantIdentity, false),
+    [setWatchingScreenShare],
   );
 
   const changeAudioProfile = useCallback(
@@ -188,7 +244,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
                 },
               }
             : ScreenSharePresets.h1080fps30;
-      const includeSystemAudio = options?.includeSystemAudio ?? true;
+      const includeSystemAudio =
+        (options?.includeSystemAudio ?? true) && options?.source?.kind !== 'window';
 
       if (isAndroidRuntime()) {
         if (!channelId) {
@@ -274,6 +331,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     setCallKind(null);
     setExpanded(false);
     setError(null);
+    setWatchingScreenShares([]);
   }, [clearMyVoicePresence, room, stopScreenShare]);
 
   const joinTarget = useCallback(
@@ -293,6 +351,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
           await stopScreenShare();
           await clearMyVoicePresence();
           await room.disconnect();
+          setWatchingScreenShares([]);
         }
 
         const nextConnection =
@@ -349,11 +408,19 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
   );
 
   useEffect(() => {
+    const configureParticipantSubscriptions = (participant: RemoteParticipant) => {
+      participant.trackPublications.forEach((publication) => {
+        configureDefaultTrackSubscription(publication);
+      });
+    };
+
     const handleConnected = () => {
       intentionalLeaveRef.current = false;
       joinedRoomRef.current = true;
       void playCryptSound('call-join');
       void room.startAudio().catch(() => undefined);
+
+      room.remoteParticipants.forEach(configureParticipantSubscriptions);
 
       if (callKind === 'channel' && channelId) {
         void setMyVoicePresence(
@@ -379,6 +446,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     };
 
     const handleParticipantConnected = (participant: RemoteParticipant) => {
+      configureParticipantSubscriptions(participant);
+
       if (isAndroidScreenShareCompanion(participant.identity, participant.metadata)) {
         return;
       }
@@ -394,6 +463,10 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     };
 
     const handleParticipantDisconnected = (participant: RemoteParticipant) => {
+      setWatchingScreenShares((current) =>
+        current.filter((identity) => identity !== participant.identity),
+      );
+
       if (isAndroidScreenShareCompanion(participant.identity, participant.metadata)) {
         return;
       }
@@ -415,6 +488,46 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       );
     };
 
+    const handleTrackPublished = (
+      publication: RemoteTrackPublication,
+      participant: RemoteParticipant,
+    ) => {
+      if (isScreenShareSource(publication.source)) {
+        publication.setSubscribed(watchingScreenSharesRef.current.includes(participant.identity));
+        return;
+      }
+
+      configureDefaultTrackSubscription(publication);
+    };
+
+    const handleTrackUnpublished = (
+      publication: RemoteTrackPublication,
+      participant: RemoteParticipant,
+    ) => {
+      if (publication.source !== Track.Source.ScreenShare) return;
+
+      setWatchingScreenShares((current) =>
+        current.filter((identity) => identity !== participant.identity),
+      );
+    };
+
+    const handleTrackSubscriptionFailed = (trackSid: string, participant: RemoteParticipant) => {
+      const failedPublication = Array.from(participant.trackPublications.values()).find(
+        (publication) => publication.trackSid === trackSid,
+      );
+
+      if (!failedPublication || !isScreenShareSource(failedPublication.source)) return;
+
+      setWatchingScreenShares((current) =>
+        current.filter((identity) => identity !== participant.identity),
+      );
+      addToast({
+        message: 'Tente assistir novamente. Sua chamada de voz continua conectada.',
+        title: 'Não foi possível abrir a transmissão',
+        tone: 'error',
+      });
+    };
+
     const handleDisconnected = () => {
       joinedRoomRef.current = false;
       void clearMyVoicePresence();
@@ -423,14 +536,20 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
     room.on(RoomEvent.Connected, handleConnected);
     room.on(RoomEvent.ParticipantConnected, handleParticipantConnected);
     room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+    room.on(RoomEvent.TrackPublished, handleTrackPublished);
     room.on(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+    room.on(RoomEvent.TrackSubscriptionFailed, handleTrackSubscriptionFailed);
+    room.on(RoomEvent.TrackUnpublished, handleTrackUnpublished);
     room.on(RoomEvent.Disconnected, handleDisconnected);
 
     return () => {
       room.off(RoomEvent.Connected, handleConnected);
       room.off(RoomEvent.ParticipantConnected, handleParticipantConnected);
       room.off(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+      room.off(RoomEvent.TrackPublished, handleTrackPublished);
       room.off(RoomEvent.TrackSubscribed, handleTrackSubscribed);
+      room.off(RoomEvent.TrackSubscriptionFailed, handleTrackSubscriptionFailed);
+      room.off(RoomEvent.TrackUnpublished, handleTrackUnpublished);
       room.off(RoomEvent.Disconnected, handleDisconnected);
     };
   }, [addToast, callKind, channelId, clearMyVoicePresence, connection, refreshVoicePresence, room]);
@@ -447,6 +566,59 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
 
     return () => window.clearInterval(heartbeat);
   }, [callKind, channelId, connection, room]);
+
+  useEffect(() => {
+    const profile = currentProfile.data;
+
+    if (!profile) return;
+
+    const synchronizeMetadata = () => {
+      if (room.state !== ConnectionState.Connected) return;
+
+      const nextMetadata = mergeVoiceParticipantVisualMetadata(
+        room.localParticipant.metadata,
+        profile,
+      );
+
+      if (nextMetadata === room.localParticipant.metadata) return;
+
+      void room.localParticipant.setMetadata(nextMetadata).catch(() => {
+        // Tokens antigos podem não permitir a atualização. A próxima entrada na call corrige o dado.
+      });
+    };
+
+    synchronizeMetadata();
+    room.on(RoomEvent.Connected, synchronizeMetadata);
+
+    return () => {
+      room.off(RoomEvent.Connected, synchronizeMetadata);
+    };
+  }, [currentProfile.data, room]);
+
+  useEffect(() => {
+    if (!connection || !user?.id) return;
+
+    const client = getSupabaseClient();
+    const channel = client
+      .channel(`voice-profile:${user.id}:${crypto.randomUUID()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          filter: `id=eq.${user.id}`,
+          schema: 'public',
+          table: 'profiles',
+        },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: profileKeys.current(user.id) });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, [connection, queryClient, user?.id]);
 
   useEffect(() => {
     if (!isAndroidRuntime()) return;
@@ -486,6 +658,7 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       isExpanded,
       isNativeScreenSharing,
       participantVolumes,
+      watchingScreenShares,
       join,
       joinDirect,
       leave,
@@ -495,6 +668,8 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       setParticipantVolume,
       startScreenShare,
       stopScreenShare,
+      stopWatchingScreenShare,
+      watchScreenShare,
     }),
     [
       callKind,
@@ -511,6 +686,9 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
       setParticipantVolume,
       startScreenShare,
       stopScreenShare,
+      stopWatchingScreenShare,
+      watchScreenShare,
+      watchingScreenShares,
     ],
   );
 
@@ -520,12 +698,14 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         audio={connection?.can_publish ? getVoiceAudioCaptureOptions(audioProfile) : false}
         className="contents"
         connect={Boolean(connection)}
+        connectOptions={{ autoSubscribe: false }}
         onDisconnected={() => {
           void clearMyVoicePresence();
           setConnection(null);
           setChannelId(null);
           setCallKind(null);
           setExpanded(false);
+          setWatchingScreenShares([]);
         }}
         onError={(liveKitError) => {
           setError(liveKitError.message);
@@ -544,8 +724,15 @@ export function VoiceCallProvider({ children }: PropsWithChildren) {
         {connection ? <RoomAudioRenderer /> : null}
         {connection ? <StartAudio label="Ativar áudio da chamada" /> : null}
         {connection ? (
+          <EnhancedNoiseCancellation
+            enabled={audioProfile === 'voice'}
+            onModeChange={setNoiseCancellationMode}
+          />
+        ) : null}
+        {connection ? (
           <VoiceConnectionMonitor
             audioProfile={audioProfile}
+            noiseCancellationMode={noiseCancellationMode}
             onChangeAudioProfile={changeAudioProfile}
           />
         ) : null}

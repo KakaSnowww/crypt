@@ -11,6 +11,11 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             {
+              name: 'krisp-noise-filter',
+              priority: 40,
+              test: /node_modules[\\/]@livekit[\\/]krisp-noise-filter/,
+            },
+            {
               name: 'supabase-vendor',
               priority: 30,
               test: /node_modules[\\/]@supabase/,

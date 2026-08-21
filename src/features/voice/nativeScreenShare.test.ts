@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  canCaptureSystemAudio,
   getNativeScreenSharePreferences,
   groupNativeCaptureSources,
   saveNativeScreenSharePreferences,
@@ -51,5 +52,11 @@ describe('groupNativeCaptureSources', () => {
       includeSystemAudio: false,
       quality: 'balanced',
     });
+  });
+
+  it('impede áudio global ao compartilhar apenas uma janela', () => {
+    expect(canCaptureSystemAudio(sources[0])).toBe(true);
+    expect(canCaptureSystemAudio(sources[1])).toBe(false);
+    expect(canCaptureSystemAudio(null)).toBe(false);
   });
 });

@@ -391,6 +391,7 @@ Deno.serve(async (request) => {
     canPublish: access.can_publish,
     canPublishData: isAndroidScreenShare ? false : access.can_publish,
     canSubscribe: !isAndroidScreenShare,
+    canUpdateOwnMetadata: !isAndroidScreenShare,
     room: roomName,
     roomJoin: true,
   });

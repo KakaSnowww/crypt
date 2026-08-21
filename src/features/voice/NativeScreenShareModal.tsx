@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import {
+  canCaptureSystemAudio,
   getNativeCaptureThumbnail,
   getNativeScreenSharePreferences,
   groupNativeCaptureSources,
@@ -89,7 +90,12 @@ export function NativeScreenShareModal({
             onClick={() => {
               if (selected) {
                 saveNativeScreenSharePreferences(preferences);
-                void onShare({ ...preferences, source: selected });
+                void onShare({
+                  ...preferences,
+                  includeSystemAudio:
+                    preferences.includeSystemAudio && canCaptureSystemAudio(selected),
+                  source: selected,
+                });
               }
             }}
           >
@@ -202,11 +208,20 @@ export function NativeScreenShareModal({
           </fieldset>
           <label className="native-share-picker__audio">
             <span>
-              <strong>Compartilhar áudio do sistema</strong>
-              <small>Envia músicas, vídeos e sons reproduzidos no Windows.</small>
+              <strong>
+                {activeKind === 'monitor'
+                  ? 'Compartilhar áudio do sistema'
+                  : 'Áudio isolado da janela indisponível'}
+              </strong>
+              <small>
+                {activeKind === 'monitor'
+                  ? 'Envia músicas, vídeos e sons reproduzidos no Windows.'
+                  : 'Ao compartilhar uma janela, o Crypt envia somente o vídeo para não vazar sons de outros aplicativos.'}
+              </small>
             </span>
             <input
-              checked={preferences.includeSystemAudio}
+              checked={activeKind === 'monitor' && preferences.includeSystemAudio}
+              disabled={activeKind === 'window'}
               onChange={(event) =>
                 setPreferences((current) => ({
                   ...current,

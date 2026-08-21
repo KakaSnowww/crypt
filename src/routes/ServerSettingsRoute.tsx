@@ -445,12 +445,15 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
     <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
       {kind === 'icon' ? (
         draftUrl ? (
-          <span className="grid size-16 overflow-hidden rounded-2xl bg-crypt-elevated">
+          <span className="grid size-16 overflow-hidden rounded-full bg-crypt-elevated ring-1 ring-white/10">
             <img
               alt="Prévia do ícone"
               className="size-full object-cover"
               src={draftUrl}
-              style={{ objectPosition: `${position.x}% ${position.y}%` }}
+              style={{
+                objectPosition: `${position.x}% ${position.y}%`,
+                transform: `scale(${position.zoom ?? 1})`,
+              }}
             />
           </span>
         ) : (
@@ -549,6 +552,7 @@ function ServerMediaEditor({ kind, server }: { kind: ServerMediaKind; server: Se
             imageUrl={draftUrl}
             onChange={setPosition}
             position={position}
+            shape={kind === 'icon' ? 'circle' : 'rounded'}
           />
         ) : null}
         {selectionError ? <p className="mt-3 text-xs text-red-300">{selectionError}</p> : null}

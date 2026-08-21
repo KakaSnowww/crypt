@@ -12,9 +12,9 @@ type ServerIconProps = {
 };
 
 const sizeClasses = {
-  lg: 'size-24 rounded-[1.75rem] text-xl',
-  md: 'size-14 rounded-2xl text-sm',
-  sm: 'size-11 rounded-2xl text-xs',
+  lg: 'size-24 rounded-full text-xl',
+  md: 'size-14 rounded-full text-sm',
+  sm: 'size-11 rounded-full text-xs',
 } as const;
 
 export function ServerIcon({

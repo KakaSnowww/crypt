@@ -23,6 +23,32 @@ type ParticipantMetadata = {
   profile_gradient_start?: unknown;
 };
 
+export type VoiceParticipantVisualProfile = {
+  avatar_path: null | string;
+  avatar_position_x: number;
+  avatar_position_y: number;
+  avatar_zoom: number;
+  banner_path: null | string;
+  banner_position_x: number;
+  banner_position_y: number;
+  banner_zoom: number;
+  profile_effect: null | string;
+  profile_gradient_angle: number;
+  profile_gradient_end: null | string;
+  profile_gradient_start: null | string;
+};
+
+function metadataRecord(metadataValue: null | string | undefined): ParticipantMetadata {
+  if (!metadataValue) return {};
+
+  try {
+    const parsed = JSON.parse(metadataValue) as unknown;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 function optionalString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
@@ -49,15 +75,7 @@ function profileEffect(value: unknown): VoiceProfileEffect {
 }
 
 export function parseVoiceParticipantMetadata(metadataValue: null | string | undefined) {
-  let metadata: ParticipantMetadata = {};
-
-  if (metadataValue) {
-    try {
-      metadata = JSON.parse(metadataValue) as ParticipantMetadata;
-    } catch {
-      metadata = {};
-    }
-  }
+  const metadata = metadataRecord(metadataValue);
 
   return {
     arcanaActive: metadata.arcana_active === true,
@@ -78,6 +96,27 @@ export function parseVoiceParticipantMetadata(metadataValue: null | string | und
     handle: optionalString(metadata.handle),
     profileEffect: profileEffect(metadata.profile_effect),
   };
+}
+
+export function mergeVoiceParticipantVisualMetadata(
+  metadataValue: null | string | undefined,
+  profile: VoiceParticipantVisualProfile,
+) {
+  return JSON.stringify({
+    ...metadataRecord(metadataValue),
+    avatar_path: profile.avatar_path,
+    avatar_position_x: profile.avatar_position_x,
+    avatar_position_y: profile.avatar_position_y,
+    avatar_zoom: profile.avatar_zoom,
+    banner_path: profile.banner_path,
+    banner_position_x: profile.banner_position_x,
+    banner_position_y: profile.banner_position_y,
+    banner_zoom: profile.banner_zoom,
+    profile_effect: profile.profile_effect ?? 'none',
+    profile_gradient_angle: profile.profile_gradient_angle,
+    profile_gradient_end: profile.profile_gradient_end,
+    profile_gradient_start: profile.profile_gradient_start,
+  });
 }
 
 export function getVoiceParticipantProfile(participant: Participant) {

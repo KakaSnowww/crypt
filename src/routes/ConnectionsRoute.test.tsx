@@ -45,6 +45,7 @@ vi.mock('../features/connections/connections.queries', () => ({
 }));
 
 vi.mock('../features/profile/profile.queries', () => ({
+  useCurrentProfile: () => queryResult(null),
   useProfileSettings: () =>
     queryResult({
       use_interests_for_suggestions: true,

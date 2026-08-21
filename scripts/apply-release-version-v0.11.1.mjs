@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const targetVersion = '0.11.0';
-const minimumAndroidVersionCode = 18;
+const targetVersion = '0.11.1';
+const minimumAndroidVersionCode = 19;
 
 function readText(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
@@ -35,7 +35,7 @@ function updatePackageFiles() {
     'release:local':
       'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-release-local.ps1',
     'release:publish':
-      'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-release-v0.11.0.ps1',
+      'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-release-v0.11.1.ps1',
   };
 
   writeJson('package.json', packageJson);
@@ -71,7 +71,7 @@ function updateBundledReleaseNotes() {
   const relativePath = 'src/features/desktopUpdates/releaseNotes.ts';
   let content = readText(relativePath);
 
-  if (content.includes("'0.11.0': {")) {
+  if (content.includes("'0.11.1': {")) {
     return;
   }
 
@@ -81,43 +81,33 @@ function updateBundledReleaseNotes() {
     throw new Error('Não encontrei a coleção bundledReleases.');
   }
 
-  const release = `  '0.11.0': {
+  const release = `  '0.11.1': {
     highlights: [
       {
         description:
-          'O aplicativo foi reconstruído com uma identidade gamer e dev em preto, roxo e ciano.',
-        title: 'Uma interface totalmente nova',
+          'O modo Voz limpa agora usa cancelamento de ruído Krisp AI, com proteção WebRTC automática em aparelhos incompatíveis.',
+        title: 'Voz realmente limpa',
       },
       {
         description:
-          'Servidores, cargos, membros e permissões ganharam uma central profissional e ações rápidas.',
-        title: 'Servidores refeitos',
+          'Transmissões não abrem mais sozinhas. Cada pessoa escolhe quando assistir e pode parar sem sair da call.',
+        title: 'Você controla a transmissão',
       },
       {
         description:
-          'Perfis e configurações agora são mais claros, organizados e consistentes em todas as telas.',
-        title: 'Perfil e configurações',
+          'Vídeo e áudio da tela são conectados e interrompidos juntos, sem afetar o restante da chamada.',
+        title: 'Compartilhamento previsível',
       },
       {
         description:
-          'O volume individual chega a 300%, com correções de áudio e sincronização de entrada e saída.',
-        title: 'Calls mais fortes',
-      },
-      {
-        description:
-          'Online, ausente, ocupado e offline são atualizados em tempo real na lista de membros.',
-        title: 'Presença sincronizada',
-      },
-      {
-        description:
-          'Assinantes podem enviar arquivos de até 500 MB e usar avatar GIF de até 5 MB.',
-        title: 'Crypt Pro ampliado',
+          'Trocas, remoções e novos enquadramentos do avatar aparecem na call em tempo real.',
+        title: 'Avatar sincronizado',
       },
     ],
     summary:
-      'A versão 0.11.0 é o System Reboot: o Crypt foi reconstruído para gamers, comunidades e programadores.',
-    title: 'System Reboot',
-    version: '0.11.0',
+      'A versão 0.11.1 é a Clear Signal: mais controle sobre transmissões e uma experiência de voz muito mais limpa.',
+    title: 'Clear Signal',
+    version: '0.11.1',
   },
 `;
 

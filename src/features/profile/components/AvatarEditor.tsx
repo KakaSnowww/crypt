@@ -180,7 +180,7 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
     >
       <div className="grid justify-items-center gap-2">
         {previewUrl ? (
-          <span className="grid size-28 overflow-hidden rounded-[2rem] bg-crypt-elevated">
+          <span className="grid size-28 overflow-hidden rounded-full bg-crypt-elevated ring-1 ring-white/10">
             <img
               alt="Prévia do novo avatar"
               className="size-full object-cover"

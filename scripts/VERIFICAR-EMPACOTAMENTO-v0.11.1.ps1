@@ -4,7 +4,7 @@ $project = Split-Path $PSScriptRoot -Parent
 Set-Location $project
 
 Write-Host ''
-Write-Host 'CRYPT - VERIFICAÇÃO DO EMPACOTAMENTO v0.11.0' -ForegroundColor Magenta
+Write-Host 'CRYPT - VERIFICAÇÃO DO EMPACOTAMENTO v0.11.1' -ForegroundColor Magenta
 Write-Host ''
 
 node scripts\verify-release.mjs

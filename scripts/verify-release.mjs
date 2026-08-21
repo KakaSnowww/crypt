@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const expectedVersion = '0.11.0';
-const expectedTitle = 'System Reboot';
+const expectedVersion = '0.11.1';
+const expectedTitle = 'Clear Signal';
 const failures = [];
 const successes = [];
 
@@ -66,9 +66,9 @@ check(
 const versionCode = Number(androidBuild.match(/versionCode\s+(\d+)/u)?.[1] ?? 0);
 
 check(
-  versionCode >= 18,
+  versionCode >= 19,
   `Android versionCode é ${versionCode}`,
-  'Android versionCode precisa ser pelo menos 18',
+  'Android versionCode precisa ser pelo menos 19',
 );
 
 check(
@@ -109,7 +109,7 @@ const requiredFiles = [
   'src/features/arcana/ArcanaTierBadge.tsx',
   'public/arcane/ui/arcane-circle.svg',
   'scripts/build-release-local.ps1',
-  'scripts/publish-release-v0.11.0.ps1',
+  'scripts/publish-release-v0.11.1.ps1',
 ];
 
 for (const relativePath of requiredFiles) {
