@@ -52,13 +52,13 @@ Require-Command `
   'npm' `
   'npm não foi encontrado.'
 
-$branch = (& git branch --show-current).Trim()
+$branch = ([string](& git branch --show-current)).Trim()
 
 if ($branch -ne 'main') {
   Stop-Release "A publicação deve ser feita na branch main. Branch atual: $branch"
 }
 
-$origin = (& git remote get-url origin).Trim()
+$origin = ([string](& git remote get-url origin)).Trim()
 
 if (
   $origin -notmatch
@@ -127,17 +127,19 @@ if ($forbiddenTracked.Count -gt 0) {
   )
 }
 
-if (
-  (& git tag --list $tag).Trim()
-) {
+$localTags = @(
+  & git tag --list $tag
+)
+
+if ($localTags.Count -gt 0) {
   Stop-Release "A tag local $tag já existe."
 }
 
-$remoteTag = (
+$remoteTags = @(
   & git ls-remote --tags origin "refs/tags/$tag"
-).Trim()
+)
 
-if ($remoteTag) {
+if ($remoteTags.Count -gt 0) {
   Stop-Release "A tag remota $tag já existe."
 }
 
