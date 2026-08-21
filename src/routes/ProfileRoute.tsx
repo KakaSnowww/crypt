@@ -89,21 +89,23 @@ export function ProfileRoute() {
   const presence = presenceStatusInformation[normalizePresenceStatus(presenceQuery.data?.status)];
 
   return (
-    <main className="profile-v3 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-      <header className="profile-v3__toolbar">
+    <main className="profile-v4 mx-auto w-full max-w-[90rem] px-4 py-5 sm:px-6 sm:py-7">
+      <header className="profile-v4__toolbar">
         <div>
-          <p className="eyebrow">Seu espaço público</p>
-          <h1>Perfil</h1>
-          <p>Veja exatamente como as outras pessoas encontram você.</p>
+          <span>IDENTITY // 01</span>
+          <div>
+            <p className="eyebrow">Perfil público</p>
+            <h1>Sua identidade no Crypt</h1>
+          </div>
         </div>
         <Link to="/app/perfil/editar">
-          <Button leadingIcon={<Pencil aria-hidden="true" size={16} />}>Editar perfil</Button>
+          <Button leadingIcon={<Pencil aria-hidden="true" size={16} />}>Personalizar</Button>
         </Link>
       </header>
 
       <section
         aria-label="Banner do perfil"
-        className={classNames('profile-v3__cover', `profile-effect-${profile.profile_effect}`)}
+        className={classNames('profile-v4__hero', `profile-effect-${profile.profile_effect}`)}
         style={
           bannerUrl
             ? {
@@ -111,11 +113,13 @@ export function ProfileRoute() {
               }
             : undefined
         }
-      />
-
-      <div className="profile-v3__layout">
-        <aside className="profile-v3__identity">
-          <div className="profile-v3__avatar">
+      >
+        <span aria-hidden="true" className="profile-v4__hero-grid" />
+        <div className="profile-v4__hero-status">
+          <span /> PROFILE LINKED
+        </div>
+        <div className="profile-v4__identity">
+          <div className="profile-v4__avatar">
             <ProfileAvatar
               avatarPath={profile.avatar_path}
               displayName={profile.display_name}
@@ -126,111 +130,116 @@ export function ProfileRoute() {
             />
             <span className={presence.tone} title={presence.label} />
           </div>
-          <div className="profile-v3__name">
-            <h2>{profile.display_name}</h2>
-            <p>@{profile.handle}</p>
+          <div className="profile-v4__identity-copy">
+            <p className="eyebrow">@{profile.handle}</p>
+            <div className="profile-v4__name-line">
+              <h2>{profile.display_name}</h2>
+              {arcanaMembership.data?.is_active ? (
+                <ArcanaTierBadge
+                  tierColor={arcanaMembership.data.tier_color}
+                  tierName={arcanaMembership.data.tier_name}
+                  tierNumber={arcanaMembership.data.tier_number}
+                />
+              ) : null}
+            </div>
+            <div className="profile-v4__presence">
+              <span className={presence.tone} />
+              <strong>{presence.label}</strong>
+              <i />
+              <p>{presenceQuery.data?.customStatus ?? 'Nenhum status personalizado definido.'}</p>
+            </div>
           </div>
-          <div className="profile-v3__status">
-            <span className={presence.tone} />
-            {presence.label}
-          </div>
-          {arcanaMembership.data?.is_active ? (
-            <ArcanaTierBadge
-              tierColor={arcanaMembership.data.tier_color}
-              tierName={arcanaMembership.data.tier_name}
-              tierNumber={arcanaMembership.data.tier_number}
-            />
-          ) : null}
-          <p className="profile-v3__bio">
-            {presenceQuery.data?.customStatus ?? 'Nenhum status personalizado definido.'}
-          </p>
-          <dl className="profile-v3__meta">
-            <div>
-              <dt>
-                <CalendarDays size={15} />
-                Entrou no Crypt
-              </dt>
-              <dd>{joinedAt}</dd>
-            </div>
-            <div>
-              <dt>
-                <Gamepad2 size={15} />
-                Interesses visíveis
-              </dt>
-              <dd>{interestCount}</dd>
-            </div>
-          </dl>
-        </aside>
-
-        <div className="profile-v3__content">
-          <section className="profile-v3__panel profile-v3__about">
-            <header>
-              <Code2 size={19} />
-              <div>
-                <p className="eyebrow">Sobre mim</p>
-                <h2>Identidade</h2>
-              </div>
-            </header>
-            <p>{profile.bio ?? 'Este espaço ainda não possui uma apresentação.'}</p>
-          </section>
-
-          <section className="profile-v3__panel" aria-labelledby="profile-interests-title">
-            <header>
-              <Sparkles size={19} />
-              <div>
-                <p className="eyebrow">Afinidades</p>
-                <h2 id="profile-interests-title">Interesses</h2>
-              </div>
-            </header>
-            {interestsVisible && visibleCategories.length > 0 ? (
-              <div className="profile-v3__interests">
-                {visibleCategories.map((category) => (
-                  <div key={category.id}>
-                    <h3>{category.label}</h3>
-                    <div>
-                      {category.interests.map((interest) => (
-                        <span key={interest.id}>{interest.label}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="profile-v3__empty">
-                <EyeOff size={17} />
-                <p>
-                  {visibleCategories.length === 0
-                    ? 'Nenhum interesse selecionado.'
-                    : 'Interesses privados.'}
-                </p>
-              </div>
-            )}
-          </section>
-
-          <section className="profile-v3__panel" aria-labelledby="favorite-track-title">
-            <header>
-              <Headphones size={19} />
-              <div>
-                <p className="eyebrow">Destaque musical</p>
-                <h2 id="favorite-track-title">Música do perfil</h2>
-              </div>
-            </header>
-            <div className="profile-v3__spotify">
-              <SpotifyEmbed
-                title={profile.favorite_spotify_title}
-                url={profile.favorite_spotify_url}
-              />
-            </div>
-          </section>
-
-          <section className="profile-v3__privacy">
-            <ShieldCheck size={18} />
-            <div>
-              <strong>Você controla o que aparece</strong>
-              <p>E-mail e dados privados nunca são exibidos no perfil.</p>
-            </div>
-          </section>
         </div>
+        <dl className="profile-v4__telemetry">
+          <div>
+            <dt>
+              <CalendarDays size={14} /> NA REDE DESDE
+            </dt>
+            <dd>{joinedAt}</dd>
+          </div>
+          <div>
+            <dt>
+              <Gamepad2 size={14} /> INTERESSES
+            </dt>
+            <dd>{interestCount.toString().padStart(2, '0')}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <div className="profile-v4__matrix">
+        <section className="profile-v4__module profile-v4__about">
+          <header>
+            <span>02</span>
+            <Code2 size={19} />
+            <div>
+              <p className="eyebrow">Sobre mim</p>
+              <h2>Identidade</h2>
+            </div>
+          </header>
+          <p>{profile.bio ?? 'Este espaço ainda não possui uma apresentação.'}</p>
+        </section>
+
+        <section className="profile-v4__module" aria-labelledby="profile-interests-title">
+          <header>
+            <span>03</span>
+            <Sparkles size={19} />
+            <div>
+              <p className="eyebrow">Afinidades</p>
+              <h2 id="profile-interests-title">Interesses</h2>
+            </div>
+          </header>
+          {interestsVisible && visibleCategories.length > 0 ? (
+            <div className="profile-v4__interests">
+              {visibleCategories.map((category) => (
+                <div key={category.id}>
+                  <h3>{category.label}</h3>
+                  <div>
+                    {category.interests.map((interest) => (
+                      <span key={interest.id}>{interest.label}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="profile-v4__empty">
+              <EyeOff size={17} />
+              <p>
+                {visibleCategories.length === 0
+                  ? 'Nenhum interesse selecionado.'
+                  : 'Interesses privados.'}
+              </p>
+            </div>
+          )}
+        </section>
+
+        <section
+          className="profile-v4__module profile-v4__music"
+          aria-labelledby="favorite-track-title"
+        >
+          <header>
+            <span>04</span>
+            <Headphones size={19} />
+            <div>
+              <p className="eyebrow">Destaque musical</p>
+              <h2 id="favorite-track-title">Música do perfil</h2>
+            </div>
+          </header>
+          <div className="profile-v4__spotify">
+            <SpotifyEmbed
+              title={profile.favorite_spotify_title}
+              url={profile.favorite_spotify_url}
+            />
+          </div>
+        </section>
+
+        <section className="profile-v4__privacy">
+          <ShieldCheck size={18} />
+          <div>
+            <strong>Você controla o que aparece</strong>
+            <p>E-mail e dados privados nunca são exibidos no perfil.</p>
+          </div>
+        </section>
       </div>
     </main>
   );

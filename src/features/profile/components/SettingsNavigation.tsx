@@ -6,32 +6,35 @@ const settingsLinks = [
   {
     description: 'Avatar, banner, interesses e privacidade',
     icon: UserRound,
-    label: 'Editar perfil',
+    index: '01',
+    label: 'Identidade',
     to: '/app/perfil/editar',
   },
   {
     description: 'Spotify, Steam, YouTube e atividade',
     icon: Link2,
-    label: 'Contas conectadas',
+    index: '02',
+    label: 'Integrações',
     to: '/app/configuracoes/conexoes',
   },
   {
     description: 'Versão, senha, sessão e exclusão da conta',
     icon: ShieldCheck,
-    label: 'Conta e segurança',
+    index: '03',
+    label: 'Sistema e segurança',
     to: '/app/conta',
   },
 ] as const;
 
 export function SettingsNavigation() {
   return (
-    <aside className="settings-sidebar">
-      <div className="settings-sidebar__heading">
-        <span>CRYPT</span>
-        <strong>Configurações</strong>
-        <p>Controle sua identidade, integrações e segurança.</p>
+    <aside className="settings-v4-nav">
+      <div className="settings-v4-nav__heading">
+        <span>CONTROL CENTER</span>
+        <strong>Seu Crypt</strong>
+        <p>Identidade, conexões e sistema em um único painel.</p>
       </div>
-      <nav aria-label="Seções das configurações" className="settings-chapters">
+      <nav aria-label="Seções das configurações" className="settings-v4-nav__links">
         {settingsLinks.map((link) => {
           const Icon = link.icon;
 
@@ -39,7 +42,7 @@ export function SettingsNavigation() {
             <NavLink
               className={({ isActive }) =>
                 classNames(
-                  'settings-chapter',
+                  'settings-v4-nav__link',
                   isActive ? 'is-active text-white' : 'text-crypt-muted hover:text-white',
                 )
               }
@@ -47,17 +50,26 @@ export function SettingsNavigation() {
               key={link.to}
               to={link.to}
             >
-              <span className="settings-chapter-icon">
+              <span className="settings-v4-nav__index">{link.index}</span>
+              <span className="settings-v4-nav__icon">
                 <Icon aria-hidden="true" size={17} />
               </span>
-              <span className="min-w-0">
-                <span>{link.label}</span>
+              <span className="settings-v4-nav__copy">
+                <strong>{link.label}</strong>
                 <small>{link.description}</small>
               </span>
+              <i />
             </NavLink>
           );
         })}
       </nav>
+      <div className="settings-v4-nav__status">
+        <span />
+        <div>
+          <strong>Sistema sincronizado</strong>
+          <small>Preferências salvas automaticamente</small>
+        </div>
+      </div>
     </aside>
   );
 }

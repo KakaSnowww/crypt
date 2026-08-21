@@ -6,6 +6,7 @@ import { DesktopUpdatePanel } from './DesktopUpdatePanel';
 
 vi.mock('../../lib/sounds', () => ({
   playCryptSound: vi.fn(() => Promise.resolve(true)),
+  playCryptUiSound: vi.fn(),
 }));
 
 afterEach(() => {

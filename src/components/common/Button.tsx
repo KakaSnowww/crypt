@@ -1,5 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from 'react';
 import { classNames } from '../../lib/classNames';
+import { playCryptUiSound } from '../../lib/sounds';
 import { Spinner } from './Spinner';
 
 type ButtonVariant = 'danger' | 'ghost' | 'primary' | 'secondary';
@@ -36,6 +37,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     loading = false,
     onPointerMove,
     onPointerLeave,
+    onPointerEnter,
+    onClick,
     size = 'md',
     type = 'button',
     variant = 'primary',
@@ -56,6 +59,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     onPointerLeave?.(event);
   }
 
+  function handlePointerEnter(event: PointerEvent<HTMLButtonElement>) {
+    if (!disabled && !loading) playCryptUiSound('hover');
+    onPointerEnter?.(event);
+  }
+
   return (
     <button
       className={classNames(
@@ -69,6 +77,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-size={size}
       data-variant={variant}
       disabled={disabled || loading}
+      onClick={(event) => {
+        playCryptUiSound('activate');
+        onClick?.(event);
+      }}
+      onPointerEnter={handlePointerEnter}
       onPointerLeave={resetPointer}
       onPointerMove={trackPointer}
       ref={ref}

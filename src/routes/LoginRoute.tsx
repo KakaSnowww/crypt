@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { KeyRound, Mail } from 'lucide-react';
+import { ArrowRight, Fingerprint, KeyRound, Mail, ShieldCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -10,7 +10,6 @@ import { loginSchema, type LoginValues } from '../features/auth/auth.schemas';
 import { getSafeNextPath, loginWithPassword } from '../features/auth/auth.service';
 import { AuthConfigurationNotice } from '../features/auth/components/AuthConfigurationNotice';
 import { AuthFormError } from '../features/auth/components/AuthFormError';
-import { AuthPageHeader } from '../features/auth/components/AuthPageHeader';
 
 export function LoginRoute() {
   const navigate = useNavigate();
@@ -33,16 +32,24 @@ export function LoginRoute() {
   });
 
   return (
-    <section aria-labelledby="login-title">
-      <AuthPageHeader
-        description="Continue de onde parou e encontre sua comunidade online."
-        eyebrow="IDENTIDADE VERIFICADA"
-        id="login-title"
-        title="Bem-vindo de volta"
-      />
+    <section aria-labelledby="login-title" className="access-v4">
+      <header className="access-v4__header">
+        <div className="access-v4__sequence">
+          <span>01</span>
+          <i />
+          <span>02</span>
+          <i />
+          <span>03</span>
+        </div>
+        <p className="eyebrow">
+          <Fingerprint size={14} /> Identity handshake
+        </p>
+        <h1 id="login-title">Reconecte-se.</h1>
+        <p>Sua comunidade, suas conversas e seus servidores estão esperando.</p>
+      </header>
       <AuthConfigurationNotice />
 
-      <form className="mt-8 grid gap-5" noValidate onSubmit={(event) => void handleSubmit(event)}>
+      <form className="access-v4__form" noValidate onSubmit={(event) => void handleSubmit(event)}>
         <Input
           autoComplete="email"
           errorText={form.formState.errors.email?.message}
@@ -64,7 +71,10 @@ export function LoginRoute() {
           {...form.register('password')}
         />
 
-        <div className="flex justify-end">
+        <div className="access-v4__recovery">
+          <span>
+            <ShieldCheck size={13} /> Conexão protegida
+          </span>
           <Link
             className="cyber-auth__link rounded-lg text-xs font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
             to="/recuperar-senha"
@@ -77,20 +87,26 @@ export function LoginRoute() {
           message={loginMutation.error ? toAuthActionError(loginMutation.error).message : undefined}
         />
 
-        <Button className="mt-1 w-full" loading={loginMutation.isPending} size="lg" type="submit">
-          Acessar o Crypt
+        <Button
+          className="access-v4__submit"
+          loading={loginMutation.isPending}
+          size="lg"
+          type="submit"
+        >
+          Acessar o Crypt <ArrowRight size={17} />
         </Button>
       </form>
 
-      <p className="mt-7 text-center text-xs text-crypt-subtle">
-        Ainda não tem uma conta?{' '}
+      <div className="access-v4__switch">
+        <span>NEW OPERATOR</span>
+        <p>Ainda não tem uma conta?</p>
         <Link
           className="cyber-auth__link font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
           to="/cadastro"
         >
           Criar conta
         </Link>
-      </p>
+      </div>
     </section>
   );
 }

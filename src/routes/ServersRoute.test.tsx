@@ -47,11 +47,11 @@ describe('ServersRoute', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Seus servidores' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: 'Seus universos' })).toBeVisible();
     expect(screen.getByText('Órbita do Snow')).toBeVisible();
     expect(screen.getByText('2 membros')).toBeVisible();
 
-    await user.click(screen.getByRole('button', { name: 'Criar servidor' }));
+    await user.click(screen.getByRole('button', { name: 'Novo universo' }));
     await user.type(screen.getByRole('textbox', { name: 'Nome' }), 'Jogos com Amigos');
     await user.type(
       screen.getByRole('textbox', { name: 'Descrição' }),

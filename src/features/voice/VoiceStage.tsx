@@ -110,17 +110,20 @@ export function VoiceStage() {
   };
 
   return (
-    <div className="voice-stage">
+    <div className="voice-stage voice-cockpit">
       <header className="voice-stage__header">
-        <div>
-          <h1>{connection.channel_name}</h1>
-          <p>
-            {connection.server_name} ·{' '}
-            {connectionState === ConnectionState.Connected ? 'Conectado' : 'Conectando…'}
-          </p>
+        <div className="voice-cockpit__identity">
+          <span>VOICE LINK // 01</span>
+          <div>
+            <p className="eyebrow">{connection.server_name}</p>
+            <h1>{connection.channel_name}</h1>
+          </div>
         </div>
 
         <div className="voice-stage__header-actions">
+          <span className="voice-cockpit__link-state">
+            <i /> {connectionState === ConnectionState.Connected ? 'LINK ESTÁVEL' : 'CONECTANDO'}
+          </span>
           <button
             onClick={() => setCameraFit((current) => (current === 'contain' ? 'cover' : 'contain'))}
             title={cameraFit === 'contain' ? 'Preencher cartões' : 'Mostrar câmera inteira'}
@@ -231,6 +234,10 @@ export function VoiceStage() {
       {showDevices ? <DeviceSettings /> : null}
 
       <footer className="voice-stage__controls">
+        <div className="voice-cockpit__dock-label">
+          <span>02</span>
+          <strong>CALL CONTROLS</strong>
+        </div>
         <CallControl
           active={isMicrophoneEnabled}
           label={isMicrophoneEnabled ? 'Silenciar' : 'Ativar microfone'}

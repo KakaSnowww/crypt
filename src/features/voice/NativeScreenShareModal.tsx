@@ -77,7 +77,7 @@ export function NativeScreenShareModal({
 
   return (
     <Modal
-      description="Escolha dentro do Crypt o monitor ou a janela que será enviada para a chamada."
+      description="Escolha a fonte, confira a prévia e controle exatamente o que entra na chamada."
       footer={
         <>
           <Button disabled={busy} onClick={() => onOpenChange(false)} variant="secondary">
@@ -105,9 +105,17 @@ export function NativeScreenShareModal({
       }
       onOpenChange={onOpenChange}
       open={open}
-      title="Compartilhar com a chamada"
+      title="Broadcast Center"
     >
       <div className="native-share-picker">
+        <header className="native-share-picker__header">
+          <span>TRANSMISSION // 01</span>
+          <div>
+            <strong>Selecione sua fonte</strong>
+            <small>Nada começa antes da sua confirmação.</small>
+          </div>
+          <i />
+        </header>
         <div className="native-share-picker__tabs" role="tablist">
           <button
             aria-selected={activeKind === 'monitor'}

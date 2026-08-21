@@ -1,4 +1,4 @@
-import { BellRing, MessageCircle, PhoneCall, Volume2 } from 'lucide-react';
+import { BellRing, MousePointer2, MessageCircle, PhoneCall, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../components/common/Button';
 import { useToast } from '../../components/common/ToastContext';
@@ -15,6 +15,12 @@ const soundGroups: Array<{
   label: string;
   sounds: CryptSound[];
 }> = [
+  {
+    description: 'Respostas discretas ao passar e clicar nos controles.',
+    icon: MousePointer2,
+    label: 'Interface e botões',
+    sounds: ['interface'],
+  },
   {
     description: 'Mensagens privadas e menções diretas.',
     icon: MessageCircle,

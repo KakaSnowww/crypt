@@ -24,7 +24,7 @@ describe('rotas do Crypt', () => {
   it('protege a área privada quando não existe sessão', async () => {
     const { router } = renderRoute('/app');
 
-    await screen.findByRole('heading', { level: 1, name: 'Bem-vindo de volta' });
+    await screen.findByRole('heading', { level: 1, name: 'Reconecte-se.' });
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toContain('next=%2Fapp');
   });
@@ -32,7 +32,7 @@ describe('rotas do Crypt', () => {
   it('protege o onboarding quando não existe sessão', async () => {
     const { router } = renderRoute('/onboarding');
 
-    await screen.findByRole('heading', { level: 1, name: 'Bem-vindo de volta' });
+    await screen.findByRole('heading', { level: 1, name: 'Reconecte-se.' });
     expect(router.state.location.pathname).toBe('/login');
     expect(router.state.location.search).toContain('next=%2Fonboarding');
   });
@@ -46,7 +46,7 @@ describe('rotas do Crypt', () => {
 
     expect(await screen.findByText('Informe um e-mail válido.')).toBeVisible();
     expect(screen.getByText('Digite sua senha.')).toBeVisible();
-    expect(screen.getByRole('region', { name: 'Área de acesso' })).toHaveClass('overflow-y-auto');
+    expect(screen.getByRole('region', { name: 'Área de acesso' })).toHaveClass('auth-v4__portal');
   });
 
   it('mostra a página 404 para um caminho inexistente', async () => {

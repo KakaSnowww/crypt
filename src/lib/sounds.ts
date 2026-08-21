@@ -1,9 +1,13 @@
-export type CryptSound = 'call-join' | 'call-leave' | 'friend-request' | 'message' | 'update';
+export type CryptSound =
+  'call-join' | 'call-leave' | 'friend-request' | 'interface' | 'message' | 'update';
+
+export type CryptUiSound = 'activate' | 'hover';
 
 const soundPaths: Record<CryptSound, string> = {
   'call-join': '/som2.mp3',
   'call-leave': '/som3.mp3',
   'friend-request': '/som4.mp3',
+  interface: '/som5.mp3',
   message: '/som1.mp3',
   update: '/som5.mp3',
 };
@@ -12,6 +16,7 @@ const soundVolumes: Record<CryptSound, number> = {
   'call-join': 0.48,
   'call-leave': 0.46,
   'friend-request': 0.5,
+  interface: 0.18,
   message: 0.42,
   update: 0.52,
 };
@@ -28,6 +33,8 @@ export const defaultSoundPreferences: CryptSoundPreferences = {
 };
 
 const audioCache = new Map<CryptSound, HTMLAudioElement>();
+let uiAudioContext: AudioContext | null = null;
+let lastUiToneAt = 0;
 
 export function getCryptSoundVolume(sound: CryptSound) {
   return soundVolumes[sound] * readCryptSoundPreferences().masterVolume;
@@ -78,6 +85,44 @@ export async function playCryptSound(sound: CryptSound) {
     return true;
   } catch (error) {
     console.warn(`O Crypt não conseguiu reproduzir o som ${sound}.`, error);
+    return false;
+  }
+}
+
+export function playCryptUiSound(sound: CryptUiSound) {
+  if (typeof window === 'undefined' || typeof window.AudioContext === 'undefined') return false;
+
+  const preferences = readCryptSoundPreferences();
+  if (preferences.disabled.includes('interface') || preferences.masterVolume === 0) return false;
+
+  const now = performance.now();
+  if (sound === 'hover' && now - lastUiToneAt < 70) return false;
+  lastUiToneAt = now;
+
+  try {
+    uiAudioContext ??= new window.AudioContext();
+    const context = uiAudioContext;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime;
+    const duration = sound === 'activate' ? 0.065 : 0.035;
+    const volume = preferences.masterVolume * (sound === 'activate' ? 0.025 : 0.012);
+
+    oscillator.type = sound === 'activate' ? 'triangle' : 'sine';
+    oscillator.frequency.setValueAtTime(sound === 'activate' ? 310 : 520, start);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      sound === 'activate' ? 460 : 620,
+      start + duration,
+    );
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), start + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.01);
+    return true;
+  } catch {
     return false;
   }
 }

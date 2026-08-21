@@ -258,29 +258,39 @@ export function ArcanaRoute() {
   const asaasSubscription = data?.provider === 'asaas';
 
   return (
-    <main className="arcana-sanctum mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <section className="arcana-subscription-altar relative overflow-hidden p-6 sm:p-10">
-        <div className="relative z-10 max-w-2xl">
+    <main className="pro-v4 mx-auto w-full max-w-[90rem] px-4 py-5 sm:px-6 sm:py-7">
+      <header className="pro-v4__topbar">
+        <div>
+          <span>CRYPT PRO // 01</span>
+          <div>
+            <p className="eyebrow">Performance layer</p>
+            <h1>Mais potência. Menos limites.</h1>
+          </div>
+        </div>
+        <div className="pro-v4__network">
+          <i /> BILLING ONLINE
+        </div>
+      </header>
+
+      <section className="pro-v4__hero">
+        <span aria-hidden="true" className="pro-v4__beam" />
+        <div className="pro-v4__hero-copy">
           <p className="eyebrow flex items-center gap-2">
             <Zap aria-hidden="true" size={14} />
-            Crypt Pro
+            Membership protocol
           </p>
-          <h1 className="arcana-subscription-title mt-3 text-4xl font-black text-white sm:text-5xl">
-            Eleve sua experiência.
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Recursos premium por <strong>R$ 5 por mês</strong>. Mais qualidade, personalização e
-            benefícios para os servidores que você mais usa.
+          <h2>
+            Desbloqueie o modo <em>PRO</em>.
+          </h2>
+          <p>
+            Streaming mais fluido, arquivos maiores e uma identidade que se destaca. Tudo por
+            <strong> R$ 5 por mês</strong>.
           </p>
 
-          {membership.error ? (
-            <p className="mt-5 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">
-              {membership.error.message}
-            </p>
-          ) : null}
+          {membership.error ? <p className="pro-v4__error">{membership.error.message}</p> : null}
 
           {active ? (
-            <div className="mt-6 inline-flex flex-wrap items-center gap-3 rounded-2xl bg-emerald-400/10 px-4 py-3">
+            <div className="pro-v4__active">
               <Zap aria-hidden="true" className="text-emerald-300" size={20} />
               <strong className="text-white">
                 Crypt Pro {proTierNames[(data?.tier_number ?? 1) - 1] ?? 'Core'}
@@ -290,7 +300,7 @@ export function ArcanaRoute() {
               </span>
             </div>
           ) : pending ? (
-            <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-500/[0.08] p-4">
+            <div className="pro-v4__pending">
               <strong className="text-sm text-amber-100">
                 Aguardando confirmação do pagamento
               </strong>
@@ -300,7 +310,7 @@ export function ArcanaRoute() {
               </p>
             </div>
           ) : (
-            <div className="arcana-price-ritual mt-6">
+            <div className="pro-v4__checkout">
               <span>
                 <b>R$ 5</b>
                 <small>/mês</small>
@@ -310,15 +320,24 @@ export function ArcanaRoute() {
                 loading={startBilling.isPending}
                 onClick={() => startBilling.mutate()}
               >
-                Assinar por R$ 5/mês
+                Ativar Crypt Pro
               </Button>
             </div>
           )}
         </div>
+        <div className="pro-v4__core" aria-hidden="true">
+          <div>
+            <span>PRO</span>
+          </div>
+          <i />
+          <i />
+          <i />
+          <small>ENCRYPTED MEMBERSHIP</small>
+        </div>
       </section>
 
       {(asaasSubscription || pending) && data ? (
-        <section className="panel mt-6 p-5 sm:p-6">
+        <section className="pro-v4__billing">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="eyebrow">Assinatura Asaas</p>
@@ -390,19 +409,39 @@ export function ArcanaRoute() {
         </section>
       ) : null}
 
-      <section className="arcana-benefit-grid mt-6 grid gap-3 sm:grid-cols-2">
-        {benefits.map(({ icon: Icon, title, text }) => (
-          <article className="arcana-benefit-card panel p-5" key={title}>
-            <Icon className="text-violet-300" />
-            <h2 className="mt-4 font-semibold text-white">{title}</h2>
-            <p className="mt-2 text-sm text-crypt-muted">{text}</p>
+      <div className="pro-v4__section-title">
+        <span>02</span>
+        <div>
+          <p className="eyebrow">Loadout</p>
+          <h2>Seu pacote de vantagens</h2>
+        </div>
+        <i />
+      </div>
+      <section className="pro-v4__benefits">
+        {benefits.map(({ icon: Icon, title, text }, index) => (
+          <article className="pro-v4__benefit" key={title}>
+            <div>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <Icon />
+            </div>
+            <h2>{title}</h2>
+            <p>{text}</p>
+            <footer>
+              MODULE READY <i />
+            </footer>
           </article>
         ))}
       </section>
 
-      <section className="panel mt-6 p-5">
-        <h2 className="text-xl font-bold text-white">Progressão Crypt Pro</h2>
-        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+      <section className="pro-v4__progress">
+        <header>
+          <span>03</span>
+          <div>
+            <p className="eyebrow">Progressão</p>
+            <h2>Histórico de assinatura</h2>
+          </div>
+        </header>
+        <div className="pro-v4__tier-grid">
           {arcanaTiers.map(([, color], index) => {
             const tierNumber = index + 1;
             const name = proTierNames[index];
@@ -438,18 +477,24 @@ export function ArcanaRoute() {
       </section>
 
       {active ? (
-        <section className="panel mt-6 p-5">
-          <h2 className="text-xl font-bold text-white">Boosts de Comunidade</h2>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <section className="pro-v4__boosts">
+          <header>
+            <span>04</span>
+            <div>
+              <p className="eyebrow">Community power</p>
+              <h2>Boosts de comunidade</h2>
+            </div>
+          </header>
+          <div className="pro-v4__boost-grid">
             {[1, 2, 3].map((slot) => {
               const rune = runes.data?.find((item) => item.rune_slot === slot);
 
               return (
-                <div className="arcana-rune-card rounded-2xl p-4" key={slot}>
+                <div className="pro-v4__boost" key={slot}>
                   <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-cyan-400/15 bg-cyan-500/[0.08] text-cyan-300">
                     <Zap aria-hidden="true" size={24} />
                   </span>
-                  <p className="mt-3 text-center text-xs font-bold text-violet-300">Boost {slot}</p>
+                  <p>BOOST SLOT // 0{slot}</p>
                   <select
                     className="mt-3 min-h-10 w-full rounded-xl bg-[#111522] text-white"
                     onChange={(event) => {

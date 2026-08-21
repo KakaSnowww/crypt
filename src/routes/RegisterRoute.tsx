@@ -1,6 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { AtSign, CheckCircle2, KeyRound, Mail, UserRound } from 'lucide-react';
+import {
+  ArrowRight,
+  AtSign,
+  CheckCircle2,
+  Fingerprint,
+  KeyRound,
+  Mail,
+  UserRound,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,7 +19,6 @@ import { registerSchema, type RegisterValues } from '../features/auth/auth.schem
 import { registerAccount } from '../features/auth/auth.service';
 import { AuthConfigurationNotice } from '../features/auth/components/AuthConfigurationNotice';
 import { AuthFormError } from '../features/auth/components/AuthFormError';
-import { AuthPageHeader } from '../features/auth/components/AuthPageHeader';
 
 export function RegisterRoute() {
   const navigate = useNavigate();
@@ -69,16 +76,28 @@ export function RegisterRoute() {
   }
 
   return (
-    <section aria-labelledby="register-title">
-      <AuthPageHeader
-        description="Crie sua identidade. O nome pode se repetir, mas o identificador @ será somente seu."
-        eyebrow="Sua conta no Crypt"
-        id="register-title"
-        title="Comece por quem você é"
-      />
+    <section aria-labelledby="register-title" className="access-v4 access-v4--register">
+      <header className="access-v4__header">
+        <div className="access-v4__sequence">
+          <span>01</span>
+          <i />
+          <span>02</span>
+          <i />
+          <span>03</span>
+        </div>
+        <p className="eyebrow">
+          <Fingerprint size={14} /> Create identity
+        </p>
+        <h1 id="register-title">Entre para a rede.</h1>
+        <p>Monte sua identidade única e encontre pessoas para jogar, criar e conversar.</p>
+      </header>
       <AuthConfigurationNotice />
 
-      <form className="mt-8 grid gap-5" noValidate onSubmit={(event) => void handleSubmit(event)}>
+      <form
+        className="access-v4__form access-v4__form--register"
+        noValidate
+        onSubmit={(event) => void handleSubmit(event)}
+      >
         <Input
           autoComplete="name"
           errorText={form.formState.errors.displayName?.message}
@@ -137,21 +156,22 @@ export function RegisterRoute() {
         />
 
         <Button
-          className="mt-1 w-full"
+          className="access-v4__submit"
           loading={registerMutation.isPending}
           size="lg"
           type="submit"
         >
-          Criar minha conta
+          Criar minha conta <ArrowRight size={17} />
         </Button>
       </form>
 
-      <p className="mt-7 text-center text-xs text-crypt-subtle">
-        Já possui uma conta?{' '}
+      <div className="access-v4__switch">
+        <span>KNOWN OPERATOR</span>
+        <p>Já possui uma conta?</p>
         <Link className="font-medium text-violet-300 hover:text-violet-200" to="/login">
           Entrar
         </Link>
-      </p>
+      </div>
     </section>
   );
 }

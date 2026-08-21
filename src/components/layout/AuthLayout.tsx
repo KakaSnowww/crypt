@@ -1,144 +1,150 @@
-import { Activity, CheckCircle2, Code2, Gamepad2, LockKeyhole, Radio, Users } from 'lucide-react';
+import {
+  Activity,
+  Binary,
+  Braces,
+  CheckCircle2,
+  CircleDot,
+  Code2,
+  Gamepad2,
+  Radio,
+  ShieldCheck,
+  Terminal,
+  Users,
+} from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Brand } from './Brand';
 
-const benefits = [
-  {
-    icon: Users,
-    text: 'Comunidades, amizades e conversas em um espaço realmente seu.',
-  },
-  {
-    icon: LockKeyhole,
-    text: 'Privacidade, cargos e permissões com controle em cada camada.',
-  },
-  {
-    icon: Gamepad2,
-    text: 'Uma experiência rápida para navegador, Windows e Android.',
-  },
+const capabilityNodes = [
+  { icon: Users, label: 'Comunidades', value: 'LIVE' },
+  { icon: Radio, label: 'Voz e vídeo', value: '48 KHZ' },
+  { icon: Gamepad2, label: 'Transmissões', value: 'HD60' },
 ] as const;
 
-const networkNodes = [
-  { className: 'is-primary', label: 'CRYPT_01', status: 'ONLINE' },
-  { className: 'is-secondary', label: 'DEV_ROOM', status: '24 ACTIVE' },
-  { className: 'is-tertiary', label: 'SQUAD', status: 'VOICE' },
+const bootSequence = [
+  ['01', 'Identidade protegida', 'READY'],
+  ['02', 'Rede em tempo real', 'ONLINE'],
+  ['03', 'Espaços sincronizados', 'SYNC'],
 ] as const;
 
 export function AuthLayout() {
   return (
-    <main className="crypt-auth-layout cyber-auth grid h-dvh min-h-0 overflow-hidden lg:grid-cols-[minmax(0,1.13fr)_minmax(28rem,0.87fr)]">
-      <section className="crypt-auth-story cyber-auth__story relative hidden h-full overflow-hidden border-r border-white/[0.06] p-10 lg:flex lg:flex-col xl:p-14">
-        <div aria-hidden="true" className="cyber-auth__grid" />
-        <div aria-hidden="true" className="cyber-auth__beam" />
-        <div aria-hidden="true" className="cyber-auth__noise" />
+    <main className="auth-v4 h-dvh min-h-0 overflow-hidden">
+      <div aria-hidden="true" className="auth-v4__backdrop">
+        <span className="auth-v4__grid" />
+        <span className="auth-v4__flare auth-v4__flare--violet" />
+        <span className="auth-v4__flare auth-v4__flare--cyan" />
+      </div>
 
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <Brand subtitle="Community OS" />
-          <div className="cyber-auth__live flex items-center gap-2">
-            <span aria-hidden="true" />
-            NETWORK ONLINE
-          </div>
+      <header className="auth-v4__topbar">
+        <Brand subtitle="Realtime Community OS" />
+        <div className="auth-v4__system-state">
+          <span />
+          <strong>CRYPT NETWORK</strong>
+          <small>OPERATIONAL</small>
         </div>
+      </header>
 
-        <div className="relative z-10 my-auto grid items-center gap-8 py-8 xl:grid-cols-[minmax(0,0.88fr)_minmax(20rem,1.12fr)]">
-          <div className="max-w-xl">
-            <p className="cyber-auth__eyebrow flex items-center gap-2">
-              <Code2 size={14} />
-              BUILT FOR PLAYERS &amp; BUILDERS
-            </p>
-            <h1 className="crypt-auth-title mt-5 text-5xl font-black leading-[0.98] tracking-[-0.065em] xl:text-6xl">
-              Seu squad.
-              <br />
-              Seu código.
-              <span> Seu espaço.</span>
-            </h1>
-            <p className="mt-6 max-w-lg text-base leading-7 text-crypt-muted">
-              O Crypt conecta comunidades, chamadas e ideias em uma plataforma criada para quem
-              joga, desenvolve e constrói junto.
-            </p>
-
-            <ul className="mt-10 grid gap-4">
-              {benefits.map((benefit) => {
-                const Icon = benefit.icon;
-
-                return (
-                  <li
-                    className="crypt-auth-benefit flex items-start gap-3 text-sm leading-6 text-crypt-muted"
-                    key={benefit.text}
-                  >
-                    <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl">
-                      <Icon aria-hidden="true" size={15} />
-                    </span>
-                    {benefit.text}
-                  </li>
-                );
-              })}
-            </ul>
+      <div className="auth-v4__stage">
+        <section className="auth-v4__manifesto" aria-labelledby="auth-manifesto-title">
+          <div className="auth-v4__chapter">
+            <span>BUILD // PLAY // CONNECT</span>
+            <span>12.0</span>
           </div>
 
-          <div aria-hidden="true" className="cyber-auth__visual">
-            <div className="cyber-auth__window">
-              <div className="cyber-auth__window-bar">
-                <span />
-                <span />
-                <span />
-                <p>crypt://network/live</p>
-                <Activity size={13} />
-              </div>
-              <div className="cyber-auth__network">
-                <span className="cyber-auth__route cyber-auth__route--one" />
-                <span className="cyber-auth__route cyber-auth__route--two" />
-                <span className="cyber-auth__route cyber-auth__route--three" />
-                <div className="cyber-auth__core">
-                  <span className="cyber-auth__core-ring" />
-                  <img alt="" src="/crypt-mark.svg" />
+          <div className="auth-v4__headline">
+            <p>
+              <Code2 aria-hidden="true" size={15} /> UMA REDE PARA QUEM CRIA
+            </p>
+            <h1 id="auth-manifesto-title">
+              Entre no seu
+              <span>próximo universo.</span>
+            </h1>
+            <p className="auth-v4__copy">
+              Calls, comunidades, jogos e projetos em uma interface construída para desaparecer
+              quando você está focado — e impressionar quando você olha.
+            </p>
+          </div>
+
+          <div className="auth-v4__capabilities" aria-label="Recursos principais">
+            {capabilityNodes.map(({ icon: Icon, label, value }, index) => (
+              <article
+                key={label}
+                style={{ '--auth-node-delay': `${index * 90}ms` } as CSSProperties}
+              >
+                <span>
+                  <Icon aria-hidden="true" size={17} />
+                </span>
+                <div>
+                  <strong>{label}</strong>
+                  <small>{value}</small>
                 </div>
-                {networkNodes.map((node) => (
-                  <div className={`cyber-auth__node ${node.className}`} key={node.label}>
-                    <Radio size={12} />
-                    <span>{node.label}</span>
-                    <strong>{node.status}</strong>
-                  </div>
-                ))}
-                <div className="cyber-auth__code">
-                  <span>
-                    <b>01</b> const network = <i>'crypt'</i>;
-                  </span>
-                  <span>
-                    <b>02</b> await squad.connect();
-                  </span>
-                  <span>
-                    <b>03</b> status: <em>online</em>
-                  </span>
-                </div>
-              </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="auth-v4__terminal" aria-hidden="true">
+            <header>
+              <span>
+                <Terminal size={13} /> crypt://boot
+              </span>
+              <Activity size={14} />
+            </header>
+            <div>
+              {bootSequence.map(([step, label, state]) => (
+                <p key={step}>
+                  <b>{step}</b>
+                  <span>{label}</span>
+                  <em>{state}</em>
+                </p>
+              ))}
             </div>
           </div>
+        </section>
+
+        <div aria-hidden="true" className="auth-v4__link">
+          <span className="auth-v4__link-source">
+            <Braces size={16} />
+          </span>
+          <i />
+          <span className="auth-v4__packet auth-v4__packet--one" />
+          <span className="auth-v4__packet auth-v4__packet--two" />
+          <span className="auth-v4__link-target">
+            <Binary size={16} />
+          </span>
         </div>
 
-        <p className="relative z-10 flex items-center gap-2 text-xs text-crypt-subtle">
-          <CheckCircle2 aria-hidden="true" size={15} />
-          Crypt 0.12.0 Preview — interface rebuild online
-        </p>
-      </section>
+        <section className="auth-v4__portal" aria-label="Área de acesso">
+          <div className="auth-v4__portal-shell">
+            <header className="auth-v4__portal-header">
+              <div>
+                <CircleDot aria-hidden="true" size={14} />
+                <span>SECURE SESSION</span>
+              </div>
+              <span className="auth-v4__latency">18 MS</span>
+            </header>
 
-      <section
-        aria-label="Área de acesso"
-        className="crypt-auth-access relative h-full min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8"
-      >
-        <div aria-hidden="true" className="cyber-auth__access-grid" />
-        <div className="relative mx-auto flex min-h-full w-full max-w-lg flex-col justify-center py-6 sm:py-10">
-          <div className="cyber-auth__access-meta mb-4 flex items-center justify-between px-1 text-[0.65rem] font-bold tracking-[0.18em]">
-            <span>SECURE ACCESS</span>
-            <span className="flex items-center gap-1.5">
-              <i /> ENCRYPTED
-            </span>
+            <div className="auth-v4__portal-content">
+              <Brand className="auth-v4__mobile-brand" subtitle="Realtime Community OS" />
+              <Outlet />
+            </div>
+
+            <footer className="auth-v4__portal-footer">
+              <span>
+                <ShieldCheck aria-hidden="true" size={13} /> TLS ACTIVE
+              </span>
+              <span>
+                <CheckCircle2 aria-hidden="true" size={13} /> AUTH READY
+              </span>
+            </footer>
           </div>
-          <div className="auth-surface p-5 sm:p-8 lg:p-9">
-            <Brand className="mb-10 lg:hidden" subtitle="Community OS" />
-            <Outlet />
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
+
+      <footer className="auth-v4__footer">
+        <span>CRYPT 0.12.0 // REBUILD PREVIEW</span>
+        <span>WINDOWS · ANDROID · WEB</span>
+      </footer>
     </main>
   );
 }

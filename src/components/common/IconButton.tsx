@@ -1,5 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from 'react';
 import { classNames } from '../../lib/classNames';
+import { playCryptUiSound } from '../../lib/sounds';
 
 export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
   icon: ReactNode;
@@ -8,7 +9,19 @@ export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'chi
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { className, icon, label, onPointerLeave, onPointerMove, size = 'md', type = 'button', ...props },
+  {
+    className,
+    disabled,
+    icon,
+    label,
+    onClick,
+    onPointerEnter,
+    onPointerLeave,
+    onPointerMove,
+    size = 'md',
+    type = 'button',
+    ...props
+  },
   ref,
 ) {
   function trackPointer(event: PointerEvent<HTMLButtonElement>) {
@@ -24,6 +37,11 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     onPointerLeave?.(event);
   }
 
+  function handlePointerEnter(event: PointerEvent<HTMLButtonElement>) {
+    if (!disabled) playCryptUiSound('hover');
+    onPointerEnter?.(event);
+  }
+
   return (
     <button
       aria-label={label}
@@ -34,6 +52,12 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
         size === 'sm' ? 'size-9' : 'size-11',
         className,
       )}
+      disabled={disabled}
+      onClick={(event) => {
+        playCryptUiSound('activate');
+        onClick?.(event);
+      }}
+      onPointerEnter={handlePointerEnter}
       ref={ref}
       title={label}
       type={type}
