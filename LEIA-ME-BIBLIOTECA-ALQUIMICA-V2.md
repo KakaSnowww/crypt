@@ -90,4 +90,3 @@ git restore --source=HEAD --worktree -- `
   src/styles/library-alchemy.css
 Remove-Item ".\public\art\alchemical-library-surreal.png"
 ```
-

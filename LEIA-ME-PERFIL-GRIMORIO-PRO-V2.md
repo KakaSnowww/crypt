@@ -45,4 +45,3 @@ git diff --check
 ## Reversão
 
 Se a atualização ainda não tiver sido commitada, restaure apenas os arquivos listados no ZIP a partir do checkpoint criado. Não use `git reset --hard` se houver outros trabalhos locais.
-
