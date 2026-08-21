@@ -5,6 +5,7 @@ import { isAndroidRuntime } from '../../lib/platform';
 import { getSupabaseClient, isSupabaseConfigured } from '../../lib/supabase/client';
 import { connectionKeys } from './connections.queries';
 import { heartbeatMyPresence } from './presence.service';
+import { presenceKeys } from './presence.queries';
 
 export function useConnectionsRealtime(userId: null | string) {
   const queryClient = useQueryClient();
@@ -84,7 +85,11 @@ export function useConnectionsRealtime(userId: null | string) {
           schema: 'public',
           table: 'user_presence',
         },
-        () => void queryClient.invalidateQueries({ queryKey: connectionKeys.friends }),
+        () =>
+          void Promise.all([
+            queryClient.invalidateQueries({ queryKey: connectionKeys.friends }),
+            queryClient.invalidateQueries({ queryKey: presenceKeys.all }),
+          ]),
       )
       .subscribe();
 
@@ -95,6 +100,8 @@ export function useConnectionsRealtime(userId: null | string) {
 }
 
 export function usePresenceHeartbeat(userId: null | string) {
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (!userId || !isSupabaseConfigured() || import.meta.env.MODE === 'test') {
       return;
@@ -106,7 +113,9 @@ export function usePresenceHeartbeat(userId: null | string) {
       let removeAppListener: (() => Promise<void>) | undefined;
 
       const updateAndroidPresence = () => {
-        void heartbeatMyPresence(appIsActive).catch(() => undefined);
+        void heartbeatMyPresence(appIsActive)
+          .then(() => queryClient.invalidateQueries({ queryKey: presenceKeys.all }))
+          .catch(() => undefined);
       };
 
       void import('@capacitor/app')
@@ -141,19 +150,24 @@ export function usePresenceHeartbeat(userId: null | string) {
     }
 
     const updatePresence = () => {
-      void heartbeatMyPresence(document.visibilityState !== 'hidden').catch(() => undefined);
+      void heartbeatMyPresence(document.visibilityState !== 'hidden')
+        .then(() => queryClient.invalidateQueries({ queryKey: presenceKeys.all }))
+        .catch(() => undefined);
+    };
+    const markOffline = () => {
+      void heartbeatMyPresence(false).catch(() => undefined);
     };
 
     updatePresence();
     document.addEventListener('visibilitychange', updatePresence);
-    window.addEventListener('pagehide', updatePresence);
+    window.addEventListener('pagehide', markOffline);
     const heartbeat = window.setInterval(updatePresence, 60_000);
 
     return () => {
       window.clearInterval(heartbeat);
       document.removeEventListener('visibilitychange', updatePresence);
-      window.removeEventListener('pagehide', updatePresence);
+      window.removeEventListener('pagehide', markOffline);
       void heartbeatMyPresence(false).catch(() => undefined);
     };
-  }, [userId]);
+  }, [queryClient, userId]);
 }

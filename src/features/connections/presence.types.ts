@@ -14,6 +14,13 @@ export type SavePresencePreferenceInput = {
   mode: PresenceMode;
 };
 
+export const presenceStatusInformation: Record<PresenceStatus, { label: string; tone: string }> = {
+  away: { label: 'Ausente', tone: 'bg-amber-400' },
+  busy: { label: 'Ocupado', tone: 'bg-red-400' },
+  offline: { label: 'Offline', tone: 'bg-slate-500' },
+  online: { label: 'Online', tone: 'bg-emerald-400' },
+};
+
 export const presenceModeInformation: Record<
   PresenceMode,
   {

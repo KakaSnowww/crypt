@@ -13,6 +13,7 @@ import {
   Share2,
   ShieldCheck,
   UserPlus,
+  UserCog,
   Users,
   X,
 } from 'lucide-react';
@@ -41,7 +42,18 @@ import {
 import { getServerMediaUrl } from '../features/servers/servers.service';
 import { useServerActions } from '../features/servers/useServerActions';
 import { hasPermission, serverPermission } from '../features/workspace/workspace.permissions';
-import { useMyServerPermissions, useServerChannels } from '../features/workspace/workspace.queries';
+import {
+  useMyServerPermissions,
+  useServerChannels,
+  useServerMemberRoles,
+  useServerRoles,
+} from '../features/workspace/workspace.queries';
+import { getMemberRoles } from '../features/workspace/memberGroups';
+import { QuickMemberRoleEditor } from '../features/workspace/components/QuickMemberRoleEditor';
+import {
+  normalizePresenceStatus,
+  presenceStatusInformation,
+} from '../features/connections/presence.types';
 
 const expirationOptions = [
   { label: '1 hora', value: '1' },
@@ -70,6 +82,8 @@ export function ServerRoute() {
   const moderationActions = useModerationActions(serverId);
   const channelsQuery = useServerChannels(serverId);
   const permissionsQuery = useMyServerPermissions(serverId);
+  const rolesQuery = useServerRoles(serverId);
+  const memberRolesQuery = useServerMemberRoles(serverId);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [expiration, setExpiration] = useState('168');
   const [maxUses, setMaxUses] = useState('unlimited');
@@ -77,6 +91,9 @@ export function ServerRoute() {
   const [reportTarget, setReportTarget] = useState<null | { id: string; name: string }>(null);
   const [reportReason, setReportReason] = useState('harassment');
   const [reportDetails, setReportDetails] = useState('');
+  const [roleTarget, setRoleTarget] = useState<
+    null | NonNullable<typeof membersQuery.data>[number]
+  >(null);
   const androidRuntime = isAndroidRuntime();
 
   if (
@@ -84,7 +101,9 @@ export function ServerRoute() {
     membersQuery.isPending ||
     invitesQuery.isPending ||
     channelsQuery.isPending ||
-    permissionsQuery.isPending
+    permissionsQuery.isPending ||
+    rolesQuery.isPending ||
+    memberRolesQuery.isPending
   ) {
     return (
       <div aria-label="Carregando servidor" className="grid min-h-72 place-items-center">
@@ -101,6 +120,9 @@ export function ServerRoute() {
     Boolean(overview?.is_owner) ||
     hasPermission(permissionsQuery.data ?? 0, serverPermission.createInvites) ||
     hasPermission(permissionsQuery.data ?? 0, serverPermission.manageInvites);
+  const canManageRoles =
+    Boolean(overview?.is_owner) ||
+    hasPermission(permissionsQuery.data ?? 0, serverPermission.manageRoles);
 
   if (overviewQuery.error || !overview) {
     return (
@@ -123,6 +145,8 @@ export function ServerRoute() {
   const members = membersQuery.data ?? [];
   const invites = invitesQuery.data ?? [];
   const channels = channelsQuery.data ?? [];
+  const roles = rolesQuery.data ?? [];
+  const memberRoleAssignments = memberRolesQuery.data ?? [];
   const firstChannel =
     channels.find((channel) => channel.channel_id === overview.default_channel_id) ?? channels[0];
 
@@ -480,59 +504,102 @@ export function ServerRoute() {
             <span className="text-xs text-crypt-subtle">{members.length}</span>
           </div>
           <div className="mt-4 grid gap-2">
-            {members.map((member) => (
-              <div className="flex items-center gap-1 rounded-xl" key={member.profile_id}>
-                <button
-                  className="flex min-w-0 flex-1 items-center gap-3 p-2 text-left transition hover:bg-white/[0.05]"
-                  onClick={() =>
-                    openMemberProfileCard({
-                      handle: member.handle,
-                      presenceStatus: member.is_online ? 'online' : 'offline',
-                    })
-                  }
-                  type="button"
-                >
-                  <span className="relative">
-                    <ProfileAvatar
-                      avatarPath={member.avatar_path}
-                      displayName={member.display_name}
-                      size="sm"
-                    />
-                    <span
-                      className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-crypt-panel ${
-                        member.is_online ? 'bg-emerald-400' : 'bg-slate-500'
-                      }`}
-                    />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
-                      {member.display_name}
-                      {member.is_owner ? (
-                        <Crown aria-label="Proprietário" className="text-amber-300" size={13} />
-                      ) : null}
-                    </span>
-                    <span className="block truncate text-xs text-crypt-subtle">
-                      @{member.handle}
-                    </span>
-                  </span>
-                </button>
-                {!member.is_owner ? (
+            {members.map((member) => {
+              const presence =
+                presenceStatusInformation[normalizePresenceStatus(member.presence_status)];
+              const assignedRoles = getMemberRoles(member.profile_id, roles, memberRoleAssignments);
+
+              return (
+                <div className="server-overview-member" key={member.profile_id}>
                   <button
-                    aria-label={`Denunciar ${member.display_name}`}
-                    className="rounded-lg p-2 text-crypt-subtle hover:bg-red-500/10 hover:text-red-300"
+                    className="flex min-w-0 flex-1 items-center gap-3 p-2 text-left transition hover:bg-white/[0.05]"
                     onClick={() =>
-                      setReportTarget({ id: member.profile_id, name: member.display_name })
+                      openMemberProfileCard({
+                        handle: member.handle,
+                        presenceStatus: normalizePresenceStatus(member.presence_status),
+                        roleBadges: assignedRoles.map((role) => ({
+                          color: role.color,
+                          name: role.role_name,
+                        })),
+                      })
                     }
                     type="button"
                   >
-                    <Flag aria-hidden="true" size={15} />
+                    <span className="relative">
+                      <ProfileAvatar
+                        avatarPath={member.avatar_path}
+                        displayName={member.display_name}
+                        size="sm"
+                      />
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-crypt-panel ${
+                          presence.tone
+                        }`}
+                      />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-1 truncate text-sm font-medium text-white">
+                        {member.display_name}
+                        {member.is_owner ? (
+                          <Crown aria-label="Proprietário" className="text-amber-300" size={13} />
+                        ) : null}
+                      </span>
+                      <span className="block truncate text-xs text-crypt-subtle">
+                        {presence.label} · @{member.handle}
+                      </span>
+                      {assignedRoles[0] ? (
+                        <span
+                          className="mt-1 block truncate text-[0.62rem] font-semibold"
+                          style={{ color: assignedRoles[0].color }}
+                        >
+                          {assignedRoles[0].role_name}
+                          {assignedRoles.length > 1 ? ` +${assignedRoles.length - 1}` : ''}
+                        </span>
+                      ) : null}
+                    </span>
                   </button>
-                ) : null}
-              </div>
-            ))}
+                  {canManageRoles ? (
+                    <button
+                      aria-label={`Atribuir cargos a ${member.display_name}`}
+                      className="server-overview-member__role-button"
+                      onClick={() => setRoleTarget(member)}
+                      title="Atribuir cargos"
+                      type="button"
+                    >
+                      <UserCog size={15} />
+                    </button>
+                  ) : null}
+                  {!member.is_owner ? (
+                    <button
+                      aria-label={`Denunciar ${member.display_name}`}
+                      className="rounded-lg p-2 text-crypt-subtle hover:bg-red-500/10 hover:text-red-300"
+                      onClick={() =>
+                        setReportTarget({ id: member.profile_id, name: member.display_name })
+                      }
+                      type="button"
+                    >
+                      <Flag aria-hidden="true" size={15} />
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </aside>
       </div>
+
+      {roleTarget ? (
+        <QuickMemberRoleEditor
+          member={roleTarget}
+          onOpenChange={(open) => !open && setRoleTarget(null)}
+          open
+          roles={roles}
+          selectedRoleIds={getMemberRoles(roleTarget.profile_id, roles, memberRoleAssignments).map(
+            (role) => role.role_id,
+          )}
+          serverId={serverId}
+        />
+      ) : null}
 
       <Modal
         description="A denúncia ficará visível apenas para a equipe de moderação deste servidor."

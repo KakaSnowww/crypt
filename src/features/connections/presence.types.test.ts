@@ -3,6 +3,7 @@ import {
   normalizePresenceMode,
   normalizePresenceStatus,
   presenceModeInformation,
+  presenceStatusInformation,
 } from './presence.types';
 
 describe('presença do Crypt', () => {
@@ -20,5 +21,12 @@ describe('presença do Crypt', () => {
   it('nunca transforma invisível em um status público', () => {
     expect(presenceModeInformation.invisible.label).toBe('Invisível');
     expect(normalizePresenceStatus('invisible')).toBe('offline');
+  });
+
+  it('mantém tons diferentes para online, ausente e ocupado', () => {
+    expect(presenceStatusInformation.online.tone).toBe('bg-emerald-400');
+    expect(presenceStatusInformation.away.tone).toBe('bg-amber-400');
+    expect(presenceStatusInformation.busy.tone).toBe('bg-red-400');
+    expect(presenceStatusInformation.offline.tone).toBe('bg-slate-500');
   });
 });

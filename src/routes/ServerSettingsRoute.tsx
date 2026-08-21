@@ -1,4 +1,15 @@
-import { Crown, ImagePlus, Save, ShieldAlert, Trash2, Upload, UserRoundCog } from 'lucide-react';
+import {
+  Crown,
+  ImagePlus,
+  LayoutDashboard,
+  ListTree,
+  Save,
+  Settings2,
+  ShieldAlert,
+  Trash2,
+  Upload,
+  UserRoundCog,
+} from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -161,6 +172,20 @@ function ServerSettingsContent({
 
   return (
     <main className="server-settings-center mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <nav className="server-settings-center__nav" aria-label="Administração do servidor">
+        <Link to={`/app/servidores/${server.server_id}`}>
+          <LayoutDashboard size={16} />
+          Visão geral
+        </Link>
+        <Link to={`/app/servidores/${server.server_id}/gerenciar`}>
+          <ListTree size={16} />
+          Organização e cargos
+        </Link>
+        <Link aria-current="page" to={`/app/servidores/${server.server_id}/configuracoes`}>
+          <Settings2 size={16} />
+          Configurações
+        </Link>
+      </nav>
       <div className="server-settings-center__header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Server settings</p>

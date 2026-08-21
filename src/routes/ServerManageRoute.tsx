@@ -334,8 +334,8 @@ function ChannelsManager({
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_23rem]">
-      <section className="panel p-5 sm:p-6">
+    <div className="channel-workbench grid gap-6 xl:grid-cols-[minmax(0,1fr)_23rem]">
+      <section className="channel-workbench__structure panel p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-white">Estrutura visível</h2>
         <p className="mt-1 text-xs leading-5 text-crypt-subtle">
           Segure a alça pontilhada e arraste para reordenar com mouse ou toque. Nomes aceitam
@@ -371,12 +371,33 @@ function ChannelsManager({
         ))}
       </section>
 
-      <div className="grid content-start gap-5">
+      <div className="channel-workbench__tools grid content-start gap-5">
         <section className="panel p-5">
           <h2 className="font-semibold text-white">Nova categoria</h2>
           <div className="mt-4 grid gap-3">
+            <Input
+              label="Nome"
+              onChange={(event) => setCategoryName(event.target.value)}
+              placeholder="🎨 Arte e criação"
+              value={categoryName}
+            />
+            <Button
+              leadingIcon={<FolderPlus aria-hidden="true" size={16} />}
+              loading={actions.createCategory.isPending}
+              onClick={() => void submitCategory()}
+            >
+              Criar categoria
+            </Button>
+          </div>
+        </section>
+
+        <section className="panel p-5">
+          <h2 className="font-semibold text-white">
+            {editingChannelId ? 'Editar canal' : 'Novo canal'}
+          </h2>
+          <div className="mt-4 grid gap-3">
             <label className="grid gap-2 text-sm font-medium text-white">
-              Tipo
+              Tipo de canal
               <select
                 className="min-h-11 rounded-2xl border border-white/10 bg-crypt-elevated px-3 text-sm"
                 disabled={Boolean(editingChannelId)}
@@ -399,27 +420,6 @@ function ChannelsManager({
                 <option value="video">Vídeo</option>
               </select>
             </label>
-            <Input
-              label="Nome"
-              onChange={(event) => setCategoryName(event.target.value)}
-              placeholder="🎨 Arte e criação"
-              value={categoryName}
-            />
-            <Button
-              leadingIcon={<FolderPlus aria-hidden="true" size={16} />}
-              loading={actions.createCategory.isPending}
-              onClick={() => void submitCategory()}
-            >
-              Criar categoria
-            </Button>
-          </div>
-        </section>
-
-        <section className="panel p-5">
-          <h2 className="font-semibold text-white">
-            {editingChannelId ? 'Editar canal' : 'Novo canal'}
-          </h2>
-          <div className="mt-4 grid gap-3">
             <Input
               label="Nome"
               onChange={(event) => setChannel((value) => ({ ...value, name: event.target.value }))}
@@ -642,8 +642,8 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
-      <section className="panel p-4">
+    <div className="roles-workbench grid gap-6 xl:grid-cols-[19rem_minmax(0,1fr)]">
+      <section className="roles-workbench__list panel p-4">
         <h2 className="px-2 font-semibold text-white">Cargos</h2>
         <p className="mt-1 px-2 text-xs leading-5 text-crypt-subtle">
           Cargos mais acima têm prioridade. Segure a alça e arraste até a posição desejada.
@@ -651,7 +651,7 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
         <div className="mt-3 grid gap-2">
           {roles.map((item) => (
             <div
-              className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-3 text-left hover:bg-white/[0.06]"
+              className="roles-workbench__item flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-3 text-left hover:bg-white/[0.06]"
               data-sort-id={item.role_id}
               key={item.role_id}
             >
@@ -700,7 +700,7 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
         </div>
       </section>
 
-      <section className="panel p-5 sm:p-6">
+      <section className="roles-workbench__editor panel p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold text-white">
             {editingId ? 'Editar cargo' : 'Novo cargo'}
@@ -738,7 +738,7 @@ function RolesManager({ roles, serverId }: { roles: ServerRole[]; serverId: stri
         <div className="mt-6 grid gap-2 sm:grid-cols-2">
           {permissionOptions.map((permission) => (
             <label
-              className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 text-sm text-crypt-muted"
+              className="roles-workbench__permission flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 text-sm text-crypt-muted"
               key={permission.bit}
             >
               <input

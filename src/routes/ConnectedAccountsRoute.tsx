@@ -207,140 +207,146 @@ export function ConnectedAccountsRoute() {
   });
 
   return (
-    <main className="settings-grimoire mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
-      <SettingsNavigation />
-      <p className="eyebrow">Contas conectadas</p>
-      <h1 className="settings-title mt-3 text-3xl font-bold">Sua identidade, em um só lugar</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-        A autorização acontece diretamente no Spotify ou na Steam. O Crypt não recebe sua senha e os
-        tokens ficam cifrados no backend. A conexão com o YouTube voltará depois da liberação
-        pública pelo Google.
-      </p>
+    <main className="settings-center mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="settings-center__layout">
+        <SettingsNavigation />
+        <div className="settings-center__content">
+          <p className="eyebrow">Contas conectadas</p>
+          <h1 className="settings-title mt-3 text-3xl font-bold">Sua identidade, em um só lugar</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
+            A autorização acontece diretamente no Spotify ou na Steam. O Crypt não recebe sua senha
+            e os tokens ficam cifrados no backend. A conexão com o YouTube voltará depois da
+            liberação pública pelo Google.
+          </p>
 
-      {query.error ? (
-        <p className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">
-          {query.error.message}
-        </p>
-      ) : null}
+          {query.error ? (
+            <p className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">
+              {query.error.message}
+            </p>
+          ) : null}
 
-      <div className="mt-8 grid gap-4">
-        {providers.map(({ available, description, icon: Icon, id, name }) => {
-          const connection = query.data?.find((item) => item.provider === id);
-          const isStarting = start.isPending && start.variables === id;
-          const isRefreshing = synchronize.isPending && synchronize.variables === id;
-          const isRemoving = remove.isPending && remove.variables === id;
+          <div className="mt-8 grid gap-4">
+            {providers.map(({ available, description, icon: Icon, id, name }) => {
+              const connection = query.data?.find((item) => item.provider === id);
+              const isStarting = start.isPending && start.variables === id;
+              const isRefreshing = synchronize.isPending && synchronize.variables === id;
+              const isRemoving = remove.isPending && remove.variables === id;
 
-          return (
-            <section className="settings-page relative overflow-hidden p-5" key={id}>
-              {!available && !connection ? (
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(181,139,70,0.10),transparent_42%)]" />
-              ) : null}
-              <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex min-w-0 gap-3">
-                  <span className="settings-section-icon grid size-11 shrink-0 place-items-center rounded-xl">
-                    <Icon aria-hidden="true" size={20} />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-semibold text-white">{name}</h2>
-                      {!available && !connection ? (
-                        <span className="settings-badge inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold">
-                          <Clock3 aria-hidden="true" size={11} />
-                          Em breve
-                        </span>
+              return (
+                <section className="settings-page relative overflow-hidden p-5" key={id}>
+                  {!available && !connection ? (
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(181,139,70,0.10),transparent_42%)]" />
+                  ) : null}
+                  <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 gap-3">
+                      <span className="settings-section-icon grid size-11 shrink-0 place-items-center rounded-xl">
+                        <Icon aria-hidden="true" size={20} />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="font-semibold text-white">{name}</h2>
+                          {!available && !connection ? (
+                            <span className="settings-badge inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold">
+                              <Clock3 aria-hidden="true" size={11} />
+                              Em breve
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                          {connection ? `Conectado como ${connection.display_name}` : description}
+                        </p>
+                        {connection ? (
+                          <p className="settings-accent-copy mt-2 text-xs leading-5">
+                            {connectionSummary(connection) || 'Dados públicos sincronizados.'}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {connection ? (
+                        <>
+                          {connection.profile_url ? (
+                            <Button
+                              leadingIcon={<ExternalLink size={15} />}
+                              onClick={() => openExternalAuthorization(connection.profile_url!)}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              Abrir perfil
+                            </Button>
+                          ) : null}
+                          <Button
+                            leadingIcon={<RefreshCw size={15} />}
+                            loading={isRefreshing}
+                            onClick={() => synchronize.mutate(id)}
+                            size="sm"
+                            variant="secondary"
+                          >
+                            Atualizar
+                          </Button>
+                          <Button
+                            leadingIcon={<Unplug size={15} />}
+                            loading={isRemoving}
+                            onClick={() => {
+                              if (window.confirm(`Desconectar ${name} do seu perfil?`))
+                                remove.mutate(id);
+                            }}
+                            size="sm"
+                            variant="ghost"
+                          >
+                            Desconectar
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          disabled={!available}
+                          leadingIcon={
+                            available ? <ExternalLink size={15} /> : <Clock3 size={15} />
+                          }
+                          loading={isStarting}
+                          onClick={() => start.mutate(id)}
+                          size="sm"
+                        >
+                          {available ? 'Conectar' : 'Em breve'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {connection ? (
+                    <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
+                      <Toggle
+                        checked={connection.show_on_profile}
+                        description="Exibe a identidade e os dados públicos desta conta."
+                        label="Mostrar no perfil"
+                        onChange={(value) =>
+                          update.mutate({ provider: id, values: { show_on_profile: value } })
+                        }
+                      />
+                      {id === 'spotify' ? (
+                        <Toggle
+                          checked={connection.show_activity}
+                          description="Atualiza a música atual enquanto o Crypt estiver aberto."
+                          label="Mostrar atividade"
+                          onChange={(value) =>
+                            update.mutate({ provider: id, values: { show_activity: value } })
+                          }
+                        />
                       ) : null}
                     </div>
-                    <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-                      {connection ? `Conectado como ${connection.display_name}` : description}
-                    </p>
-                    {connection ? (
-                      <p className="settings-accent-copy mt-2 text-xs leading-5">
-                        {connectionSummary(connection) || 'Dados públicos sincronizados.'}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {connection ? (
-                    <>
-                      {connection.profile_url ? (
-                        <Button
-                          leadingIcon={<ExternalLink size={15} />}
-                          onClick={() => openExternalAuthorization(connection.profile_url!)}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          Abrir perfil
-                        </Button>
-                      ) : null}
-                      <Button
-                        leadingIcon={<RefreshCw size={15} />}
-                        loading={isRefreshing}
-                        onClick={() => synchronize.mutate(id)}
-                        size="sm"
-                        variant="secondary"
-                      >
-                        Atualizar
-                      </Button>
-                      <Button
-                        leadingIcon={<Unplug size={15} />}
-                        loading={isRemoving}
-                        onClick={() => {
-                          if (window.confirm(`Desconectar ${name} do seu perfil?`))
-                            remove.mutate(id);
-                        }}
-                        size="sm"
-                        variant="ghost"
-                      >
-                        Desconectar
-                      </Button>
-                    </>
                   ) : (
-                    <Button
-                      disabled={!available}
-                      leadingIcon={available ? <ExternalLink size={15} /> : <Clock3 size={15} />}
-                      loading={isStarting}
-                      onClick={() => start.mutate(id)}
-                      size="sm"
-                    >
-                      {available ? 'Conectar' : 'Em breve'}
-                    </Button>
+                    <p className="settings-inset relative mt-4 rounded-xl px-4 py-3 text-xs leading-5">
+                      {available
+                        ? 'Ao clicar em Conectar, o navegador oficial do provedor será aberto. Depois da autorização, você voltará automaticamente ao Crypt.'
+                        : 'A integração está preservada, mas novas conexões permanecerão desligadas até concluirmos a verificação pública necessária.'}
+                    </p>
                   )}
-                </div>
-              </div>
-
-              {connection ? (
-                <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
-                  <Toggle
-                    checked={connection.show_on_profile}
-                    description="Exibe a identidade e os dados públicos desta conta."
-                    label="Mostrar no perfil"
-                    onChange={(value) =>
-                      update.mutate({ provider: id, values: { show_on_profile: value } })
-                    }
-                  />
-                  {id === 'spotify' ? (
-                    <Toggle
-                      checked={connection.show_activity}
-                      description="Atualiza a música atual enquanto o Crypt estiver aberto."
-                      label="Mostrar atividade"
-                      onChange={(value) =>
-                        update.mutate({ provider: id, values: { show_activity: value } })
-                      }
-                    />
-                  ) : null}
-                </div>
-              ) : (
-                <p className="settings-inset relative mt-4 rounded-xl px-4 py-3 text-xs leading-5">
-                  {available
-                    ? 'Ao clicar em Conectar, o navegador oficial do provedor será aberto. Depois da autorização, você voltará automaticamente ao Crypt.'
-                    : 'A integração está preservada, mas novas conexões permanecerão desligadas até concluirmos a verificação pública necessária.'}
-                </p>
-              )}
-            </section>
-          );
-        })}
+                </section>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </main>
   );

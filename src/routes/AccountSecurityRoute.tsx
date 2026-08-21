@@ -73,158 +73,168 @@ export function AccountSecurityRoute() {
   }
 
   return (
-    <main className="settings-grimoire mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-      <SettingsNavigation />
-      <p className="eyebrow">Conta e segurança</p>
-      <h1 className="settings-title mt-3 text-3xl font-bold tracking-tight">Proteja seu acesso</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-        Sua senha permanece exclusivamente no Supabase Auth e nunca é salva na tabela pública de
-        perfis.
-      </p>
+    <main className="settings-center mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="settings-center__layout">
+        <SettingsNavigation />
+        <div className="settings-center__content">
+          <p className="eyebrow">Conta e segurança</p>
+          <h1 className="settings-title mt-3 text-3xl font-bold tracking-tight">
+            Proteja seu acesso
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
+            Sua senha permanece exclusivamente no Supabase Auth e nunca é salva na tabela pública de
+            perfis.
+          </p>
 
-      <section className="settings-page mt-8 p-5 sm:p-7" aria-labelledby="session-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-400/10 text-emerald-300">
-            <ShieldCheck aria-hidden="true" size={20} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="session-title">
-              Sessão ativa
-            </h2>
-            <p className="mt-1 text-sm text-crypt-muted">{user?.email}</p>
-          </div>
-        </div>
-        <Button
-          className="mt-5"
-          leadingIcon={<LogOut aria-hidden="true" size={17} />}
-          onClick={() => void handleLogout()}
-          variant="secondary"
-        >
-          Sair neste dispositivo
-        </Button>
-      </section>
-
-      <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="password-title">
-        <h2 className="text-lg font-semibold text-white" id="password-title">
-          Alterar senha
-        </h2>
-        <form
-          className="mt-5 grid max-w-lg gap-5"
-          noValidate
-          onSubmit={(event) =>
-            void passwordForm.handleSubmit(async (values) => {
-              await passwordMutation.mutateAsync(values).catch(() => undefined);
-            })(event)
-          }
-        >
-          <Input
-            autoComplete="new-password"
-            errorText={passwordForm.formState.errors.password?.message}
-            label="Nova senha"
-            leadingIcon={<KeyRound aria-hidden="true" size={17} />}
-            required
-            type="password"
-            {...passwordForm.register('password')}
-          />
-          <Input
-            autoComplete="new-password"
-            errorText={passwordForm.formState.errors.confirmPassword?.message}
-            label="Confirme a nova senha"
-            leadingIcon={<KeyRound aria-hidden="true" size={17} />}
-            required
-            type="password"
-            {...passwordForm.register('confirmPassword')}
-          />
-          <AuthFormError
-            message={
-              passwordMutation.error ? toAuthActionError(passwordMutation.error).message : undefined
-            }
-          />
-          <Button className="w-fit" loading={passwordMutation.isPending} type="submit">
-            Atualizar senha
-          </Button>
-        </form>
-      </section>
-
-      <DesktopUpdatePanel />
-      <AndroidUpdatePanel />
-      <SoundSettingsPanel />
-      <WindowsStartupPanel />
-
-      <section
-        className="mt-5 rounded-[1.75rem] border border-red-400/15 bg-red-500/[0.06] p-5 sm:p-7"
-        aria-labelledby="danger-title"
-      >
-        <h2 className="text-lg font-semibold text-red-100" id="danger-title">
-          Zona de perigo
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-crypt-muted">
-          A exclusão remove o usuário do sistema de autenticação e o perfil relacionado. Esta ação
-          não pode ser desfeita.
-        </p>
-        <Button
-          className="mt-5"
-          leadingIcon={<Trash2 aria-hidden="true" size={17} />}
-          onClick={() => setDeleteModalOpen(true)}
-          variant="danger"
-        >
-          Excluir minha conta
-        </Button>
-      </section>
-
-      <Modal
-        description="Confirme sua senha atual e a palavra EXCLUIR. A função administrativa roda somente no servidor."
-        footer={
-          <>
-            <Button onClick={() => setDeleteModalOpen(false)} variant="secondary">
-              Cancelar
-            </Button>
+          <section className="settings-page mt-8 p-5 sm:p-7" aria-labelledby="session-title">
+            <div className="flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-400/10 text-emerald-300">
+                <ShieldCheck aria-hidden="true" size={20} />
+              </span>
+              <div>
+                <h2 className="font-semibold text-white" id="session-title">
+                  Sessão ativa
+                </h2>
+                <p className="mt-1 text-sm text-crypt-muted">{user?.email}</p>
+              </div>
+            </div>
             <Button
-              form="delete-account-form"
-              loading={deletionMutation.isPending}
-              type="submit"
+              className="mt-5"
+              leadingIcon={<LogOut aria-hidden="true" size={17} />}
+              onClick={() => void handleLogout()}
+              variant="secondary"
+            >
+              Sair neste dispositivo
+            </Button>
+          </section>
+
+          <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="password-title">
+            <h2 className="text-lg font-semibold text-white" id="password-title">
+              Alterar senha
+            </h2>
+            <form
+              className="mt-5 grid max-w-lg gap-5"
+              noValidate
+              onSubmit={(event) =>
+                void passwordForm.handleSubmit(async (values) => {
+                  await passwordMutation.mutateAsync(values).catch(() => undefined);
+                })(event)
+              }
+            >
+              <Input
+                autoComplete="new-password"
+                errorText={passwordForm.formState.errors.password?.message}
+                label="Nova senha"
+                leadingIcon={<KeyRound aria-hidden="true" size={17} />}
+                required
+                type="password"
+                {...passwordForm.register('password')}
+              />
+              <Input
+                autoComplete="new-password"
+                errorText={passwordForm.formState.errors.confirmPassword?.message}
+                label="Confirme a nova senha"
+                leadingIcon={<KeyRound aria-hidden="true" size={17} />}
+                required
+                type="password"
+                {...passwordForm.register('confirmPassword')}
+              />
+              <AuthFormError
+                message={
+                  passwordMutation.error
+                    ? toAuthActionError(passwordMutation.error).message
+                    : undefined
+                }
+              />
+              <Button className="w-fit" loading={passwordMutation.isPending} type="submit">
+                Atualizar senha
+              </Button>
+            </form>
+          </section>
+
+          <DesktopUpdatePanel />
+          <AndroidUpdatePanel />
+          <SoundSettingsPanel />
+          <WindowsStartupPanel />
+
+          <section
+            className="mt-5 rounded-[1.75rem] border border-red-400/15 bg-red-500/[0.06] p-5 sm:p-7"
+            aria-labelledby="danger-title"
+          >
+            <h2 className="text-lg font-semibold text-red-100" id="danger-title">
+              Zona de perigo
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-crypt-muted">
+              A exclusão remove o usuário do sistema de autenticação e o perfil relacionado. Esta
+              ação não pode ser desfeita.
+            </p>
+            <Button
+              className="mt-5"
+              leadingIcon={<Trash2 aria-hidden="true" size={17} />}
+              onClick={() => setDeleteModalOpen(true)}
               variant="danger"
             >
-              Excluir definitivamente
+              Excluir minha conta
             </Button>
-          </>
-        }
-        onOpenChange={setDeleteModalOpen}
-        open={deleteModalOpen}
-        title="Excluir sua conta?"
-      >
-        <form
-          className="grid gap-5"
-          id="delete-account-form"
-          noValidate
-          onSubmit={(event) =>
-            void deletionForm.handleSubmit(async (values) => {
-              await deletionMutation.mutateAsync(values).catch(() => undefined);
-            })(event)
-          }
-        >
-          <Input
-            autoComplete="current-password"
-            errorText={deletionForm.formState.errors.password?.message}
-            label="Senha atual"
-            required
-            type="password"
-            {...deletionForm.register('password')}
-          />
-          <Input
-            autoComplete="off"
-            errorText={deletionForm.formState.errors.confirmation?.message}
-            label="Digite EXCLUIR"
-            required
-            {...deletionForm.register('confirmation')}
-          />
-          <AuthFormError
-            message={
-              deletionMutation.error ? toAuthActionError(deletionMutation.error).message : undefined
+          </section>
+
+          <Modal
+            description="Confirme sua senha atual e a palavra EXCLUIR. A função administrativa roda somente no servidor."
+            footer={
+              <>
+                <Button onClick={() => setDeleteModalOpen(false)} variant="secondary">
+                  Cancelar
+                </Button>
+                <Button
+                  form="delete-account-form"
+                  loading={deletionMutation.isPending}
+                  type="submit"
+                  variant="danger"
+                >
+                  Excluir definitivamente
+                </Button>
+              </>
             }
-          />
-        </form>
-      </Modal>
+            onOpenChange={setDeleteModalOpen}
+            open={deleteModalOpen}
+            title="Excluir sua conta?"
+          >
+            <form
+              className="grid gap-5"
+              id="delete-account-form"
+              noValidate
+              onSubmit={(event) =>
+                void deletionForm.handleSubmit(async (values) => {
+                  await deletionMutation.mutateAsync(values).catch(() => undefined);
+                })(event)
+              }
+            >
+              <Input
+                autoComplete="current-password"
+                errorText={deletionForm.formState.errors.password?.message}
+                label="Senha atual"
+                required
+                type="password"
+                {...deletionForm.register('password')}
+              />
+              <Input
+                autoComplete="off"
+                errorText={deletionForm.formState.errors.confirmation?.message}
+                label="Digite EXCLUIR"
+                required
+                {...deletionForm.register('confirmation')}
+              />
+              <AuthFormError
+                message={
+                  deletionMutation.error
+                    ? toAuthActionError(deletionMutation.error).message
+                    : undefined
+                }
+              />
+            </form>
+          </Modal>
+        </div>
+      </div>
     </main>
   );
 }

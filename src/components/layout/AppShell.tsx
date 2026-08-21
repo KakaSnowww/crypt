@@ -213,6 +213,9 @@ export function AppShell() {
     hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageChannels) ||
     hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageCategories) ||
     hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageRoles);
+  const canManageRoles =
+    Boolean(currentServer?.is_owner) ||
+    hasPermission(serverPermissionsQuery.data ?? 0, serverPermission.manageRoles);
   const unreadNotifications =
     notificationsQuery.data?.filter((notification) => !notification.read_at).length ?? 0;
   const unreadDirectMessages = (directConversationsQuery.data ?? []).reduce(
@@ -751,8 +754,10 @@ export function AppShell() {
             </div>
             <ServerMemberGroups
               assignments={serverMemberRoles}
+              canManageRoles={canManageRoles}
               members={serverMembers}
               roles={serverRoles}
+              serverId={selectedServerId}
             />
           </aside>
         ) : null}
@@ -843,8 +848,10 @@ export function AppShell() {
         {currentServer ? (
           <ServerMemberGroups
             assignments={serverMemberRoles}
+            canManageRoles={canManageRoles}
             members={serverMembers}
             roles={serverRoles}
+            serverId={selectedServerId}
           />
         ) : (
           <div className="mt-4 rounded-2xl border border-dashed border-white/10 p-4 text-xs leading-5 text-crypt-subtle">
