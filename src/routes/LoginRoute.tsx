@@ -1,18 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { ArrowRight, Fingerprint, KeyRound, Mail, ShieldCheck } from 'lucide-react';
+import { KeyRound, Mail, ShieldCheck } from 'lucide-react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
 import { toAuthActionError } from '../features/auth/auth.errors';
 import { loginSchema, type LoginValues } from '../features/auth/auth.schemas';
 import { getSafeNextPath, loginWithPassword } from '../features/auth/auth.service';
 import { AuthConfigurationNotice } from '../features/auth/components/AuthConfigurationNotice';
+import {
+  useAuthExperience,
+  waitForAuthTransition,
+} from '../features/auth/components/useAuthExperience';
+import { AuthField } from '../features/auth/components/AuthField';
 import { AuthFormError } from '../features/auth/components/AuthFormError';
+import { AuthScreen } from '../features/auth/components/AuthScreen';
+import { AuthSubmitButton } from '../features/auth/components/AuthSubmitButton';
 
 export function LoginRoute() {
   const navigate = useNavigate();
+  const { setPhase } = useAuthExperience();
   const [searchParams] = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get('next'));
   const form = useForm<LoginValues>({
@@ -24,61 +31,59 @@ export function LoginRoute() {
   });
   const loginMutation = useMutation({
     mutationFn: loginWithPassword,
-    onSuccess: () => void navigate(nextPath, { replace: true }),
+    onSuccess: async () => {
+      setPhase('verified');
+      await waitForAuthTransition();
+      void navigate(nextPath, { replace: true });
+    },
   });
+
+  useEffect(() => {
+    if (loginMutation.isPending) setPhase('loading');
+    else if (loginMutation.error) setPhase('error');
+  }, [loginMutation.error, loginMutation.isPending, setPhase]);
 
   const handleSubmit = form.handleSubmit(async (values) => {
     await loginMutation.mutateAsync(values).catch(() => undefined);
   });
 
   return (
-    <section aria-labelledby="login-title" className="access-v4">
-      <header className="access-v4__header">
-        <div className="access-v4__sequence">
-          <span>01</span>
-          <i />
-          <span>02</span>
-          <i />
-          <span>03</span>
-        </div>
-        <p className="eyebrow">
-          <Fingerprint size={14} /> Identity handshake
-        </p>
-        <h1 id="login-title">Reconecte-se.</h1>
-        <p>Sua comunidade, suas conversas e seus servidores estão esperando.</p>
-      </header>
+    <AuthScreen
+      description="Entre para continuar no Crypt. Sua sessão será protegida e sincronizada com seus espaços."
+      eyebrow="Identity handshake"
+      id="login-title"
+      step="01"
+      title="Bem-vindo de volta"
+    >
       <AuthConfigurationNotice />
 
-      <form className="access-v4__form" noValidate onSubmit={(event) => void handleSubmit(event)}>
-        <Input
+      <form className="auth-form" noValidate onSubmit={(event) => void handleSubmit(event)}>
+        <AuthField
           autoComplete="email"
           errorText={form.formState.errors.email?.message}
           label="E-mail"
-          leadingIcon={<Mail aria-hidden="true" size={17} />}
+          icon={<Mail aria-hidden="true" size={17} />}
           placeholder="voce@exemplo.com"
           required
           type="email"
           {...form.register('email')}
         />
-        <Input
+        <AuthField
           autoComplete="current-password"
           errorText={form.formState.errors.password?.message}
           label="Senha"
-          leadingIcon={<KeyRound aria-hidden="true" size={17} />}
+          icon={<KeyRound aria-hidden="true" size={17} />}
           placeholder="Digite sua senha"
           required
           type="password"
           {...form.register('password')}
         />
 
-        <div className="access-v4__recovery">
+        <div className="auth-form__options">
           <span>
             <ShieldCheck size={13} /> Conexão protegida
           </span>
-          <Link
-            className="cyber-auth__link rounded-lg text-xs font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
-            to="/recuperar-senha"
-          >
+          <Link className="auth-link" to="/recuperar-senha">
             Esqueci minha senha
           </Link>
         </div>
@@ -87,26 +92,22 @@ export function LoginRoute() {
           message={loginMutation.error ? toAuthActionError(loginMutation.error).message : undefined}
         />
 
-        <Button
-          className="access-v4__submit"
+        <AuthSubmitButton
           loading={loginMutation.isPending}
-          size="lg"
+          loadingLabel="ESTABELECENDO SESSÃO"
           type="submit"
         >
-          Acessar o Crypt <ArrowRight size={17} />
-        </Button>
+          Entrar no Crypt
+        </AuthSubmitButton>
       </form>
 
-      <div className="access-v4__switch">
-        <span>NEW OPERATOR</span>
-        <p>Ainda não tem uma conta?</p>
-        <Link
-          className="cyber-auth__link font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
-          to="/cadastro"
-        >
-          Criar conta
+      <div className="auth-form__switch">
+        <span>NEW IDENTITY</span>
+        <p>Ainda não faz parte da rede?</p>
+        <Link className="auth-link" to="/cadastro">
+          Criar uma conta
         </Link>
       </div>
-    </section>
+    </AuthScreen>
   );
 }

@@ -1,12 +1,16 @@
-import { CircleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Spinner } from '../components/common/Spinner';
 import { toAuthActionError } from '../features/auth/auth.errors';
 import { completeAuthCallback, getSafeNextPath } from '../features/auth/auth.service';
+import {
+  useAuthExperience,
+  waitForAuthTransition,
+} from '../features/auth/components/useAuthExperience';
+import { AuthState } from '../features/auth/components/AuthScreen';
 
 export function AuthCallbackRoute() {
   const navigate = useNavigate();
+  const { setPhase } = useAuthExperience();
   const [searchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string>();
   const code = searchParams.get('code');
@@ -18,14 +22,19 @@ export function AuthCallbackRoute() {
 
   useEffect(() => {
     if (immediateError || !code) {
+      setPhase('error');
       return;
     }
 
     let active = true;
+    setPhase('loading');
 
     void completeAuthCallback(code)
-      .then(() => {
+      .then(async () => {
         if (active) {
+          setPhase('verified');
+          await waitForAuthTransition(420);
+          if (!active) return;
           const nextPath =
             requestedNext === '/redefinir-senha'
               ? '/redefinir-senha'
@@ -35,6 +44,7 @@ export function AuthCallbackRoute() {
       })
       .catch((error: unknown) => {
         if (active) {
+          setPhase('error');
           setErrorMessage(toAuthActionError(error).message);
         }
       });
@@ -42,35 +52,31 @@ export function AuthCallbackRoute() {
     return () => {
       active = false;
     };
-  }, [code, immediateError, navigate, requestedNext]);
+  }, [code, immediateError, navigate, requestedNext, setPhase]);
 
   const visibleError = immediateError ?? errorMessage;
 
   if (visibleError) {
     return (
-      <section aria-labelledby="callback-error-title">
-        <span className="grid size-12 place-items-center rounded-2xl bg-red-500/10 text-red-300">
-          <CircleAlert aria-hidden="true" size={24} />
-        </span>
-        <h1 className="mt-5 text-3xl font-bold tracking-tight text-white" id="callback-error-title">
-          Não foi possível concluir
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-crypt-muted">{visibleError}</p>
-        <Link
-          className="mt-7 inline-flex min-h-11 items-center justify-center rounded-2xl bg-violet-600 px-4 text-sm font-semibold text-white hover:bg-violet-500"
-          to="/login"
-        >
-          Voltar para o login
-        </Link>
-      </section>
+      <AuthState
+        action={
+          <Link className="auth-state__button" to="/login">
+            Voltar para o login
+          </Link>
+        }
+        description={visibleError}
+        icon="error"
+        id="callback-error-title"
+        title="Não foi possível concluir"
+      />
     );
   }
 
   return (
-    <section aria-live="polite" className="grid justify-items-center gap-4 py-12 text-center">
-      <Spinner />
-      <h1 className="text-xl font-semibold text-white">Validando seu acesso…</h1>
-      <p className="text-sm text-crypt-muted">Esta etapa leva apenas alguns segundos.</p>
-    </section>
+    <AuthState
+      description="Estamos verificando a assinatura recebida e preparando sua sessão."
+      id="callback-loading-title"
+      title="Validando seu acesso…"
+    />
   );
 }
