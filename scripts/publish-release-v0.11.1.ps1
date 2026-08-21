@@ -25,6 +25,20 @@ function Require-Command(
   }
 }
 
+function Test-ForbiddenReleasePath(
+  [string]$Path
+) {
+  $isEnvironmentFile =
+    $Path -match '(^|/)\.env($|\.)' -and
+    $Path -notmatch '(^|/)\.env\.(example|sample|template)$'
+
+  return (
+    $isEnvironmentFile -or
+    $Path -match 'google-services\.json$' -or
+    $Path -match '\.(jks|keystore)$'
+  )
+}
+
 Require-Command `
   'git' `
   'Git não foi encontrado.'
@@ -103,9 +117,7 @@ if ($variableNames -notcontains 'DISCORD_APPLICATION_ID') {
 $forbiddenTracked = @(
   git ls-files
 ) | Where-Object {
-  $_ -match '(^|/)\.env($|\.)' -or
-  $_ -match 'google-services\.json$' -or
-  $_ -match '\.(jks|keystore)$'
+  Test-ForbiddenReleasePath $_
 }
 
 if ($forbiddenTracked.Count -gt 0) {
@@ -173,9 +185,7 @@ $staged = @(
 
 $forbiddenStaged =
   $staged | Where-Object {
-    $_ -match '(^|/)\.env($|\.)' -or
-    $_ -match 'google-services\.json$' -or
-    $_ -match '\.(jks|keystore)$'
+    Test-ForbiddenReleasePath $_
   }
 
 if ($forbiddenStaged.Count -gt 0) {

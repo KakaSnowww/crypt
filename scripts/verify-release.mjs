@@ -92,6 +92,13 @@ check(
 );
 
 check(
+  publishScript.includes('.env\\.(example|sample|template)$') &&
+    publishScript.includes('Test-ForbiddenReleasePath'),
+  'Modelos públicos de ambiente não são tratados como segredos',
+  'O script de publicação bloqueia incorretamente arquivos .env.example',
+);
+
+check(
   windowsWorkflow.includes('npm run release:verify') &&
     windowsWorkflow.includes('Crypt-Windows-$version.sha256') &&
     windowsWorkflow.includes(expectedTitle),
