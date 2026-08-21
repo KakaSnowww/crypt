@@ -99,6 +99,14 @@ check(
 );
 
 check(
+  !publishScript.includes('(& git tag --list $tag).Trim()') &&
+    publishScript.includes('$localTags.Count -gt 0') &&
+    publishScript.includes('$remoteTags.Count -gt 0'),
+  'Ausência de tag é tratada sem chamar método em valor nulo',
+  'A verificação de tags não é compatível com saída vazia no Windows PowerShell 5.1',
+);
+
+check(
   windowsWorkflow.includes('npm run release:verify') &&
     windowsWorkflow.includes('Crypt-Windows-$version.sha256') &&
     windowsWorkflow.includes(expectedTitle),
