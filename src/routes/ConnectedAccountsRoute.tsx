@@ -207,17 +207,24 @@ export function ConnectedAccountsRoute() {
   });
 
   return (
-    <main className="settings-center mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <main className="settings-center connected-v4 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <div className="settings-center__layout">
         <SettingsNavigation />
-        <div className="settings-center__content">
-          <p className="eyebrow">Contas conectadas</p>
-          <h1 className="settings-title mt-3 text-3xl font-bold">Sua identidade, em um só lugar</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-            A autorização acontece diretamente no Spotify ou na Steam. O Crypt não recebe sua senha
-            e os tokens ficam cifrados no backend. A conexão com o YouTube voltará depois da
-            liberação pública pelo Google.
-          </p>
+        <div className="settings-center__content connected-v4__content">
+          <header className="connected-v4__header">
+            <span>INTEGRATIONS // 02</span>
+            <div>
+              <p className="eyebrow">Contas conectadas</p>
+              <h1>Sua identidade, em um só lugar</h1>
+              <p>
+                Autorize Spotify e Steam sem entregar sua senha ao Crypt. Os tokens permanecem
+                cifrados no backend.
+              </p>
+            </div>
+            <div className="connected-v4__sync">
+              <i /> VAULT ONLINE
+            </div>
+          </header>
 
           {query.error ? (
             <p className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-200">
@@ -225,15 +232,19 @@ export function ConnectedAccountsRoute() {
             </p>
           ) : null}
 
-          <div className="mt-8 grid gap-4">
-            {providers.map(({ available, description, icon: Icon, id, name }) => {
+          <div className="connected-v4__grid">
+            {providers.map(({ available, description, icon: Icon, id, name }, index) => {
               const connection = query.data?.find((item) => item.provider === id);
               const isStarting = start.isPending && start.variables === id;
               const isRefreshing = synchronize.isPending && synchronize.variables === id;
               const isRemoving = remove.isPending && remove.variables === id;
 
               return (
-                <section className="settings-page relative overflow-hidden p-5" key={id}>
+                <section className="connected-v4__card" key={id}>
+                  <div className="connected-v4__card-index">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <i className={connection ? 'is-linked' : ''} />
+                  </div>
                   {!available && !connection ? (
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(181,139,70,0.10),transparent_42%)]" />
                   ) : null}
