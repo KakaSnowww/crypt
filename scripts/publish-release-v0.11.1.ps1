@@ -130,7 +130,7 @@ if ($remoteTag) {
 }
 
 Write-Host ''
-Write-Host 'CRYPT — PUBLICAÇÃO OFICIAL' -ForegroundColor Magenta
+Write-Host 'CRYPT - PUBLICACAO OFICIAL' -ForegroundColor Magenta
 Write-Host ''
 Write-Host "Versão: $version"
 Write-Host "Branch: $branch"
@@ -194,7 +194,7 @@ if ($staged.Count -gt 0) {
   }
 }
 
-git tag -a $tag -m "Crypt v$version — Clear Signal"
+git tag -a $tag -m "Crypt v$version - Clear Signal"
 
 if ($LASTEXITCODE -ne 0) {
   Stop-Release 'Não foi possível criar a tag.'

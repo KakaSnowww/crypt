@@ -44,6 +44,7 @@ const releaseNotes = readText('src/features/desktopUpdates/releaseNotes.ts');
 const windowsWorkflow = readText('.github/workflows/release-windows.yml');
 const androidWorkflow = readText('.github/workflows/release-android.yml');
 const publicNotes = readText(`docs/releases/v${expectedVersion}.md`);
+const publishScript = readText(`scripts/publish-release-v${expectedVersion}.ps1`);
 
 check(
   packageJson?.version === expectedVersion,
@@ -82,6 +83,12 @@ check(
   publicNotes.includes(`# Crypt v${expectedVersion} — ${expectedTitle}`),
   'Notas públicas da release existem',
   'Notas públicas da release estão ausentes',
+);
+
+check(
+  publishScript.includes(`git tag -a $tag -m "Crypt v$version - ${expectedTitle}"`),
+  'Mensagem da tag é compatível com Windows PowerShell 5.1',
+  'Mensagem da tag contém caracteres que quebram o Windows PowerShell 5.1',
 );
 
 check(
