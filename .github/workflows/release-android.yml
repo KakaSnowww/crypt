@@ -124,7 +124,7 @@ jobs:
 
           if ! gh release view "$tag" --repo "$repository" >/dev/null 2>&1; then
             if [ -f "$notes_path" ]; then
-              gh release create "$tag" --repo "$repository" --title "Crypt v$version — A Ascensão Arcana" --notes-file "$notes_path"
+              gh release create "$tag" --repo "$repository" --title "Crypt v$version — System Reboot" --notes-file "$notes_path"
             else
               gh release create "$tag" --repo "$repository" --title "Crypt v$version" --generate-notes
             fi

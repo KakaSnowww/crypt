@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import './tokens.css';
-@import './arcane-theme.css';
+@import './cyber-auth.css';
 @import './accessibility-performance.css';
 
 :root {

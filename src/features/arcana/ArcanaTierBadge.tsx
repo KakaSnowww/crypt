@@ -11,16 +11,10 @@ type Props = {
   tierNumber: null | number | undefined;
 };
 
-export function ArcanaTierBadge({
-  className = '',
-  compact = false,
-  tierColor,
-  tierName,
-  tierNumber,
-}: Props) {
+export function ArcanaTierBadge({ className = '', compact = false, tierColor, tierNumber }: Props) {
   const asset = getArcanaTierAsset(tierNumber);
   const color = tierColor ?? asset.color;
-  const name = tierName ?? asset.name;
+  const level = Math.max(1, Math.min(12, tierNumber ?? 1));
 
   return (
     <span
@@ -32,7 +26,7 @@ export function ArcanaTierBadge({
       }
     >
       <ArcanaTierIcon decorative size={compact ? 'xs' : 'sm'} tierNumber={tierNumber} />
-      <span>Arcana {name}</span>
+      <span>Crypt Pro · Nível {level}</span>
     </span>
   );
 }

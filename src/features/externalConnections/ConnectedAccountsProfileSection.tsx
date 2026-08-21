@@ -119,7 +119,7 @@ function accountSubtitle(account: PublicAccount) {
     if (typeof currentGame === 'string' && currentGame) return `Jogando ${currentGame}`;
     const gameCount = numericDetail(account.details, 'game_count');
     return gameCount === null
-      ? 'Biblioteca privada'
+      ? 'Perfil privado'
       : `${new Intl.NumberFormat('pt-BR').format(gameCount)} jogos visíveis`;
   }
 

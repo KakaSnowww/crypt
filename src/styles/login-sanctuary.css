@@ -1,0 +1,7 @@
+/* Deprecated: regras do antigo "Santuário Arcano" standalone.
+   Os estilos de autenticação foram consolidados em `arcane-theme.css`
+   (bloco "PREMIUM AUTH EXPERIENCE"). Este arquivo é mantido apenas
+   para evitar imports quebrados em branches antigos e será removido
+   em uma release futura. */
+
+@charset "UTF-8";

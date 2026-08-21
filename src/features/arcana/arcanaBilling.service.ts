@@ -11,13 +11,13 @@ type BillingResponse = {
 };
 
 const billingErrors: Record<string, string> = {
-  already_active: 'Sua Arcana já está ativa.',
+  already_active: 'Seu Crypt Pro já está ativo.',
   asaas_not_configured: 'As credenciais do Asaas ainda não foram configuradas.',
   asaas_request_failed: 'O Asaas não conseguiu concluir a solicitação agora.',
   authentication_required: 'Entre novamente para administrar sua assinatura.',
   checkout_in_progress: 'Um checkout já está sendo criado. Aguarde alguns segundos.',
   invalid_session: 'Sua sessão expirou. Entre novamente.',
-  no_subscription: 'Nenhuma assinatura da Arcana foi encontrada no Asaas.',
+  no_subscription: 'Nenhuma assinatura do Crypt Pro foi encontrada no Asaas.',
   origin_not_allowed: 'O Crypt bloqueou uma origem não autorizada.',
   provider_error: 'Não foi possível administrar a assinatura agora.',
 };

@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $project = Split-Path $PSScriptRoot -Parent
-$version = '0.10.0'
+$version = '0.11.0'
 $output = Join-Path $project "release-local\v$version"
 
 Set-Location $project

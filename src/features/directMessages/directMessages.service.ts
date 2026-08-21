@@ -306,12 +306,27 @@ export async function markDirectRead(conversationId: string) {
 
 function extensionForFile(file: File) {
   const knownExtensions: Record<string, string> = {
+    'application/json': 'json',
     'application/pdf': 'pdf',
+    'application/vnd.rar': 'rar',
+    'application/x-7z-compressed': '7z',
+    'application/x-rar-compressed': 'rar',
+    'application/x-zip-compressed': 'zip',
+    'application/zip': 'zip',
+    'audio/mpeg': 'mp3',
+    'audio/ogg': 'ogg',
+    'audio/wav': 'wav',
+    'audio/webm': 'weba',
     'image/gif': 'gif',
     'image/jpeg': 'jpg',
     'image/png': 'png',
     'image/webp': 'webp',
+    'text/csv': 'csv',
+    'text/markdown': 'md',
     'text/plain': 'txt',
+    'video/mp4': 'mp4',
+    'video/quicktime': 'mov',
+    'video/webm': 'webm',
   };
 
   return knownExtensions[file.type] ?? 'bin';

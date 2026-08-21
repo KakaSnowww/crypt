@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
-import { FileUp, Image, Palette, Sparkles, Users } from 'lucide-react';
+import { FileUp, Image, Palette, Users, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { CommunityRuneIcon } from '../../arcana/CommunityRuneIcon';
 import { useServerArcanaStatus } from '../serverArcana.queries';
 import { formatServerAttachmentLimit, getServerCirclePalette } from '../serverArcana.types';
 import '../serverArcana.css';
@@ -56,10 +55,10 @@ export function ServerArcanaPanel({ serverId }: { serverId: string }) {
     {
       description:
         status.circle_level >= 3
-          ? 'Benefício máximo do Círculo ativo.'
-          : 'Desbloqueado com 15 Runas ativas.',
-      icon: Sparkles,
-      title: 'Círculo máximo',
+          ? 'Pacote máximo de benefícios ativo.'
+          : 'Desbloqueado com 15 Boosts ativos.',
+      icon: Zap,
+      title: 'Boost máximo',
       unlocked: status.circle_level >= 3,
     },
   ] as const;
@@ -73,15 +72,15 @@ export function ServerArcanaPanel({ serverId }: { serverId: string }) {
       <div className="server-arcana-panel__header">
         <div className="flex min-w-0 items-start gap-3">
           <span className="server-arcana-panel__mark">
-            <CommunityRuneIcon decorative size="md" />
+            <Zap aria-hidden="true" size={22} />
           </span>
           <div className="min-w-0">
-            <p className="eyebrow">Runas de Comunidade</p>
+            <p className="eyebrow">Boosts de Comunidade</p>
             <h2 className="mt-2 text-xl font-bold text-white" id="server-arcana-title">
-              {status.circle_name}
+              Boost nível {status.circle_level}
             </h2>
             <p className="mt-1 text-xs leading-5 text-crypt-muted">
-              {status.rune_count} {status.rune_count === 1 ? 'Runa ativa' : 'Runas ativas'} de{' '}
+              {status.rune_count} {status.rune_count === 1 ? 'Boost ativo' : 'Boosts ativos'} de{' '}
               {status.contributor_count}{' '}
               {status.contributor_count === 1 ? 'apoiador' : 'apoiadores'}.
             </p>
@@ -98,7 +97,7 @@ export function ServerArcanaPanel({ serverId }: { serverId: string }) {
         <div className="flex items-center justify-between gap-4 text-[0.65rem] text-crypt-muted">
           <span>
             {nextThreshold === null
-              ? 'Círculo completo'
+              ? 'Boost completo'
               : `${status.runes_to_next_level} para o próximo nível`}
           </span>
           <span>
@@ -124,9 +123,9 @@ export function ServerArcanaPanel({ serverId }: { serverId: string }) {
       </div>
 
       <p className="relative mt-5 text-xs leading-5 text-crypt-subtle">
-        Pessoas com Arcana podem direcionar até três Runas.{' '}
+        Pessoas com Crypt Pro podem direcionar até três Boosts.{' '}
         <Link className="font-semibold text-violet-200 hover:text-white" to="/app/arcana">
-          Administrar minhas Runas
+          Administrar meus Boosts
         </Link>
         .
       </p>

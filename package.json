@@ -1,7 +1,7 @@
 {
   "name": "crypt",
   "private": true,
-  "version": "0.10.0",
+  "version": "0.11.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Plataforma social de comunidades, conversas, amizades e interesses.",
@@ -49,7 +49,7 @@
     "validate:desktop": "npm run validate && npm run desktop:check",
     "release:verify": "node scripts/verify-release.mjs",
     "release:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-release-local.ps1",
-    "release:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-release-v0.10.0.ps1"
+    "release:publish": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/publish-release-v0.11.0.ps1"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",

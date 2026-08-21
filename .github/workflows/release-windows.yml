@@ -138,7 +138,7 @@ jobs:
           gh release view $tag --repo $repository *> $null
           if ($LASTEXITCODE -ne 0) {
             if (Test-Path $notesPath) {
-              gh release create $tag --repo $repository --title "Crypt v$version — A Ascensão Arcana" --notes-file $notesPath
+              gh release create $tag --repo $repository --title "Crypt v$version — System Reboot" --notes-file $notesPath
             } else {
               gh release create $tag --repo $repository --title "Crypt v$version" --generate-notes
             }

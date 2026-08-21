@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const expectedVersion = '0.10.0';
+const expectedVersion = '0.11.0';
+const expectedTitle = 'System Reboot';
 const failures = [];
 const successes = [];
 
@@ -42,56 +43,59 @@ const androidBuild = readText('android/app/build.gradle');
 const releaseNotes = readText('src/features/desktopUpdates/releaseNotes.ts');
 const windowsWorkflow = readText('.github/workflows/release-windows.yml');
 const androidWorkflow = readText('.github/workflows/release-android.yml');
-const publicNotes = readText('docs/releases/v0.10.0.md');
+const publicNotes = readText(`docs/releases/v${expectedVersion}.md`);
 
 check(
   packageJson?.version === expectedVersion,
-  'package.json está em 0.10.0',
-  'package.json não está em 0.10.0',
+  `package.json está em ${expectedVersion}`,
+  `package.json não está em ${expectedVersion}`,
 );
 
 check(
   lock?.version === expectedVersion && lock?.packages?.['']?.version === expectedVersion,
   'package-lock.json está sincronizado',
-  'package-lock.json não está sincronizado com 0.10.0',
+  `package-lock.json não está sincronizado com ${expectedVersion}`,
 );
 
 check(
-  /versionName\s+"0\.10\.0"/u.test(androidBuild),
-  'Android versionName está em 0.10.0',
-  'Android versionName não está em 0.10.0',
+  androidBuild.includes(`versionName "${expectedVersion}"`),
+  `Android versionName está em ${expectedVersion}`,
+  `Android versionName não está em ${expectedVersion}`,
 );
 
 const versionCode = Number(androidBuild.match(/versionCode\s+(\d+)/u)?.[1] ?? 0);
 
 check(
-  versionCode >= 17,
+  versionCode >= 18,
   `Android versionCode é ${versionCode}`,
-  'Android versionCode precisa ser pelo menos 17',
+  'Android versionCode precisa ser pelo menos 18',
 );
 
 check(
-  releaseNotes.includes("'0.10.0': {") && releaseNotes.includes("title: 'A Ascensão Arcana'"),
-  'Novidades internas da 0.10.0 existem',
-  'Novidades internas da 0.10.0 estão ausentes',
+  releaseNotes.includes(`'${expectedVersion}': {`) &&
+    releaseNotes.includes(`title: '${expectedTitle}'`),
+  `Novidades internas da ${expectedVersion} existem`,
+  `Novidades internas da ${expectedVersion} estão ausentes`,
 );
 
 check(
-  publicNotes.includes('# Crypt v0.10.0'),
+  publicNotes.includes(`# Crypt v${expectedVersion} — ${expectedTitle}`),
   'Notas públicas da release existem',
   'Notas públicas da release estão ausentes',
 );
 
 check(
   windowsWorkflow.includes('npm run release:verify') &&
-    windowsWorkflow.includes('Crypt-Windows-$version.sha256'),
+    windowsWorkflow.includes('Crypt-Windows-$version.sha256') &&
+    windowsWorkflow.includes(expectedTitle),
   'Workflow Windows verifica versão e checksum',
   'Workflow Windows não contém as proteções novas',
 );
 
 check(
   androidWorkflow.includes('npm run release:verify') &&
-    androidWorkflow.includes('Crypt-Android-$version.sha256'),
+    androidWorkflow.includes('Crypt-Android-$version.sha256') &&
+    androidWorkflow.includes(expectedTitle),
   'Workflow Android verifica versão e checksum',
   'Workflow Android não contém as proteções novas',
 );
@@ -105,7 +109,7 @@ const requiredFiles = [
   'src/features/arcana/ArcanaTierBadge.tsx',
   'public/arcane/ui/arcane-circle.svg',
   'scripts/build-release-local.ps1',
-  'scripts/publish-release-v0.10.0.ps1',
+  'scripts/publish-release-v0.11.0.ps1',
 ];
 
 for (const relativePath of requiredFiles) {
@@ -130,7 +134,7 @@ for (const relativePath of forbiddenTrackedCandidates) {
 }
 
 console.log('');
-console.log('CRYPT — VERIFICAÇÃO DA RELEASE v0.10.0');
+console.log(`CRYPT — VERIFICAÇÃO DA RELEASE v${expectedVersion}`);
 console.log('');
 
 for (const success of successes) {
@@ -150,4 +154,4 @@ if (failures.length) {
 }
 
 console.log('');
-console.log('Metadados da v0.10.0 estão consistentes.');
+console.log(`Metadados da v${expectedVersion} estão consistentes.`);

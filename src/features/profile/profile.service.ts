@@ -209,8 +209,9 @@ export async function uploadAvatar(
   file: File,
   previousPath: null | string,
   position: ImagePosition = { x: 50, y: 50, zoom: 1 },
+  hasCryptPro = false,
 ) {
-  validateAvatarFile(file);
+  validateAvatarFile(file, hasCryptPro);
 
   const client = getSupabaseClient();
   const extension = extensionForMimeType(file.type);

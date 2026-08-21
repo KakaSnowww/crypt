@@ -24,6 +24,15 @@ export function useServersRealtime(userId: null | string, serverId?: null | stri
         'postgres_changes',
         {
           event: '*',
+          schema: 'public',
+          table: 'user_presence',
+        },
+        () => void queryClient.invalidateQueries({ queryKey: serverKeys.members(serverId ?? '') }),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
           filter: `profile_id=eq.${userId}`,
           schema: 'public',
           table: 'server_members',

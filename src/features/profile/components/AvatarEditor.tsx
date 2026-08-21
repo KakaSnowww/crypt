@@ -6,6 +6,7 @@ import { ImagePositionEditor } from '../../../components/common/ImagePositionEdi
 import { useToast } from '../../../components/common/ToastContext';
 import { centeredImagePosition, type ImagePosition } from '../../../lib/imagePosition';
 import { useAuth } from '../../auth/useAuth';
+import { useArcanaMembership } from '../../arcana/arcana.queries';
 import { toProfileActionError } from '../profile.errors';
 import { profileKeys } from '../profile.queries';
 import { validateAvatarFile } from '../profile.schemas';
@@ -28,6 +29,8 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
   const { user } = useAuth();
+  const membership = useArcanaMembership(Boolean(user));
+  const hasCryptPro = membership.data?.is_active === true;
   const [file, setFile] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [editing, setEditing] = useState(false);
@@ -82,7 +85,7 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
 
   function selectFile(selectedFile: File) {
     try {
-      validateAvatarFile(selectedFile);
+      validateAvatarFile(selectedFile, hasCryptPro);
       clearPreviewUrl();
       setFile(selectedFile);
       setPreviewUrl(URL.createObjectURL(selectedFile));
@@ -111,7 +114,7 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
       if (!user) return;
 
       if (file) {
-        await uploadAvatar(user.id, file, profile.avatar_path, position);
+        await uploadAvatar(user.id, file, profile.avatar_path, position, hasCryptPro);
       } else {
         await updateProfileRow(user.id, {
           avatar_position_x: position.x,
@@ -209,7 +212,7 @@ export function AvatarEditor({ onBusyChange, profile }: AvatarEditorProps) {
       <div className="min-w-0">
         <p className="text-sm font-semibold text-white">Sua imagem no Crypt</p>
         <p className="mt-1 max-w-xl text-xs leading-5 text-crypt-subtle">
-          Arraste um arquivo para esta área ou escolha JPG, PNG, WebP ou GIF de até 2 MB.
+          JPG, PNG ou WebP de até 2 MB. Com Crypt Pro, use GIF animado de até 5 MB.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">

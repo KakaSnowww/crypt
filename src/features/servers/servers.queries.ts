@@ -37,6 +37,9 @@ export function useServerMembers(serverId: null | string, enabled = true) {
     enabled: enabled && Boolean(serverId),
     queryFn: () => fetchServerMembers(serverId ?? ''),
     queryKey: serverKeys.members(serverId ?? ''),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: true,
+    staleTime: 5_000,
   });
 }
 

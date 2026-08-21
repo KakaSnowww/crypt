@@ -191,9 +191,9 @@ export function NativeScreenShareModal({
                 value="high"
               />
               <QualityOption
-                description="1080p · 60 FPS · exclusivo Arcana"
+                description="1080p · 60 FPS · exclusivo Crypt Pro"
                 disabled={!arcana.data?.is_active}
-                label="Arcana HD60"
+                label="Crypt Pro HD60"
                 onSelect={() => setPreferences((current) => ({ ...current, quality: 'arcana' }))}
                 selected={preferences.quality === 'arcana'}
                 value="arcana"

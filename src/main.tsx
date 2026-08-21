@@ -7,6 +7,7 @@ import { configureAndroidRuntime, hideAndroidSplashScreen } from './lib/androidR
 import { configureDesktopDeepLinks } from './lib/desktopDeepLinks';
 import { configureRuntimeDocument } from './lib/platform';
 import './styles/globals.css';
+import './styles/cyber-app.css';
 
 configureRuntimeDocument();
 

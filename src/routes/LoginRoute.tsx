@@ -35,10 +35,10 @@ export function LoginRoute() {
   return (
     <section aria-labelledby="login-title">
       <AuthPageHeader
-        description="Entre para continuar suas conversas e encontrar sua comunidade."
-        eyebrow="Acesse sua conta"
+        description="Continue de onde parou e encontre sua comunidade online."
+        eyebrow="IDENTIDADE VERIFICADA"
         id="login-title"
-        title="Que bom ter você de volta"
+        title="Bem-vindo de volta"
       />
       <AuthConfigurationNotice />
 
@@ -66,7 +66,7 @@ export function LoginRoute() {
 
         <div className="flex justify-end">
           <Link
-            className="rounded-lg text-xs font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
+            className="cyber-auth__link rounded-lg text-xs font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
             to="/recuperar-senha"
           >
             Esqueci minha senha
@@ -78,14 +78,14 @@ export function LoginRoute() {
         />
 
         <Button className="mt-1 w-full" loading={loginMutation.isPending} size="lg" type="submit">
-          Entrar no Crypt
+          Acessar o Crypt
         </Button>
       </form>
 
       <p className="mt-7 text-center text-xs text-crypt-subtle">
         Ainda não tem uma conta?{' '}
         <Link
-          className="font-medium text-violet-300 hover:text-violet-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
+          className="cyber-auth__link font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crypt-focus"
           to="/cadastro"
         >
           Criar conta

@@ -34,6 +34,7 @@ import { useDirectMessagesRealtime } from '../features/directMessages/useDirectM
 import { MessageAttachmentCard } from '../features/messages/components/MessageAttachmentCard';
 import { MessageContent } from '../features/messages/components/MessageContent';
 import { ConversationToolsModal } from '../features/messages/components/ConversationToolsModal';
+import { MESSAGE_ATTACHMENT_ACCEPT } from '../features/messages/messages.schemas';
 import {
   parseMessageAttachments,
   parseMessageReactions,
@@ -289,7 +290,7 @@ export function DirectConversationRoute() {
               ) : null}
               <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-crypt-elevated/85 p-2 focus-within:border-violet-400/50">
                 <input
-                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain"
+                  accept={MESSAGE_ATTACHMENT_ACCEPT}
                   className="hidden"
                   multiple
                   onChange={(event) => setFiles(Array.from(event.target.files ?? []).slice(0, 3))}

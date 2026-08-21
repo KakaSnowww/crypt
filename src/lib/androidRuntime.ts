@@ -23,7 +23,7 @@ export async function configureAndroidRuntime() {
       }
     }),
     StatusBar.setStyle({ style: Style.Light }),
-    StatusBar.setBackgroundColor({ color: '#070b16' }),
+    StatusBar.setBackgroundColor({ color: '#080a07' }),
     StatusBar.setOverlaysWebView({ overlay: false }),
     configureAndroidSystemNotifications(),
   ]);

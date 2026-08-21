@@ -25,6 +25,7 @@ import {
   insertMemberMention,
 } from '../features/messages/message.mentions';
 import { useChannelMessages } from '../features/messages/messages.queries';
+import { MESSAGE_ATTACHMENT_ACCEPT } from '../features/messages/messages.schemas';
 import { markChannelRead } from '../features/messages/messages.service';
 import {
   parseMessageAttachments,
@@ -349,7 +350,7 @@ export function ChannelRoute() {
               ) : null}
               <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-crypt-elevated/85 p-2 focus-within:border-violet-400/50">
                 <input
-                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain"
+                  accept={MESSAGE_ATTACHMENT_ACCEPT}
                   className="hidden"
                   multiple
                   onChange={(event) => setFiles(Array.from(event.target.files ?? []).slice(0, 3))}

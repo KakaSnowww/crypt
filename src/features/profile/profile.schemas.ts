@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ProfileActionError } from './profile.errors';
 
 export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+export const MAX_PRO_GIF_AVATAR_BYTES = 5 * 1024 * 1024;
 export const MAX_BANNER_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_AVATAR_TYPES = new Set(['image/gif', 'image/jpeg', 'image/png', 'image/webp']);
 
@@ -84,9 +85,21 @@ export const spotifyTrackSchema = z.object({
     }),
 });
 
-export function validateAvatarFile(file: File) {
+export function validateAvatarFile(file: File, hasCryptPro = false) {
   if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
     throw new ProfileActionError('avatar_invalid');
+  }
+
+  if (file.type === 'image/gif') {
+    if (!hasCryptPro) {
+      throw new ProfileActionError('avatar_gif_pro_required');
+    }
+
+    if (file.size > MAX_PRO_GIF_AVATAR_BYTES) {
+      throw new ProfileActionError('avatar_gif_too_large');
+    }
+
+    return;
   }
 
   if (file.size > MAX_AVATAR_BYTES) {

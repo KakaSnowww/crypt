@@ -22,35 +22,36 @@ export function Toggle({
   const descriptionId = `${id}-description`;
 
   return (
-    <label
+    <div
       className={classNames(
-        'crypt-toggle flex min-h-16 items-start gap-4 rounded-2xl border p-4',
+        'crypt-toggle flex min-h-16 items-center gap-4 rounded-2xl border p-4',
         checked ? 'is-checked' : undefined,
-        disabled ? 'cursor-not-allowed opacity-55' : undefined,
+        disabled ? 'is-disabled' : undefined,
       )}
-      htmlFor={id}
     >
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-white">{label}</span>
+        <label className="block text-sm font-semibold text-white" htmlFor={id}>
+          {label}
+        </label>
         <span className="mt-1 block text-xs leading-5 text-crypt-subtle" id={descriptionId}>
           {description}
         </span>
       </span>
 
-      <span className="relative mt-0.5 inline-flex">
-        <input
-          aria-describedby={descriptionId}
-          checked={checked}
-          className="peer sr-only"
-          disabled={disabled}
-          id={id}
-          name={name}
-          onChange={(event) => onChange(event.target.checked)}
-          type="checkbox"
-        />
-        <span className="crypt-toggle__track h-6 w-11 rounded-full border" />
-        <span className="crypt-toggle__thumb pointer-events-none absolute left-1 top-1 size-4 rounded-full" />
-      </span>
-    </label>
+      <button
+        aria-checked={checked}
+        aria-describedby={descriptionId}
+        aria-label={label}
+        className="crypt-toggle__control"
+        disabled={disabled}
+        id={id}
+        name={name}
+        onClick={() => onChange(!checked)}
+        role="switch"
+        type="button"
+      >
+        <span aria-hidden="true" className="crypt-toggle__thumb" />
+      </button>
+    </div>
   );
 }

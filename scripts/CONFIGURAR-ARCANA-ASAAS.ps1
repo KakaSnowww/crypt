@@ -90,7 +90,13 @@ function Assert-CommandSucceeded([string]$Step) {
 
 function New-WebhookToken {
   $bytes = [byte[]]::new(48)
-  [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+  $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+
+  try {
+    $rng.GetBytes($bytes)
+  } finally {
+    $rng.Dispose()
+  }
 
   return [Convert]::ToBase64String($bytes).
     TrimEnd('=').
@@ -108,7 +114,7 @@ function Invoke-AsaasApi(
   $headers = @{
     accept = 'application/json'
     access_token = $ApiKey
-    'User-Agent' = 'Crypt/0.10.0'
+    'User-Agent' = 'Crypt/0.11.0'
   }
 
   $parameters = @{

@@ -8,7 +8,9 @@ import { isAndroidRuntime } from '../../../lib/platform';
 import { useMyPresencePreferences, usePresenceActions } from '../../connections/presence.queries';
 import {
   normalizePresenceMode,
+  normalizePresenceStatus,
   presenceModeInformation,
+  presenceStatusInformation,
   type PresenceMode,
 } from '../../connections/presence.types';
 import { ProfileAvatar } from './ProfileAvatar';
@@ -126,7 +128,7 @@ export function PresenceStatusMenu({
             <span
               className={classNames(
                 'absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-[3px] border-crypt-sidebar',
-                presenceModeInformation[normalizePresenceMode(query.data?.mode)].tone,
+                presenceStatusInformation[normalizePresenceStatus(query.data?.status)].tone,
               )}
             />
           </span>

@@ -21,6 +21,44 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.11.0': {
+    highlights: [
+      {
+        description:
+          'O aplicativo foi reconstruído com uma identidade gamer e dev em preto, roxo e ciano.',
+        title: 'Uma interface totalmente nova',
+      },
+      {
+        description:
+          'Servidores, cargos, membros e permissões ganharam uma central profissional e ações rápidas.',
+        title: 'Servidores refeitos',
+      },
+      {
+        description:
+          'Perfis e configurações agora são mais claros, organizados e consistentes em todas as telas.',
+        title: 'Perfil e configurações',
+      },
+      {
+        description:
+          'O volume individual chega a 300%, com correções de áudio e sincronização de entrada e saída.',
+        title: 'Calls mais fortes',
+      },
+      {
+        description:
+          'Online, ausente, ocupado e offline são atualizados em tempo real na lista de membros.',
+        title: 'Presença sincronizada',
+      },
+      {
+        description:
+          'Assinantes podem enviar arquivos de até 500 MB e usar avatar GIF de até 5 MB.',
+        title: 'Crypt Pro ampliado',
+      },
+    ],
+    summary:
+      'A versão 0.11.0 é o System Reboot: o Crypt foi reconstruído para gamers, comunidades e programadores.',
+    title: 'System Reboot',
+    version: '0.11.0',
+  },
   '0.10.0': {
     highlights: [
       {

@@ -337,7 +337,7 @@ async function asaasRequest<T>(path: string, init: RequestInit = {}) {
   headers.set('access_token', requiredSecret('ASAAS_API_KEY'));
   headers.set('accept', 'application/json');
   headers.set('content-type', 'application/json');
-  headers.set('user-agent', 'Crypt/0.10.0');
+  headers.set('user-agent', 'Crypt/0.11.0');
 
   const response = await fetch(`${asaasBaseUrl()}${path}`, {
     ...init,
@@ -736,7 +736,7 @@ async function processCheckoutEvent(
   }
 }
 
-async function startCheckout(admin: AdminClient, profileId: string, email: string) {
+async function startCheckout(admin: AdminClient, profileId: string) {
   if (await hasActiveArcana(admin, profileId)) {
     return { already_active: true };
   }
@@ -759,8 +759,8 @@ async function startCheckout(admin: AdminClient, profileId: string, email: strin
   if (
     existing?.status === 'pending' &&
     !existing.provider_checkout_id &&
-    existing.checkout_expires_at &&
-    new Date(existing.checkout_expires_at).getTime() > Date.now() - 2 * 60 * 1000
+    existing.checkout_started_at &&
+    new Date(existing.checkout_started_at).getTime() > Date.now() - 2 * 60 * 1000
   ) {
     throw new Error('checkout_in_progress');
   }
@@ -795,7 +795,6 @@ async function startCheckout(admin: AdminClient, profileId: string, email: strin
         successUrl: callbackUrl('success'),
       },
       chargeTypes: ['RECURRENT'],
-      customerData: { email },
       externalReference: reference,
       items: [
         {
@@ -1229,11 +1228,7 @@ Deno.serve(async (request) => {
 
   try {
     if (action === 'start') {
-      return json(
-        origin,
-        200,
-        await startCheckout(admin, authentication.user.id, authentication.user.email),
-      );
+      return json(origin, 200, await startCheckout(admin, authentication.user.id));
     }
 
     if (action === 'sync') {

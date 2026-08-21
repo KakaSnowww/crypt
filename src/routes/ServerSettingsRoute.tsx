@@ -1,4 +1,15 @@
-import { Crown, ImagePlus, Save, ShieldAlert, Trash2, Upload, UserRoundCog } from 'lucide-react';
+import {
+  Crown,
+  ImagePlus,
+  LayoutDashboard,
+  ListTree,
+  Save,
+  Settings2,
+  ShieldAlert,
+  Trash2,
+  Upload,
+  UserRoundCog,
+} from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -160,12 +171,26 @@ function ServerSettingsContent({
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <main className="server-settings-center mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <nav className="server-settings-center__nav" aria-label="Administração do servidor">
+        <Link to={`/app/servidores/${server.server_id}`}>
+          <LayoutDashboard size={16} />
+          Visão geral
+        </Link>
+        <Link to={`/app/servidores/${server.server_id}/gerenciar`}>
+          <ListTree size={16} />
+          Organização e cargos
+        </Link>
+        <Link aria-current="page" to={`/app/servidores/${server.server_id}/configuracoes`}>
+          <Settings2 size={16} />
+          Configurações
+        </Link>
+      </nav>
+      <div className="server-settings-center__header flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Configurações básicas</p>
+          <p className="eyebrow">Server settings</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
-            Gerenciar {server.server_name}
+            Configurar {server.server_name}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
             Alterações de propriedade e exclusão são verificadas novamente no banco.

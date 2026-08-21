@@ -1,0 +1,714 @@
+:root {
+  --alchemy-ink: #080907;
+  --alchemy-charcoal: #10120f;
+  --alchemy-leather: #1a1811;
+  --alchemy-parchment: #eadfbd;
+  --alchemy-parchment-muted: #bdb18f;
+  --alchemy-brass: #b79252;
+  --alchemy-brass-bright: #d2ae68;
+  --alchemy-reagent: #6e9170;
+  --alchemy-line: rgb(197 164 100 / 17%);
+  --font-alchemy: Georgia, 'Times New Roman', ui-serif, serif;
+  /* Retira a paleta violeta legada também de utilitários Tailwind já existentes. */
+  --color-violet-50: #fff8df;
+  --color-violet-100: #f6e9bd;
+  --color-violet-200: #e4cb87;
+  --color-violet-300: #c9a557;
+  --color-violet-400: #a98438;
+  --color-violet-500: #7f6328;
+  --color-violet-600: #60491d;
+  --color-violet-700: #463514;
+  --color-violet-800: #2e2514;
+  --color-violet-900: #1b180f;
+  --color-violet-950: #0b0c08;
+  --color-indigo-500: #47715d;
+  --color-indigo-600: #315545;
+  --color-indigo-700: #243f34;
+  --color-blue-500: #4c826d;
+  --color-blue-600: #35634f;
+  --color-blue-700: #274a3d;
+}
+
+/* Biblioteca Alquímica II — identidade integral */
+.crypt-auth-layout {
+  background: #060806 !important;
+}
+
+.crypt-auth-story {
+  isolation: isolate;
+  border-color: rgb(206 170 96 / 18%) !important;
+  background:
+    linear-gradient(90deg, rgb(4 6 4 / 12%), rgb(4 6 4 / 78%)),
+    linear-gradient(0deg, rgb(3 5 3 / 45%), transparent 60%),
+    url('/art/alchemical-library-living-v3.png') left center / cover no-repeat !important;
+}
+
+.crypt-auth-story::after {
+  position: absolute;
+  inset: 1.25rem;
+  z-index: -1;
+  border: 1px solid rgb(214 180 108 / 13%);
+  content: '';
+  pointer-events: none;
+}
+
+.crypt-auth-story__circle,
+.crypt-auth-story__constellations {
+  display: none !important;
+}
+
+.crypt-auth-story__crystal {
+  border-color: rgb(211 174 96 / 38%) !important;
+  background: rgb(8 12 8 / 72%) !important;
+  color: var(--alchemy-brass-bright) !important;
+  box-shadow: 0 0 42px rgb(74 133 99 / 28%) !important;
+}
+
+.crypt-auth-title {
+  max-width: 11ch;
+  font-family: var(--font-alchemy);
+  font-weight: 400 !important;
+  letter-spacing: -0.045em !important;
+  text-shadow: 0 4px 30px #000;
+}
+
+.crypt-auth-title span {
+  color: var(--alchemy-brass-bright) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.crypt-auth-benefit > span {
+  border: 1px solid rgb(201 164 90 / 23%);
+  background: rgb(8 13 9 / 72%) !important;
+  color: #89b197 !important;
+}
+
+.crypt-auth-tome {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.85rem;
+  border-top: 1px solid rgb(210 174 99 / 25%);
+  border-bottom: 1px solid rgb(210 174 99 / 12%);
+  padding: 0.8rem 0;
+  color: var(--alchemy-brass-bright);
+}
+
+.crypt-auth-tome span {
+  font-family: var(--font-alchemy);
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.crypt-auth-access {
+  background:
+    radial-gradient(circle at 50% 18%, rgb(74 126 94 / 12%), transparent 22rem),
+    linear-gradient(145deg, #10120d, #070906) !important;
+}
+
+.auth-surface {
+  border-color: rgb(203 166 94 / 22%) !important;
+  border-radius: 0.35rem 2rem 0.35rem 0.35rem !important;
+  background: linear-gradient(145deg, rgb(31 30 21 / 94%), rgb(10 12 9 / 97%)) !important;
+  box-shadow: 0 34px 100px rgb(0 0 0 / 46%) !important;
+}
+
+.alchemy-hero {
+  min-height: 34rem;
+  background:
+    linear-gradient(90deg, rgb(5 7 5 / 88%) 0%, rgb(5 7 5 / 67%) 48%, rgb(5 7 5 / 28%)),
+    linear-gradient(0deg, rgb(5 7 5 / 76%), transparent 68%),
+    url('/art/alchemical-library-living-v3.png') center / cover no-repeat !important;
+}
+
+.alchemy-hero .alchemy-display {
+  max-width: 12ch;
+  text-shadow: 0 4px 32px #000;
+}
+
+.alchemy-hero__seal {
+  box-shadow:
+    inset 0 0 0 0.7rem rgb(183 146 82 / 3%),
+    0 0 60px rgb(72 135 95 / 20%);
+}
+
+.alchemy-page-heading {
+  border-bottom: 1px solid var(--alchemy-line);
+  padding-bottom: 1.5rem;
+}
+
+.alchemy-invite {
+  border-color: rgb(192 154 83 / 20%) !important;
+  background:
+    radial-gradient(circle at 90% 20%, rgb(69 117 85 / 14%), transparent 18rem),
+    linear-gradient(145deg, rgb(29 27 19 / 92%), rgb(12 14 10 / 96%)) !important;
+}
+
+/* Cobre componentes antigos fora do shell: login, modais, perfis e telas de update. */
+.text-violet-100,
+.text-violet-200,
+.text-violet-300,
+.text-violet-400 {
+  color: var(--alchemy-brass-bright) !important;
+}
+
+.border-violet-400\/15,
+.border-violet-400\/20,
+.border-violet-400\/25,
+.border-violet-400\/40,
+.border-violet-400\/50,
+.border-violet-400\/55,
+.border-violet-400\/60 {
+  border-color: rgb(193 155 82 / 28%) !important;
+}
+
+.from-violet-500,
+.from-violet-600,
+.from-violet-700 {
+  --tw-gradient-from: #8b6a2f !important;
+}
+
+.to-blue-500,
+.to-blue-600,
+.to-blue-700,
+.via-indigo-700 {
+  --tw-gradient-to: #32604b !important;
+}
+
+@media (max-width: 63.999rem) {
+  .crypt-auth-access {
+    background:
+      linear-gradient(180deg, rgb(5 8 5 / 54%), rgb(5 8 5 / 94%)),
+      url('/art/alchemical-library-living-v3.png') 31% center / auto 100% no-repeat !important;
+  }
+
+  .alchemy-hero {
+    min-height: 31rem;
+    background-position: 34% center !important;
+  }
+}
+
+body.app-shell-active {
+  background:
+    radial-gradient(circle at 80% 5%, rgb(112 139 100 / 8%), transparent 28rem),
+    linear-gradient(145deg, #090a08, #0d0d0a 55%, #070806) !important;
+}
+
+.arcane-atmosphere__aurora--violet {
+  background: radial-gradient(circle, #527d5e, transparent 67%) !important;
+}
+
+.arcane-atmosphere__aurora--blue {
+  background: radial-gradient(circle, #917039, transparent 68%) !important;
+}
+
+.arcane-atmosphere__star {
+  background: #dbc992 !important;
+  box-shadow:
+    0 0 7px #9cb47d,
+    0 0 18px rgb(87 146 107 / 42%) !important;
+}
+
+.app-shell--alchemy {
+  background:
+    linear-gradient(90deg, rgb(183 146 82 / 3%) 1px, transparent 1px) 0 0 / 5rem 100%,
+    linear-gradient(145deg, rgb(13 14 11 / 96%), rgb(7 8 6 / 98%)) !important;
+}
+
+.app-shell--alchemy .app-shell__rail {
+  border-color: var(--alchemy-line) !important;
+  background: linear-gradient(180deg, #15140f, #090a08) !important;
+  box-shadow: inset -1px 0 rgb(231 201 137 / 5%);
+}
+
+.app-shell--alchemy .app-shell__sidebar,
+.app-shell--alchemy .app-shell__members {
+  border-color: var(--alchemy-line) !important;
+  background: linear-gradient(90deg, transparent 96%, rgb(201 166 102 / 4%)), #10110e !important;
+  box-shadow: none;
+}
+
+.app-shell--alchemy .app-shell__header {
+  border-color: var(--alchemy-line) !important;
+  background: rgb(10 11 9 / 91%) !important;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 18%);
+}
+
+.app-shell--alchemy .app-shell__sidebar nav a[aria-current='page'] {
+  color: var(--alchemy-parchment);
+  background: linear-gradient(90deg, rgb(183 146 82 / 14%), rgb(183 146 82 / 3%));
+  box-shadow: inset 2px 0 var(--alchemy-brass);
+}
+
+.app-shell--alchemy .text-violet-200,
+.app-shell--alchemy .text-violet-300 {
+  color: var(--alchemy-parchment-muted) !important;
+}
+
+.app-shell--alchemy .bg-violet-500,
+.app-shell--alchemy .bg-violet-500\/10 {
+  background-color: rgb(183 146 82 / 15%) !important;
+}
+
+.alchemy-display {
+  font-family: var(--font-alchemy);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  color: var(--alchemy-parchment);
+}
+
+.alchemy-kicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--alchemy-brass-bright);
+}
+
+.alchemy-hero {
+  min-height: 28rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--alchemy-line);
+  border-radius: 0.35rem 2.5rem 0.35rem 0.35rem;
+  background:
+    linear-gradient(90deg, transparent 3.2rem, rgb(183 146 82 / 8%) 3.25rem, transparent 3.3rem),
+    radial-gradient(circle at 86% 38%, rgb(95 126 91 / 16%), transparent 20rem),
+    linear-gradient(135deg, rgb(33 30 21 / 92%), rgb(12 13 10 / 96%));
+  box-shadow:
+    0 28px 80px rgb(0 0 0 / 28%),
+    inset 0 1px rgb(239 220 175 / 5%);
+}
+
+.alchemy-hero::after {
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid rgb(183 146 82 / 9%);
+  content: '';
+  pointer-events: none;
+}
+
+.alchemy-hero__seal {
+  position: absolute;
+  right: 9%;
+  top: 20%;
+  display: grid;
+  width: 8rem;
+  height: 8rem;
+  place-items: center;
+  border: 1px solid rgb(183 146 82 / 28%);
+  border-radius: 999px;
+  color: var(--alchemy-brass);
+  box-shadow: inset 0 0 0 0.7rem rgb(183 146 82 / 3%);
+  opacity: 0.68;
+}
+
+.alchemy-hero__folio {
+  position: absolute;
+  right: 2rem;
+  bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-alchemy);
+  font-size: 0.65rem;
+  letter-spacing: 0.13em;
+  color: rgb(234 223 189 / 45%);
+}
+
+.alchemy-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--alchemy-line);
+  padding-bottom: 1rem;
+}
+
+.alchemy-card {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1px solid var(--alchemy-line);
+  border-radius: 0.25rem 1.5rem 0.25rem 0.25rem;
+  background: linear-gradient(145deg, rgb(31 29 21 / 83%), rgb(14 15 12 / 92%));
+  padding: 1.5rem;
+  box-shadow: 0 18px 45px rgb(0 0 0 / 17%);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.alchemy-card::after {
+  position: absolute;
+  right: -3rem;
+  bottom: -3rem;
+  width: 9rem;
+  height: 9rem;
+  border: 1px solid rgb(110 145 112 / 12%);
+  border-radius: 999px;
+  content: '';
+}
+
+.alchemy-card:hover {
+  transform: translateY(-3px);
+  border-color: rgb(210 174 104 / 32%);
+  background: linear-gradient(145deg, rgb(39 35 24 / 90%), rgb(15 17 13 / 96%));
+}
+
+.alchemy-card__number {
+  font-family: var(--font-alchemy);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: rgb(234 223 189 / 40%);
+}
+
+.alchemy-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid rgb(210 174 104 / 24%);
+  border-radius: 0.25rem 0.9rem 0.25rem 0.25rem;
+  background: rgb(234 223 189 / 4%);
+  padding: 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--alchemy-parchment);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.alchemy-button:hover {
+  transform: translateY(-1px);
+  border-color: rgb(210 174 104 / 43%);
+  background: rgb(234 223 189 / 8%);
+}
+
+.alchemy-button--primary {
+  border-color: var(--alchemy-brass);
+  background: var(--alchemy-brass);
+  color: #15130d;
+}
+
+.alchemy-button--primary:hover {
+  background: var(--alchemy-brass-bright);
+}
+
+.alchemy-note {
+  border-top: 1px solid var(--alchemy-line);
+  border-bottom: 1px solid var(--alchemy-line);
+  background: linear-gradient(90deg, rgb(110 145 112 / 8%), transparent 55%);
+  padding: 1.25rem 0.25rem;
+}
+
+.alchemy-note__icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  place-items: center;
+  border: 1px solid rgb(110 145 112 / 28%);
+  border-radius: 999px;
+  color: #a6c3a6;
+}
+
+@media (max-width: 640px) {
+  .alchemy-hero {
+    min-height: 31rem;
+    border-radius: 0.25rem 1.75rem 0.25rem 0.25rem;
+  }
+
+  .alchemy-hero__seal {
+    right: -2.5rem;
+    top: 2rem;
+    width: 7rem;
+    height: 7rem;
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alchemy-card,
+  .alchemy-button {
+    transition: none;
+  }
+}
+
+/* Biblioteca Alquímica III — cenário vivo */
+.living-alchemy {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.living-alchemy__mist {
+  position: absolute;
+  inset: 35% -20% -30%;
+  background: radial-gradient(ellipse at center, rgb(26 139 87 / 20%), transparent 63%);
+  filter: blur(22px);
+  animation: alchemy-breathe 7s ease-in-out infinite alternate;
+}
+
+.living-alchemy__orbit {
+  position: absolute;
+  right: 8%;
+  top: 13%;
+  width: 15rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(214 177 91 / 22%);
+  border-radius: 50%;
+  animation: alchemy-spin 34s linear infinite;
+}
+
+.living-alchemy__orbit::before,
+.living-alchemy__orbit::after {
+  position: absolute;
+  inset: 17%;
+  border: 1px dashed rgb(214 177 91 / 22%);
+  border-radius: 50%;
+  content: '';
+}
+
+.living-alchemy__orbit::after {
+  inset: 36%;
+}
+.living-alchemy__orbit span {
+  position: absolute;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #d6b15b;
+  box-shadow: 0 0 20px #9fe3ad;
+}
+.living-alchemy__orbit span:nth-child(1) {
+  left: 9%;
+  top: 25%;
+}
+.living-alchemy__orbit span:nth-child(2) {
+  right: 1%;
+  top: 52%;
+}
+.living-alchemy__orbit span:nth-child(3) {
+  bottom: 5%;
+  left: 42%;
+}
+
+.living-alchemy__book {
+  position: absolute;
+  width: 3.5rem;
+  height: 3.5rem;
+  color: rgb(239 217 158 / 62%);
+  filter: drop-shadow(0 12px 10px rgb(0 0 0 / 55%));
+  animation: alchemy-float 6s ease-in-out infinite;
+}
+.living-alchemy__book--one {
+  left: 8%;
+  top: 19%;
+  transform: rotate(-18deg);
+}
+.living-alchemy__book--two {
+  right: 19%;
+  top: 48%;
+  animation-delay: -2s;
+  transform: rotate(12deg) scale(0.72);
+}
+.living-alchemy__book--three {
+  left: 38%;
+  bottom: 10%;
+  animation-delay: -4s;
+  transform: rotate(7deg) scale(0.55);
+}
+
+.living-alchemy__potion {
+  position: absolute;
+  color: #89d7a3;
+  filter: drop-shadow(0 0 18px rgb(56 224 130 / 52%));
+  animation: alchemy-float 5.4s ease-in-out infinite reverse;
+}
+.living-alchemy__potion svg {
+  width: 3.8rem;
+  height: 3.8rem;
+  stroke-width: 1.1;
+}
+.living-alchemy__potion span {
+  position: absolute;
+  left: 23%;
+  right: 23%;
+  bottom: 16%;
+  height: 23%;
+  border-radius: 50%;
+  background: rgb(38 222 118 / 35%);
+  animation: alchemy-liquid 2.6s ease-in-out infinite;
+}
+.living-alchemy__potion--one {
+  left: 17%;
+  bottom: 14%;
+}
+.living-alchemy__potion--two {
+  right: 5%;
+  bottom: 18%;
+  animation-delay: -2.3s;
+  transform: scale(0.7) rotate(8deg);
+}
+
+.living-alchemy__spark {
+  position: absolute;
+  color: #f2ce70;
+  animation: alchemy-twinkle 2.4s ease-in-out infinite;
+}
+.living-alchemy__spark--one {
+  left: 31%;
+  top: 13%;
+  width: 1.2rem;
+}
+.living-alchemy__spark--two {
+  right: 29%;
+  bottom: 21%;
+  width: 0.85rem;
+  animation-delay: -1.2s;
+}
+
+.living-alchemy--compact {
+  z-index: 0;
+  opacity: 0.32;
+}
+.living-alchemy--compact .living-alchemy__book {
+  width: 2rem;
+}
+.living-alchemy--compact .living-alchemy__potion {
+  display: none;
+}
+.app-shell--alchemy > :not(.living-alchemy) {
+  position: relative;
+  z-index: 1;
+}
+
+.crypt-auth-story {
+  background-position: center !important;
+}
+.crypt-auth-story::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(1 4 3 / 35%), rgb(2 5 3 / 76%));
+  content: '';
+}
+.auth-surface {
+  backdrop-filter: blur(24px) saturate(1.2);
+}
+
+.alchemy-hero {
+  box-shadow:
+    0 38px 120px rgb(0 0 0 / 55%),
+    inset 0 0 90px rgb(26 118 75 / 12%);
+}
+.alchemy-hero::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgb(2 5 3 / 92%) 0 35%,
+    rgb(2 5 3 / 34%) 70%,
+    rgb(2 5 3 / 54%)
+  );
+  content: '';
+}
+
+.alchemy-tome {
+  position: relative;
+  overflow: hidden;
+  border-left: 0.42rem solid #725728 !important;
+  border-radius: 0.2rem 1.2rem 1.2rem 0.2rem !important;
+  background: linear-gradient(
+    105deg,
+    rgb(45 35 22 / 96%),
+    rgb(16 19 14 / 97%) 42%,
+    rgb(8 12 9 / 98%)
+  ) !important;
+  box-shadow:
+    inset 1.2rem 0 2rem rgb(0 0 0 / 25%),
+    0 18px 48px rgb(0 0 0 / 25%);
+}
+.alchemy-tome::after {
+  position: absolute;
+  inset: 0.65rem;
+  border: 1px solid rgb(211 171 87 / 14%);
+  border-radius: 0.1rem 0.8rem 0.8rem 0.1rem;
+  content: '';
+  pointer-events: none;
+}
+.alchemy-tome:hover {
+  transform: translateY(-5px) rotateX(1deg);
+  border-color: rgb(218 179 92 / 42%) !important;
+  box-shadow:
+    0 28px 70px rgb(0 0 0 / 42%),
+    0 0 34px rgb(45 166 98 / 8%);
+}
+.alchemy-empty-shelf {
+  background:
+    radial-gradient(circle at 50% 30%, rgb(44 133 83 / 15%), transparent 19rem),
+    linear-gradient(145deg, #17150e, #080b08) !important;
+}
+
+@keyframes alchemy-float {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: -2deg;
+  }
+  50% {
+    translate: 0 -1.25rem;
+    rotate: 3deg;
+  }
+}
+@keyframes alchemy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes alchemy-breathe {
+  to {
+    opacity: 0.45;
+    transform: scale(1.12);
+  }
+}
+@keyframes alchemy-twinkle {
+  50% {
+    opacity: 0.2;
+    transform: scale(0.55) rotate(35deg);
+  }
+}
+@keyframes alchemy-liquid {
+  50% {
+    transform: translateY(-0.22rem) scaleX(1.14);
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .living-alchemy__orbit {
+    width: 10rem;
+    right: -3rem;
+  }
+  .living-alchemy__book--one {
+    left: 3%;
+    top: 8%;
+  }
+  .living-alchemy__book--three {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .living-alchemy * {
+    animation: none !important;
+  }
+}

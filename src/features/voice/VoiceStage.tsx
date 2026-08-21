@@ -22,6 +22,7 @@ import {
   Users,
   Video,
   VideoOff,
+  Volume2,
   X,
 } from 'lucide-react';
 import { useEffect, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
@@ -249,6 +250,7 @@ function ParticipantCard({
   participant: Participant;
   track: TrackReferenceOrPlaceholder;
 }) {
+  const { participantVolumes, setParticipantVolume } = useVoiceCall();
   const isSpeaking = useIsSpeaking(participant);
   const [profileOpen, setProfileOpen] = useState(false);
   const hasVideo = Boolean(track.publication && !track.publication.isMuted);
@@ -268,6 +270,7 @@ function ParticipantCard({
     : profile.handle
       ? `/app/pessoas/@${profile.handle}`
       : null;
+  const participantVolume = participantVolumes[participant.identity] ?? 100;
 
   function toggleProfile() {
     setProfileOpen((current) => !current);
@@ -346,6 +349,29 @@ function ParticipantCard({
         ) : null}
         {participant.isLocal ? <small>Você</small> : null}
       </footer>
+
+      {!participant.isLocal ? (
+        <label
+          className="voice-participant__volume"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          <Volume2 aria-hidden="true" size={14} />
+          <span className="sr-only">Volume de {profile.displayName}</span>
+          <input
+            aria-label={`Volume de ${profile.displayName}`}
+            max="300"
+            min="0"
+            onChange={(event) =>
+              setParticipantVolume(participant.identity, Number(event.target.value))
+            }
+            step="5"
+            type="range"
+            value={participantVolume}
+          />
+          <output>{participantVolume}%</output>
+        </label>
+      ) : null}
 
       {profileOpen ? (
         <section

@@ -65,160 +65,161 @@ export function ProfileSettingsRoute() {
   const profile = profileQuery.data;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10">
-      <SettingsNavigation />
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="eyebrow">Perfil e privacidade</p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
-            Escolha como aparecer
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
-            Tudo que foi escolhido no onboarding pode ser alterado aqui.
+    <main className="settings-center mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="settings-center__layout">
+        <SettingsNavigation />
+        <div className="settings-center__content">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="eyebrow">Perfil e privacidade</p>
+              <h1 className="settings-title mt-3 text-3xl font-bold tracking-tight">
+                Personalize sua identidade
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-crypt-muted">
+                Tudo que foi escolhido no onboarding pode ser alterado aqui.
+              </p>
+            </div>
+            <Link className="settings-text-link text-sm font-semibold" to="/app/perfil">
+              Ver meu perfil
+            </Link>
+          </div>
+
+          <section className="settings-page mt-8 p-5 sm:p-7" aria-labelledby="identity-title">
+            <div className="flex items-start gap-3">
+              <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
+                <UserRound aria-hidden="true" size={19} />
+              </span>
+              <div>
+                <h2 className="settings-section-title font-semibold" id="identity-title">
+                  Apresentação
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                  Nome repetível, biografia opcional e identificador único.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-5">
+              <Input
+                disabled
+                helperText="A troca de identificador terá limites próprios em uma fase posterior."
+                label="Identificador"
+                leadingIcon={<AtSign aria-hidden="true" size={17} />}
+                value={profile.handle}
+              />
+              <ProfileDetailsForm profile={profile} />
+            </div>
+          </section>
+
+          <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="avatar-title">
+            <div className="flex items-start gap-3">
+              <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
+                <Image aria-hidden="true" size={19} />
+              </span>
+              <div>
+                <h2 className="settings-section-title font-semibold" id="avatar-title">
+                  Avatar
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                  Arquivo validado e armazenado na sua própria pasta.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <AvatarEditor profile={profile} />
+            </div>
+          </section>
+
+          <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="visual-title">
+            <div className="flex items-start gap-3">
+              <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
+                <Sparkles aria-hidden="true" size={19} />
+              </span>
+              <div>
+                <h2 className="settings-section-title font-semibold" id="visual-title">
+                  Banner e efeitos
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                  Personalize seu perfil e o ambiente do seu cartão nas chamadas.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <ProfileVisualEditor profile={profile} />
+              <div className="mt-5">
+                <ProfileGradientEditor profile={profile} />
+              </div>
+            </div>
+          </section>
+
+          <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="interests-title">
+            <div className="flex items-start gap-3">
+              <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
+                <Sparkles aria-hidden="true" size={19} />
+              </span>
+              <div>
+                <h2 className="settings-section-title font-semibold" id="interests-title">
+                  Interesses e autodescrições
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                  Tudo é opcional. Personalidade não representa diagnóstico.
+                </p>
+              </div>
+            </div>
+            <div className="mt-7">
+              <InterestEditor
+                categories={catalogQuery.data}
+                selectedInterestIds={selectionsQuery.data ?? []}
+              />
+            </div>
+          </section>
+
+          <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="privacy-title">
+            <div className="flex items-start gap-3">
+              <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
+                <LockKeyhole aria-hidden="true" size={19} />
+              </span>
+              <div>
+                <h2 className="settings-section-title font-semibold" id="privacy-title">
+                  Privacidade
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                  Interesses ficam ocultos até você autorizar.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <PrivacySettingsForm settings={settingsQuery.data} />
+            </div>
+          </section>
+
+          <section className="settings-page mt-5 p-5 sm:p-7" aria-labelledby="spotify-title">
+            <div className="flex items-start gap-3">
+              <span className="settings-section-icon grid size-10 shrink-0 place-items-center rounded-xl">
+                <Music2 aria-hidden="true" size={19} />
+              </span>
+              <div>
+                <h2 className="settings-section-title font-semibold" id="spotify-title">
+                  Música favorita
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-crypt-subtle">
+                  Link validado e exibido no player oficial do Spotify.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <SpotifyTrackEditor profile={profile} />
+            </div>
+          </section>
+
+          <p className="mt-6 text-center text-xs text-crypt-subtle">
+            Senha, sessão e exclusão continuam disponíveis em{' '}
+            <Link className="settings-text-link font-semibold" to="/app/conta">
+              Conta e segurança
+            </Link>
+            .
           </p>
         </div>
-        <Link
-          className="text-sm font-semibold text-violet-300 hover:text-violet-200"
-          to="/app/perfil"
-        >
-          Ver meu perfil
-        </Link>
       </div>
-
-      <section className="panel mt-8 p-5 sm:p-7" aria-labelledby="identity-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
-            <UserRound aria-hidden="true" size={19} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="identity-title">
-              Apresentação
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Nome repetível, biografia opcional e identificador único.
-            </p>
-          </div>
-        </div>
-        <div className="mt-6 grid gap-5">
-          <Input
-            disabled
-            helperText="A troca de identificador terá limites próprios em uma fase posterior."
-            label="Identificador"
-            leadingIcon={<AtSign aria-hidden="true" size={17} />}
-            value={profile.handle}
-          />
-          <ProfileDetailsForm profile={profile} />
-        </div>
-      </section>
-
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="avatar-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-500/10 text-blue-200">
-            <Image aria-hidden="true" size={19} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="avatar-title">
-              Avatar
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Arquivo validado e armazenado na sua própria pasta.
-            </p>
-          </div>
-        </div>
-        <div className="mt-6">
-          <AvatarEditor profile={profile} />
-        </div>
-      </section>
-
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="visual-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-200">
-            <Sparkles aria-hidden="true" size={19} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="visual-title">
-              Banner e efeitos
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Personalize seu perfil e o ambiente do seu cartão nas chamadas.
-            </p>
-          </div>
-        </div>
-        <div className="mt-6">
-          <ProfileVisualEditor profile={profile} />
-          <div className="mt-5">
-            <ProfileGradientEditor profile={profile} />
-          </div>
-        </div>
-      </section>
-
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="interests-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-200">
-            <Sparkles aria-hidden="true" size={19} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="interests-title">
-              Interesses e autodescrições
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Tudo é opcional. Personalidade não representa diagnóstico.
-            </p>
-          </div>
-        </div>
-        <div className="mt-7">
-          <InterestEditor
-            categories={catalogQuery.data}
-            selectedInterestIds={selectionsQuery.data ?? []}
-          />
-        </div>
-      </section>
-
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="privacy-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-200">
-            <LockKeyhole aria-hidden="true" size={19} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="privacy-title">
-              Privacidade
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Interesses ficam ocultos até você autorizar.
-            </p>
-          </div>
-        </div>
-        <div className="mt-6">
-          <PrivacySettingsForm settings={settingsQuery.data} />
-        </div>
-      </section>
-
-      <section className="panel mt-5 p-5 sm:p-7" aria-labelledby="spotify-title">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-green-500/10 text-green-300">
-            <Music2 aria-hidden="true" size={19} />
-          </span>
-          <div>
-            <h2 className="font-semibold text-white" id="spotify-title">
-              Música favorita
-            </h2>
-            <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-              Link validado e exibido no player oficial do Spotify.
-            </p>
-          </div>
-        </div>
-        <div className="mt-6">
-          <SpotifyTrackEditor profile={profile} />
-        </div>
-      </section>
-
-      <p className="mt-6 text-center text-xs text-crypt-subtle">
-        Senha, sessão e exclusão continuam disponíveis em{' '}
-        <Link className="font-semibold text-violet-300" to="/app/conta">
-          Conta e segurança
-        </Link>
-        .
-      </p>
     </main>
   );
 }

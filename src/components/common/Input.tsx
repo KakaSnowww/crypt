@@ -6,10 +6,11 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   helperText?: string;
   label: string;
   leadingIcon?: ReactNode;
+  trailingIcon?: ReactNode;
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, errorText, helperText, id, label, leadingIcon, required, ...props },
+  { className, errorText, helperText, id, label, leadingIcon, required, trailingIcon, ...props },
   ref,
 ) {
   const generatedId = useId();
@@ -47,12 +48,19 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             'placeholder:text-crypt-subtle',
             errorText ? 'is-invalid border-red-400/60' : 'border-white/10',
             leadingIcon ? 'pl-11' : undefined,
+            trailingIcon ? 'pr-12' : undefined,
           )}
           id={inputId}
           ref={ref}
           required={required}
           {...props}
         />
+
+        {trailingIcon ? (
+          <span className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-crypt-subtle">
+            {trailingIcon}
+          </span>
+        ) : null}
       </div>
 
       {helperText ? (

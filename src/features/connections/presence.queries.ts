@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../components/common/ToastContext';
 import { connectionKeys } from './connections.queries';
+import { serverKeys } from '../servers/servers.queries';
 import { fetchMyPresencePreferences, saveMyPresencePreference } from './presence.service';
 import type { SavePresencePreferenceInput } from './presence.types';
 
@@ -35,6 +36,7 @@ export function usePresenceActions() {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: presenceKeys.all }),
           queryClient.invalidateQueries({ queryKey: connectionKeys.all }),
+          queryClient.invalidateQueries({ queryKey: serverKeys.all }),
         ]);
         addToast({
           message: 'Seu status já foi sincronizado nos seus dispositivos.',
