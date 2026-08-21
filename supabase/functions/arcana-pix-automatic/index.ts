@@ -203,7 +203,7 @@ async function asaasRequest<T>(path: string, init: RequestInit = {}) {
   headers.set('access_token', requiredSecret('ASAAS_API_KEY'));
   headers.set('accept', 'application/json');
   headers.set('content-type', 'application/json');
-  headers.set('user-agent', 'Crypt/0.10.0');
+  headers.set('user-agent', 'Crypt/0.11.0');
 
   const response = await fetch(`${asaasBaseUrl()}${path}`, {
     ...init,

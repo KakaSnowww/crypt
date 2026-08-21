@@ -117,7 +117,7 @@ export function AuthLayout() {
 
         <p className="relative z-10 flex items-center gap-2 text-xs text-crypt-subtle">
           <CheckCircle2 aria-hidden="true" size={15} />
-          Crypt 0.10.0 — secure community network
+          Crypt 0.11.0 — secure community network
         </p>
       </section>
 

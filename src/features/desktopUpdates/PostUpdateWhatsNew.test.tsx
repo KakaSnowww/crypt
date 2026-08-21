@@ -16,15 +16,15 @@ describe('PostUpdateWhatsNew', () => {
 
     render(<PostUpdateWhatsNew />);
 
-    expect(screen.getByRole('dialog', { name: 'A Ascensão Arcana' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'System Reboot' })).toBeInTheDocument();
     expect(
-      screen.getByText('O Crypt foi atualizado para a versão 0.10.0. Veja o que ficou diferente.'),
+      screen.getByText('O Crypt foi atualizado para a versão 0.11.0. Veja o que ficou diferente.'),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Começar a usar' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(window.localStorage.getItem(seenReleaseStorageKey)).toBe('0.10.0');
+    expect(window.localStorage.getItem(seenReleaseStorageKey)).toBe('0.11.0');
   });
 });
 

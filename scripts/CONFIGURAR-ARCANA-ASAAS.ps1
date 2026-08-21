@@ -114,7 +114,7 @@ function Invoke-AsaasApi(
   $headers = @{
     accept = 'application/json'
     access_token = $ApiKey
-    'User-Agent' = 'Crypt/0.10.0'
+    'User-Agent' = 'Crypt/0.11.0'
   }
 
   $parameters = @{

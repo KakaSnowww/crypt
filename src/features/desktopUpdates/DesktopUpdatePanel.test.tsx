@@ -17,7 +17,7 @@ describe('DesktopUpdatePanel', () => {
   it('mostra a versão também quando o Crypt está aberto no navegador', () => {
     render(<DesktopUpdatePanel />);
 
-    expect(screen.getByText(/Versão atual: 0\.10\.0/)).toBeInTheDocument();
+    expect(screen.getByText(/Versão atual: 0\.11\.0/)).toBeInTheDocument();
     expect(screen.getByText(/Você está usando o Crypt pelo navegador/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Verificar agora' })).not.toBeInTheDocument();
   });
