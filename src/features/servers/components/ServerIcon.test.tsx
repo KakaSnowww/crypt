@@ -10,8 +10,9 @@ describe('ServerIcon com Boost', () => {
   });
 
   it('não mostra selo em nível zero', () => {
-    render(<ServerIcon iconPath={null} name="Crypt Teste" />);
+    const { container } = render(<ServerIcon iconPath={null} name="Crypt Teste" />);
 
     expect(screen.queryByLabelText(/Boost do servidor nível/u)).not.toBeInTheDocument();
+    expect(container.firstElementChild).toHaveClass('rounded-full');
   });
 });

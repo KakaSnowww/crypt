@@ -33,6 +33,10 @@ export function groupNativeCaptureSources(sources: NativeCaptureSource[]) {
   };
 }
 
+export function canCaptureSystemAudio(source: NativeCaptureSource | null | undefined) {
+  return source?.kind === 'monitor';
+}
+
 export function getNativeScreenSharePreferences(): NativeScreenSharePreferences {
   const savedQuality = window.localStorage.getItem(qualityStorageKey);
   const savedSystemAudio = window.localStorage.getItem(systemAudioStorageKey);

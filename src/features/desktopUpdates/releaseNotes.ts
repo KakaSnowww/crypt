@@ -21,6 +21,39 @@ export const seenReleaseStorageKey = 'crypt:last-seen-release';
 export const updateSoundStorageKey = 'crypt:last-update-sound';
 
 const bundledReleases: Record<string, CryptRelease> = {
+  '0.11.1': {
+    highlights: [
+      {
+        description:
+          'O modo Voz limpa agora usa cancelamento de ruído Krisp AI, com proteção WebRTC automática em aparelhos incompatíveis.',
+        title: 'Voz realmente limpa',
+      },
+      {
+        description:
+          'Transmissões não abrem mais sozinhas. Cada pessoa escolhe quando assistir e pode parar sem sair da call.',
+        title: 'Você controla a transmissão',
+      },
+      {
+        description:
+          'Tela inteira mantém o áudio do Windows; compartilhar uma janela não vaza sons de outros aplicativos.',
+        title: 'Compartilhamento previsível',
+      },
+      {
+        description:
+          'Avatares e ícones de servidor agora usam máscara e prévia circulares, com enquadramento mais fiel.',
+        title: 'Fotos redondas de verdade',
+      },
+      {
+        description:
+          'Trocas, remoções e novos enquadramentos do avatar aparecem na call em tempo real.',
+        title: 'Avatar sincronizado na call',
+      },
+    ],
+    summary:
+      'A versão 0.11.1 é a Clear Signal: mais controle sobre transmissões e uma experiência de voz muito mais limpa.',
+    title: 'Clear Signal',
+    version: '0.11.1',
+  },
   '0.11.0': {
     highlights: [
       {

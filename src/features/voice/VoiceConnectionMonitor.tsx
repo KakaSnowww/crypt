@@ -13,11 +13,20 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../components/common/ToastContext';
+import type { NoiseCancellationMode } from './EnhancedNoiseCancellation';
 import { voiceAudioProfiles, type VoiceAudioProfile } from './voiceAudioProfile';
 
 type Props = {
   audioProfile: VoiceAudioProfile;
+  noiseCancellationMode: NoiseCancellationMode;
   onChangeAudioProfile: (profile: VoiceAudioProfile) => Promise<void>;
+};
+
+const noiseCancellationLabels: Record<NoiseCancellationMode, string> = {
+  enhanced: 'Krisp AI ativo',
+  loading: 'Krisp AI iniciando',
+  off: 'Sem supressão',
+  standard: 'Supressão WebRTC ativa',
 };
 
 function qualityDetails(quality: ConnectionQuality, reconnecting: boolean) {
@@ -68,7 +77,11 @@ function qualityDetails(quality: ConnectionQuality, reconnecting: boolean) {
   } as const;
 }
 
-export function VoiceConnectionMonitor({ audioProfile, onChangeAudioProfile }: Props) {
+export function VoiceConnectionMonitor({
+  audioProfile,
+  noiseCancellationMode,
+  onChangeAudioProfile,
+}: Props) {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
   const { addToast } = useToast();
@@ -150,7 +163,7 @@ export function VoiceConnectionMonitor({ audioProfile, onChangeAudioProfile }: P
       addToast({
         message:
           profile === 'voice'
-            ? 'Eco, ruído e volume automático foram ajustados para conversa.'
+            ? 'O Crypt ativou o Krisp AI com proteção de eco e fallback WebRTC.'
             : 'O microfone agora usa menos processamento. Recomendamos utilizar fones.',
         title: 'Perfil de áudio aplicado',
         tone: 'success',
@@ -180,7 +193,9 @@ export function VoiceConnectionMonitor({ audioProfile, onChangeAudioProfile }: P
           <Icon aria-hidden="true" size={16} />
           <span>
             <strong>{details.label}</strong>
-            <small>{selectedProfile.label}</small>
+            <small>
+              {selectedProfile.label} · {noiseCancellationLabels[noiseCancellationMode]}
+            </small>
           </span>
         </span>
         <ChevronDown aria-hidden="true" size={15} />
@@ -219,7 +234,8 @@ export function VoiceConnectionMonitor({ audioProfile, onChangeAudioProfile }: P
           </div>
 
           <p>
-            O indicador usa perda de pacotes, latência e variação da rede informadas pelo LiveKit.
+            O Krisp AI remove ruídos e vozes de fundo antes do áudio ser enviado. Quando o aparelho
+            não suporta o filtro avançado, o Crypt mantém eco, ganho e supressão nativa do WebRTC.
           </p>
         </div>
       ) : null}

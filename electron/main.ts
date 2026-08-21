@@ -25,6 +25,7 @@ import {
 import { applicationScheme, applicationSchemePrivileges } from './applicationProtocol.js';
 import { registerDesktopUpdaterIpc, startDesktopUpdater } from './desktopUpdater.js';
 import { startDiscordPresence, stopDiscordPresence } from './discordPresence.js';
+import { shouldCaptureSystemAudio } from './displayMedia.js';
 import {
   isAllowedCryptDeepLink,
   isAllowedExternalUrl,
@@ -167,7 +168,9 @@ function configureSession() {
           }
 
           callback({
-            audio: request.audioRequested ? 'loopback' : undefined,
+            audio: shouldCaptureSystemAudio(selectedSource.id, request.audioRequested)
+              ? 'loopback'
+              : undefined,
             video: selectedSource,
           });
         })

@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $project = Split-Path $PSScriptRoot -Parent
-$version = '0.11.0'
+$version = '0.11.1'
 $tag = "v$version"
 
 Set-Location $project
@@ -194,7 +194,7 @@ if ($staged.Count -gt 0) {
   }
 }
 
-git tag -a $tag -m "Crypt v$version — System Reboot"
+git tag -a $tag -m "Crypt v$version — Clear Signal"
 
 if ($LASTEXITCODE -ne 0) {
   Stop-Release 'Não foi possível criar a tag.'

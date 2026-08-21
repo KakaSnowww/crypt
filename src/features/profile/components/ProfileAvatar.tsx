@@ -12,9 +12,9 @@ type ProfileAvatarProps = {
 };
 
 const sizeClasses = {
-  lg: 'size-28 rounded-[2rem] text-2xl',
-  md: 'size-16 rounded-2xl text-base',
-  sm: 'size-9 rounded-xl text-xs',
+  lg: 'size-28 rounded-full text-2xl',
+  md: 'size-16 rounded-full text-base',
+  sm: 'size-9 rounded-full text-xs',
 } as const;
 
 function getProfileInitials(displayName: string) {

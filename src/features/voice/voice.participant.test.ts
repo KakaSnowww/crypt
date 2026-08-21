@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { parseVoiceParticipantMetadata } from './voice.participant';
+import {
+  mergeVoiceParticipantVisualMetadata,
+  parseVoiceParticipantMetadata,
+} from './voice.participant';
 
 describe('metadata visual de participantes', () => {
   it('lê enquadramento, gradiente e Arcana', () => {
@@ -67,6 +70,34 @@ describe('metadata visual de participantes', () => {
       avatarPositionX: 50,
       avatarZoom: 1,
       gradientStart: null,
+    });
+  });
+
+  it('atualiza o visual sem apagar metadados da assinatura', () => {
+    const nextMetadata = mergeVoiceParticipantVisualMetadata(
+      JSON.stringify({ arcana_active: true, handle: 'snow' }),
+      {
+        avatar_path: 'user/avatar-new.webp',
+        avatar_position_x: 42,
+        avatar_position_y: 58,
+        avatar_zoom: 1.4,
+        banner_path: null,
+        banner_position_x: 50,
+        banner_position_y: 50,
+        banner_zoom: 1,
+        profile_effect: 'neon',
+        profile_gradient_angle: 135,
+        profile_gradient_end: '#654321',
+        profile_gradient_start: '#123456',
+      },
+    );
+
+    expect(JSON.parse(nextMetadata)).toMatchObject({
+      arcana_active: true,
+      avatar_path: 'user/avatar-new.webp',
+      avatar_position_x: 42,
+      handle: 'snow',
+      profile_effect: 'neon',
     });
   });
 });

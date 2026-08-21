@@ -11,8 +11,11 @@ import type { TrackReference, TrackReferenceOrPlaceholder } from '@livekit/compo
 import { ConnectionState, Track, type Participant } from 'livekit-client';
 import {
   ChevronDown,
+  Eye,
+  EyeOff,
   ExternalLink,
   FlipHorizontal2,
+  LoaderCircle,
   Mic,
   MicOff,
   MonitorUp,
@@ -43,8 +46,16 @@ import { useVoiceCall } from './useVoiceCall';
 import './voice-identity.css';
 
 export function VoiceStage() {
-  const { connection, isNativeScreenSharing, leave, startScreenShare, stopScreenShare } =
-    useVoiceCall();
+  const {
+    connection,
+    isNativeScreenSharing,
+    leave,
+    startScreenShare,
+    stopScreenShare,
+    stopWatchingScreenShare,
+    watchingScreenShares,
+    watchScreenShare,
+  } = useVoiceCall();
   const { addToast } = useToast();
   const participants = useParticipants().filter(
     (participant) => !isAndroidScreenShareCompanion(participant.identity, participant.metadata),
@@ -58,7 +69,7 @@ export function VoiceStage() {
     (track) =>
       !isAndroidScreenShareCompanion(track.participant.identity, track.participant.metadata),
   );
-  const screenTracks = useTracks([Track.Source.ScreenShare]);
+  const screenTracks = useTracks([Track.Source.ScreenShare], { onlySubscribed: false });
   const connectionState = useConnectionState();
   const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant();
   const [showDevices, setShowDevices] = useState(false);
@@ -129,12 +140,82 @@ export function VoiceStage() {
           screenTracks.length ? 'has-share' : ''
         } participant-count-${Math.min(participants.length, 4)}`}
       >
-        {screenTracks.map((track) => (
-          <article className="voice-stage__share" key={`${track.participant.identity}-share`}>
-            <VideoTrack trackRef={track} />
-            <span>{track.participant.name || track.participant.identity} está compartilhando</span>
-          </article>
-        ))}
+        {screenTracks.map((track) => {
+          const participantIdentity = track.participant.identity;
+          const participantName = track.participant.name || participantIdentity;
+          const isLocalShare = track.participant.isLocal;
+          const watchRequested = watchingScreenShares.includes(participantIdentity);
+          const isWatching =
+            isLocalShare || Boolean(watchRequested && track.publication?.isSubscribed);
+
+          return (
+            <article
+              className={`voice-stage__share ${isWatching ? 'is-watching' : 'is-available'}`}
+              key={`${participantIdentity}-share`}
+            >
+              {isWatching ? (
+                <>
+                  <VideoTrack trackRef={track} />
+                  <div className="voice-stage__share-status">
+                    <span>{participantName} está compartilhando</span>
+                    {!isLocalShare ? (
+                      <button
+                        onClick={() =>
+                          void run('transmissão', () =>
+                            stopWatchingScreenShare(participantIdentity),
+                          )
+                        }
+                        type="button"
+                      >
+                        <EyeOff aria-hidden="true" size={14} />
+                        Parar de assistir
+                      </button>
+                    ) : null}
+                  </div>
+                </>
+              ) : watchRequested ? (
+                <div className="voice-stage__share-invitation is-connecting">
+                  <span aria-hidden="true">
+                    <LoaderCircle className="animate-spin" size={28} />
+                  </span>
+                  <div>
+                    <strong>Conectando à transmissão de {participantName}</strong>
+                    <p>O Crypt está negociando vídeo e áudio com o servidor.</p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      void run('transmissão', () => stopWatchingScreenShare(participantIdentity))
+                    }
+                    type="button"
+                  >
+                    <X aria-hidden="true" size={15} />
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <div className="voice-stage__share-invitation">
+                  <span aria-hidden="true">
+                    <MonitorUp size={28} />
+                  </span>
+                  <div>
+                    <strong>{participantName} iniciou uma transmissão</strong>
+                    <p>Você decide quando começar. Nada será reproduzido automaticamente.</p>
+                  </div>
+                  <button
+                    disabled={busy === 'transmissão'}
+                    onClick={() =>
+                      void run('transmissão', () => watchScreenShare(participantIdentity))
+                    }
+                    type="button"
+                  >
+                    <Eye aria-hidden="true" size={15} />
+                    Assistir transmissão
+                  </button>
+                </div>
+              )}
+            </article>
+          );
+        })}
 
         <div className="voice-stage__people">
           {cameraTracks.map((track) => (
