@@ -8,6 +8,7 @@ import { configureDesktopDeepLinks } from './lib/desktopDeepLinks';
 import { configureRuntimeDocument } from './lib/platform';
 import './styles/globals.css';
 import './styles/cyber-app.css';
+import './styles/nova-ui.css';
 
 configureRuntimeDocument();
 

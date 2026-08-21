@@ -113,9 +113,9 @@ export function ExperienceSettingsButton() {
                 <Sparkles aria-hidden="true" size={16} />
               </span>
               <div>
-                <h3 className="text-sm font-semibold text-white">Efeitos arcanos</h3>
+                <h3 className="text-sm font-semibold text-white">Efeitos da interface</h3>
                 <p className="mt-1 text-xs leading-5 text-crypt-subtle">
-                  Controla partículas, constelações, brilhos e transparências.
+                  Controla movimento, luzes, profundidade e transparências.
                 </p>
               </div>
             </div>

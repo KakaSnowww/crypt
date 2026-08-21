@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from 'react';
 import { classNames } from '../../lib/classNames';
 import { Spinner } from './Spinner';
 
@@ -34,6 +34,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     disabled,
     leadingIcon,
     loading = false,
+    onPointerMove,
+    onPointerLeave,
     size = 'md',
     type = 'button',
     variant = 'primary',
@@ -41,6 +43,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   },
   ref,
 ) {
+  function trackPointer(event: PointerEvent<HTMLButtonElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty('--crypt-pointer-x', `${event.clientX - bounds.left}px`);
+    event.currentTarget.style.setProperty('--crypt-pointer-y', `${event.clientY - bounds.top}px`);
+    onPointerMove?.(event);
+  }
+
+  function resetPointer(event: PointerEvent<HTMLButtonElement>) {
+    event.currentTarget.style.removeProperty('--crypt-pointer-x');
+    event.currentTarget.style.removeProperty('--crypt-pointer-y');
+    onPointerLeave?.(event);
+  }
+
   return (
     <button
       className={classNames(
@@ -54,6 +69,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-size={size}
       data-variant={variant}
       disabled={disabled || loading}
+      onPointerLeave={resetPointer}
+      onPointerMove={trackPointer}
       ref={ref}
       type={type}
       {...props}

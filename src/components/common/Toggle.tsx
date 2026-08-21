@@ -50,7 +50,13 @@ export function Toggle({
         role="switch"
         type="button"
       >
+        <span aria-hidden="true" className="crypt-toggle__state crypt-toggle__state--off">
+          OFF
+        </span>
         <span aria-hidden="true" className="crypt-toggle__thumb" />
+        <span aria-hidden="true" className="crypt-toggle__state crypt-toggle__state--on">
+          ON
+        </span>
       </button>
     </div>
   );

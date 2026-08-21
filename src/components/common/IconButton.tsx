@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type PointerEvent, type ReactNode } from 'react';
 import { classNames } from '../../lib/classNames';
 
 export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
@@ -8,9 +8,22 @@ export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'chi
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { className, icon, label, size = 'md', type = 'button', ...props },
+  { className, icon, label, onPointerLeave, onPointerMove, size = 'md', type = 'button', ...props },
   ref,
 ) {
+  function trackPointer(event: PointerEvent<HTMLButtonElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty('--crypt-pointer-x', `${event.clientX - bounds.left}px`);
+    event.currentTarget.style.setProperty('--crypt-pointer-y', `${event.clientY - bounds.top}px`);
+    onPointerMove?.(event);
+  }
+
+  function resetPointer(event: PointerEvent<HTMLButtonElement>) {
+    event.currentTarget.style.removeProperty('--crypt-pointer-x');
+    event.currentTarget.style.removeProperty('--crypt-pointer-y');
+    onPointerLeave?.(event);
+  }
+
   return (
     <button
       aria-label={label}
@@ -24,6 +37,8 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       ref={ref}
       title={label}
       type={type}
+      onPointerLeave={resetPointer}
+      onPointerMove={trackPointer}
       {...props}
     >
       {icon}

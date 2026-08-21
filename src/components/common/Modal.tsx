@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { Sparkles, X } from 'lucide-react';
+import { Cpu, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type ModalProps = {
@@ -21,8 +21,8 @@ export function Modal({ children, description, footer, onOpenChange, open, title
 
           <div className="relative pr-10">
             <p className="mb-2 flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-violet-300">
-              <Sparkles size={11} />
-              Crypt
+              <Cpu size={11} />
+              Crypt OS
             </p>
             <Dialog.Title className="text-xl font-bold tracking-tight text-white">
               {title}
